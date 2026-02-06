@@ -1,0 +1,115 @@
+# Mimir 운영 환경 설정
+
+# 분산 모드
+deploymentMode: Distributed
+
+mimir:
+  structuredConfig:
+    multitenancy_enabled: false
+    
+    blocks_storage:
+      backend: filesystem
+      filesystem:
+        dir: /data/blocks
+    
+    limits:
+      ingestion_rate: 50000
+      ingestion_burst_size: 100000
+      max_global_series_per_user: 1000000
+      max_global_series_per_metric: 100000
+
+# Distributor
+distributor:
+  replicas: 2
+  
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+
+# Ingester
+ingester:
+  replicas: 3
+  
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+  
+  persistence:
+    enabled: true
+    storageClass: gp3
+    size: 50Gi
+  
+  zoneAwareReplication:
+    enabled: true
+
+# Querier
+querier:
+  replicas: 2
+  
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+# Query Frontend
+query_frontend:
+  replicas: 2
+  
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+# Store Gateway
+store_gateway:
+  replicas: 2
+  
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  
+  persistence:
+    enabled: true
+    storageClass: gp3
+    size: 50Gi
+
+# Compactor
+compactor:
+  replicas: 1
+  
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  
+  persistence:
+    enabled: true
+    storageClass: gp3
+    size: 50Gi

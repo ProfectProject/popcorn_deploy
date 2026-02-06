@@ -1,0 +1,42 @@
+apiVersion: v2
+name: popcorn-umbrella
+description: Popcorn MSA Application Umbrella Chart
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+dependencies:
+- name: gateway
+  version: "1.0.0"
+  repository: "file://../charts/gateway"
+  condition: gateway.enabled
+
+- name: users
+  version: "1.0.0"
+  repository: "file://../charts/users"
+  condition: users.enabled
+
+- name: stores
+  version: "1.0.0"
+  repository: "file://../charts/stores"
+  condition: stores.enabled
+
+- name: order
+  version: "1.0.0"
+  repository: "file://../charts/order"
+  condition: order.enabled
+
+- name: payment
+  version: "1.0.0"
+  repository: "file://../charts/payment"
+  condition: payment.enabled
+
+- name: orderQuery
+  version: "1.0.0"
+  repository: "file://../charts/orderQuery"
+  condition: orderQuery.enabled
+
+- name: checkIns
+  version: "1.0.0"
+  repository: "file://../charts/checkIns"
+  condition: checkIns.enabled

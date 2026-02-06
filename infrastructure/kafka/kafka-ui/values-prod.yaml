@@ -1,0 +1,36 @@
+# Kafka UI 운영 환경 설정
+
+replicaCount: 2
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+ingress:
+  enabled: true
+  annotations:
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:375896310755:certificate/xxx"
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+
+yamlApplicationConfig:
+  kafka:
+    clusters:
+      - name: popcorn-kafka-prod
+        bootstrapServers: kafka:9092
+        metrics:
+          port: 9997
+          type: JMX
+        readOnly: false  # 운영 환경에서는 true로 설정 권장
+  
+  auth:
+    type: disabled  # 운영 환경에서는 인증 활성화 권장
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70

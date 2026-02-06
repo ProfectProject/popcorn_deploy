@@ -1,0 +1,104 @@
+# ArgoCD 기본 설정
+
+global:
+  domain: argocd.goormpopcorn.shop
+
+## Server
+server:
+  replicas: 1
+  
+  service:
+    type: ClusterIP
+    
+  ingress:
+    enabled: false  # 환경별로 오버라이드
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/backend-protocol: HTTPS
+      alb.ingress.kubernetes.io/healthcheck-path: /healthz
+    hosts:
+      - argocd.goormpopcorn.shop
+    tls:
+      - secretName: argocd-server-tls
+        hosts:
+          - argocd.goormpopcorn.shop
+  
+  # 메트릭 활성화
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+## Repo Server
+repoServer:
+  replicas: 1
+  
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+## Application Controller
+controller:
+  replicas: 1
+  
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+## Dex (SSO)
+dex:
+  enabled: false  # 필요시 활성화
+
+## Redis
+redis:
+  enabled: true
+  
+redis-ha:
+  enabled: false  # 운영 환경에서는 true
+
+## Configs
+configs:
+  params:
+    server.insecure: true  # ALB에서 TLS 종료
+    
+  cm:
+    # Git 저장소 설정
+    repositories: |
+      - url: https://github.com/your-org/popcorn_deploy.git
+        name: popcorn-deploy
+    
+    # 리소스 제외 설정
+    resource.exclusions: |
+      - apiGroups:
+        - cilium.io
+        kinds:
+        - CiliumIdentity
+        clusters:
+        - "*"
+    
+    # 타임아웃 설정
+    timeout.reconciliation: 180s
+    
+  rbac:
+    policy.default: role:readonly
+    policy.csv: |
+      p, role:org-admin, applications, *, */*, allow
+      p, role:org-admin, clusters, get, *, allow
+      p, role:org-admin, repositories, *, *, allow
+      p, role:org-admin, logs, get, *, allow
+      p, role:org-admin, exec, create, */*, allow
+      g, admin, role:admin
+
+## Notifications (선택사항)
+notifications:
+  enabled: false
+  argocdUrl: https://argocd.goormpopcorn.shop
+
+## ApplicationSet Controller
+applicationSet:
+  enabled: true
+  replicas: 1

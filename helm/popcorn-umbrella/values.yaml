@@ -1,0 +1,125 @@
+# Global settings
+global:
+  imageRegistry: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com
+  imageTag: latest
+  environment: dev
+  
+  # 공통 데이터베이스 설정
+  database:
+    host: postgres
+    port: 5432
+    name: popcorn
+    
+  # 공통 Redis 설정
+  redis:
+    host: redis
+    port: 6379
+    
+  # 공통 Kafka 설정
+  kafka:
+    bootstrapServers: kafka:9092
+
+# Gateway Service
+gateway:
+  enabled: true
+  replicaCount: 1
+  image:
+    tag: latest
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  ingress:
+    enabled: true
+    hosts:
+      - host: api.goormpopcorn.shop
+        paths:
+          - path: /
+            pathType: Prefix
+
+# Users Service
+users:
+  enabled: true
+  replicaCount: 1
+  image:
+    tag: latest
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Stores Service
+stores:
+  enabled: true
+  replicaCount: 1
+  image:
+    tag: latest
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Order Service
+order:
+  enabled: true
+  replicaCount: 1
+  image:
+    tag: latest
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Payment Service
+payment:
+  enabled: true
+  replicaCount: 1
+  image:
+    tag: latest
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Order Query Service (CQRS)
+orderQuery:
+  enabled: true
+  replicaCount: 1
+  image:
+    tag: latest
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# CheckIns Service (includes QR functionality)
+checkIns:
+  enabled: true
+  replicaCount: 1
+  image:
+    tag: latest
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

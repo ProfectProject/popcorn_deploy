@@ -1,0 +1,20 @@
+# Mimir 개발 환경 설정
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+persistence:
+  enabled: true
+  size: 5Gi
+
+mimir:
+  structuredConfig:
+    limits:
+      ingestion_rate: 5000
+      ingestion_burst_size: 10000
+      max_global_series_per_user: 100000

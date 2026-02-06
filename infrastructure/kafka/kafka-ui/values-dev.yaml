@@ -1,0 +1,21 @@
+# Kafka UI 개발 환경 설정
+
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+ingress:
+  enabled: false
+
+yamlApplicationConfig:
+  kafka:
+    clusters:
+      - name: popcorn-kafka-dev
+        bootstrapServers: kafka:9092
+        readOnly: false

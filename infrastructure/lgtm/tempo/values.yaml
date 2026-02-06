@@ -1,0 +1,58 @@
+# Tempo 기본 설정
+
+tempo:
+  repository: grafana/tempo
+  tag: 2.3.1
+  pullPolicy: IfNotPresent
+  
+  # 스토리지 설정
+  storage:
+    trace:
+      backend: local
+      local:
+        path: /var/tempo/traces
+  
+  # 보관 기간
+  retention: 168h  # 7일
+  
+  # 수신 설정
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+# 배포 모드
+deploymentMode: SingleBinary
+
+singleBinary:
+  replicas: 1
+  
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  
+  persistence:
+    enabled: true
+    storageClass: gp3
+    size: 10Gi
+
+# 서비스
+service:
+  type: ClusterIP
+
+# 메트릭
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false
+
+# 테스트 비활성화
+test:
+  enabled: false

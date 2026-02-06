@@ -1,0 +1,64 @@
+# Kafka 운영 환경 설정
+
+replicaCount: 3
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+
+persistence:
+  enabled: true
+  storageClass: "gp3"
+  size: 50Gi
+
+logPersistence:
+  enabled: true
+  storageClass: "gp3"
+  size: 20Gi
+
+config: |
+  # 로그 보관 설정 (7일)
+  log.retention.hours=168
+  log.retention.bytes=10737418240
+  log.segment.bytes=1073741824
+  
+  # 복제 설정 (고가용성)
+  default.replication.factor=3
+  min.insync.replicas=2
+  
+  # 압축 설정
+  compression.type=producer
+  
+  # 자동 토픽 생성 비활성화 (운영 환경)
+  auto.create.topics.enable=false
+  
+  # 파티션 설정
+  num.partitions=3
+  
+  # 성능 튜닝
+  num.network.threads=8
+  num.io.threads=8
+  socket.send.buffer.bytes=102400
+  socket.receive.buffer.bytes=102400
+  socket.request.max.bytes=104857600
+  
+  # 복제 설정
+  replica.lag.time.max.ms=30000
+  replica.socket.timeout.ms=30000
+  replica.socket.receive.buffer.bytes=65536
+
+pdb:
+  create: true
+  minAvailable: 2
+
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: kafka
+        topologyKey: topology.kubernetes.io/zone
