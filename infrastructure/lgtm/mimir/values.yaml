@@ -1,0 +1,56 @@
+# Mimir 기본 설정 (Prometheus 호환)
+
+# 배포 모드
+deploymentMode: SingleBinary
+
+mimir:
+  structuredConfig:
+    # 멀티테넌시 비활성화
+    multitenancy_enabled: false
+    
+    # 블록 스토리지
+    blocks_storage:
+      backend: filesystem
+      filesystem:
+        dir: /data/blocks
+    
+    # 압축기
+    compactor:
+      data_dir: /data/compactor
+    
+    # 수집 제한
+    limits:
+      ingestion_rate: 10000
+      ingestion_burst_size: 20000
+
+# 단일 바이너리
+mimir-distributed:
+  enabled: false
+
+# 리소스
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# 영구 스토리지
+persistence:
+  enabled: true
+  storageClass: gp3
+  size: 10Gi
+
+# 서비스
+service:
+  type: ClusterIP
+  port: 8080
+
+# 메트릭
+metrics:
+  enabled: true
+
+# 테스트 비활성화
+test:
+  enabled: false

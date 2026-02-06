@@ -1,0 +1,139 @@
+# Production environment overrides
+global:
+  environment: prod
+  imageTag: latest
+  
+  database:
+    host: popcorn-db-prod.cluster-xxx.ap-northeast-2.rds.amazonaws.com
+    
+  redis:
+    host: popcorn-redis-prod.xxx.cache.amazonaws.com
+
+# 운영 환경 고가용성 설정
+gateway:
+  replicaCount: 3
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+  env:
+    SPRING_PROFILES_ACTIVE: "prod"
+    LOGGING_LEVEL_ROOT: "WARN"
+    JAVA_OPTS: "-Xms512m -Xmx1024m"
+  ingress:
+    enabled: true
+    annotations:
+      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:375896310755:certificate/xxx"
+      alb.ingress.kubernetes.io/ssl-redirect: "443"
+
+users:
+  replicaCount: 3
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 8
+  env:
+    SPRING_PROFILES_ACTIVE: "prod"
+    JAVA_OPTS: "-Xms512m -Xmx1024m"
+
+stores:
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+  env:
+    SPRING_PROFILES_ACTIVE: "prod"
+    JAVA_OPTS: "-Xms512m -Xmx1024m"
+
+order:
+  replicaCount: 3
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+  env:
+    SPRING_PROFILES_ACTIVE: "prod"
+    JAVA_OPTS: "-Xms512m -Xmx1024m"
+
+payment:
+  enabled: true
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+  env:
+    SPRING_PROFILES_ACTIVE: "prod"
+    JAVA_OPTS: "-Xms512m -Xmx1024m"
+
+orderQuery:
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+  env:
+    SPRING_PROFILES_ACTIVE: "prod"
+    JAVA_OPTS: "-Xms512m -Xmx1024m"
+
+checkIns:
+  enabled: true
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+  env:
+    SPRING_PROFILES_ACTIVE: "prod"
+    JAVA_OPTS: "-Xms256m -Xmx512m"

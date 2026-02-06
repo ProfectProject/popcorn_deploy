@@ -1,0 +1,75 @@
+# Kafka UI 기본 설정
+
+replicaCount: 1
+
+image:
+  repository: provectuslabs/kafka-ui
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  ingressClassName: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  hosts:
+    - host: kafka.goormpopcorn.shop
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Kafka 클러스터 설정
+yamlApplicationConfig:
+  kafka:
+    clusters:
+      - name: popcorn-kafka
+        bootstrapServers: kafka:9092
+        metrics:
+          port: 9997
+          type: JMX
+        readOnly: false
+  
+  auth:
+    type: disabled
+  
+  management:
+    health:
+      ldap:
+        enabled: false
+
+env:
+  - name: KAFKA_CLUSTERS_0_NAME
+    value: "popcorn-kafka"
+  - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+    value: "kafka:9092"
+  - name: DYNAMIC_CONFIG_ENABLED
+    value: "true"
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health
+    port: 8080
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health
+    port: 8080
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 10

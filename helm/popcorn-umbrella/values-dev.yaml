@@ -1,0 +1,80 @@
+# Development environment overrides
+global:
+  environment: dev
+  imageTag: dev-latest
+  
+  database:
+    host: popcorn-db-dev.cluster-xxx.ap-northeast-2.rds.amazonaws.com
+    
+  redis:
+    host: popcorn-redis-dev.xxx.cache.amazonaws.com
+
+# 개발 환경 리소스 최소화
+gateway:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  env:
+    SPRING_PROFILES_ACTIVE: "dev"
+    LOGGING_LEVEL_ROOT: "DEBUG"
+  ingress:
+    enabled: false  # 개발 환경에서는 Ingress 비활성화
+
+users:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  env:
+    SPRING_PROFILES_ACTIVE: "dev"
+    SPRING_JPA_SHOW_SQL: "true"
+
+stores:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  env:
+    SPRING_PROFILES_ACTIVE: "dev"
+
+order:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  env:
+    SPRING_PROFILES_ACTIVE: "dev"
+
+# 개발 환경에서는 일부 서비스 비활성화 가능
+payment:
+  enabled: false  # 개발 시 결제 서비스 비활성화
+  
+orderQuery:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+checkIns:
+  enabled: false  # 개발 시 체크인 서비스 비활성화

@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "common.fullname" . }}-config
+  labels:
+    {{- include "common.labels" . | nindent 4 }}
+data:
+  # Spring Cloud Gateway 라우팅 설정
+  SPRING_CLOUD_GATEWAY_ROUTES_0_ID: "users-service"
+  SPRING_CLOUD_GATEWAY_ROUTES_0_URI: "http://users:8080"
+  SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0: "Path=/api/users/**"
+  
+  SPRING_CLOUD_GATEWAY_ROUTES_1_ID: "stores-service"
+  SPRING_CLOUD_GATEWAY_ROUTES_1_URI: "http://stores:8080"
+  SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: "Path=/api/stores/**"
+  
+  SPRING_CLOUD_GATEWAY_ROUTES_2_ID: "order-service"
+  SPRING_CLOUD_GATEWAY_ROUTES_2_URI: "http://order:8080"
+  SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0: "Path=/api/orders/**"
+  
+  SPRING_CLOUD_GATEWAY_ROUTES_3_ID: "payment-service"
+  SPRING_CLOUD_GATEWAY_ROUTES_3_URI: "http://payment:8080"
+  SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0: "Path=/api/payments/**"
+  
+  SPRING_CLOUD_GATEWAY_ROUTES_4_ID: "orderquery-service"
+  SPRING_CLOUD_GATEWAY_ROUTES_4_URI: "http://orderquery:8080"
+  SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0: "Path=/api/orders/query/**"
+  
+  SPRING_CLOUD_GATEWAY_ROUTES_5_ID: "checkins-service"
+  SPRING_CLOUD_GATEWAY_ROUTES_5_URI: "http://checkins:8080"
+  SPRING_CLOUD_GATEWAY_ROUTES_5_PREDICATES_0: "Path=/api/checkins/**,/api/qr/**"
+  
+  # CORS 설정
+  SPRING_CLOUD_GATEWAY_GLOBALCORS_CORSCONFIGURATIONS_[/**]_ALLOWEDORIGINS: "https://goormpopcorn.shop"
+  SPRING_CLOUD_GATEWAY_GLOBALCORS_CORSCONFIGURATIONS_[/**]_ALLOWEDMETHODS: "GET,POST,PUT,DELETE,OPTIONS"
+  SPRING_CLOUD_GATEWAY_GLOBALCORS_CORSCONFIGURATIONS_[/**]_ALLOWEDHEADERS: "*"
+  SPRING_CLOUD_GATEWAY_GLOBALCORS_CORSCONFIGURATIONS_[/**]_ALLOWCREDENTIALS: "true"
+  
+  # Actuator 설정
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics,prometheus"
+  MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "always"

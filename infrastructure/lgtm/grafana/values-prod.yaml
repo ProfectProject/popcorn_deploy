@@ -1,0 +1,66 @@
+# Grafana 운영 환경 설정
+
+replicas: 2
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+ingress:
+  enabled: true
+  annotations:
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:375896310755:certificate/xxx"
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+
+persistence:
+  enabled: true
+  size: 20Gi
+
+# 운영 환경에서는 Secret으로 관리
+adminPassword: "CHANGE_ME"  # Kubernetes Secret으로 관리 권장
+
+env:
+  GF_SERVER_ROOT_URL: "https://grafana.goormpopcorn.shop"
+  GF_SECURITY_ADMIN_PASSWORD__FILE: /etc/secrets/admin-password
+
+# 고가용성 설정
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+# 추가 플러그인
+plugins:
+  - grafana-piechart-panel
+  - grafana-clock-panel
+  - grafana-simple-json-datasource
+
+grafana.ini:
+  server:
+    root_url: "https://grafana.goormpopcorn.shop"
+  
+  security:
+    admin_user: admin
+    cookie_secure: true
+    cookie_samesite: lax
+  
+  users:
+    allow_sign_up: false
+    auto_assign_org: true
+    auto_assign_org_role: Viewer
+  
+  auth:
+    disable_login_form: false
+  
+  analytics:
+    check_for_updates: true
+    reporting_enabled: false
+  
+  log:
+    mode: console
+    level: info

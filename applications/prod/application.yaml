@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: popcorn-prod
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    repoURL: https://github.com/your-org/popcorn_deploy.git
+    targetRevision: HEAD
+    path: helm/popcorn-umbrella
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-prod.yaml
+      
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: popcorn-prod
+    
+  syncPolicy:
+    automated:
+      prune: false  # 운영 환경은 자동 삭제 비활성화
+      selfHeal: false  # 운영 환경은 자동 복구 비활성화
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+        
+  revisionHistoryLimit: 10

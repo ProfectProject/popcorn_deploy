@@ -1,0 +1,92 @@
+# ArgoCD 운영 환경 설정
+
+server:
+  replicas: 2
+  
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+  
+  ingress:
+    enabled: true
+    annotations:
+      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:375896310755:certificate/xxx"
+      alb.ingress.kubernetes.io/ssl-redirect: "443"
+  
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+
+repoServer:
+  replicas: 2
+  
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+  
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+
+controller:
+  replicas: 1
+  
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+
+redis-ha:
+  enabled: true
+  replicas: 3
+  
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+configs:
+  params:
+    server.insecure: true
+    application.instanceLabelKey: argocd.argoproj.io/instance
+    
+  cm:
+    # 운영 환경 Git 저장소
+    repositories: |
+      - url: https://github.com/your-org/popcorn_deploy.git
+        name: popcorn-deploy
+    
+    # 리소스 추적 설정
+    resource.customizations: |
+      argoproj.io/Application:
+        health.lua: |
+          hs = {}
+          hs.status = "Progressing"
+          hs.message = ""
+          if obj.status ~= nil then
+            if obj.status.health ~= nil then
+              hs.status = obj.status.health.status
+              if obj.status.health.message ~= nil then
+                hs.message = obj.status.health.message
+              end
+            end
+          end
+          return hs

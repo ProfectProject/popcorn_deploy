@@ -1,0 +1,112 @@
+# Kafka 기본 설정 (KRaft 모드)
+
+## Kafka 이미지
+image:
+  registry: docker.io
+  repository: bitnami/kafka
+  tag: 3.6.1
+
+## KRaft 모드 활성화 (ZooKeeper 불필요)
+kraft:
+  enabled: true
+
+## 클러스터 설정
+replicaCount: 3
+
+## 리소스 설정
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+## 스토리지 설정
+persistence:
+  enabled: true
+  storageClass: "gp3"
+  size: 10Gi
+
+## 리스너 설정
+listeners:
+  client:
+    protocol: PLAINTEXT
+  controller:
+    protocol: PLAINTEXT
+  interbroker:
+    protocol: PLAINTEXT
+  external:
+    protocol: PLAINTEXT
+
+## 서비스 설정
+service:
+  type: ClusterIP
+  ports:
+    client: 9092
+    controller: 9093
+    interbroker: 9094
+
+## 메트릭 설정
+metrics:
+  kafka:
+    enabled: true
+  jmx:
+    enabled: true
+
+## 로그 설정
+logPersistence:
+  enabled: true
+  storageClass: "gp3"
+  size: 5Gi
+
+## Kafka 설정
+config: |
+  # 로그 보관 설정
+  log.retention.hours=168
+  log.retention.bytes=1073741824
+  log.segment.bytes=1073741824
+  
+  # 복제 설정
+  default.replication.factor=3
+  min.insync.replicas=2
+  
+  # 압축 설정
+  compression.type=producer
+  
+  # 자동 토픽 생성
+  auto.create.topics.enable=true
+  
+  # 파티션 설정
+  num.partitions=3
+
+## 헬스체크
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+
+## Pod Disruption Budget
+pdb:
+  create: true
+  minAvailable: 2
+
+## Anti-affinity (Multi-AZ 배치)
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: kafka
+          topologyKey: topology.kubernetes.io/zone

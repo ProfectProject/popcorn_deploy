@@ -1,0 +1,132 @@
+# Grafana 기본 설정
+
+replicas: 1
+
+image:
+  repository: grafana/grafana
+  tag: 10.2.3
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  ingressClassName: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  hosts:
+    - grafana.goormpopcorn.shop
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# 관리자 설정
+adminUser: admin
+adminPassword: admin  # 운영 환경에서는 변경 필요
+
+# 데이터 소스 자동 구성
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      # Loki
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki-gateway
+        isDefault: false
+        jsonData:
+          maxLines: 1000
+      
+      # Tempo
+      - name: Tempo
+        type: tempo
+        access: proxy
+        url: http://tempo:3100
+        isDefault: false
+        jsonData:
+          tracesToLogsV2:
+            datasourceUid: loki
+          serviceMap:
+            datasourceUid: mimir
+      
+      # Mimir (Prometheus)
+      - name: Mimir
+        type: prometheus
+        access: proxy
+        url: http://mimir-query-frontend:8080/prometheus
+        isDefault: true
+        jsonData:
+          timeInterval: 30s
+
+# 대시보드 자동 프로비저닝
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+
+# 사전 구성된 대시보드
+dashboards:
+  default:
+    kubernetes-cluster:
+      gnetId: 7249
+      revision: 1
+      datasource: Mimir
+    
+    kubernetes-pods:
+      gnetId: 6417
+      revision: 1
+      datasource: Mimir
+    
+    loki-logs:
+      gnetId: 13639
+      revision: 2
+      datasource: Loki
+
+# 플러그인
+plugins:
+  - grafana-piechart-panel
+  - grafana-clock-panel
+
+# 영구 스토리지
+persistence:
+  enabled: true
+  storageClassName: gp3
+  size: 10Gi
+
+# 환경 변수
+env:
+  GF_SECURITY_ADMIN_USER: admin
+  GF_SECURITY_ADMIN_PASSWORD: admin
+  GF_USERS_ALLOW_SIGN_UP: false
+  GF_SERVER_ROOT_URL: "https://grafana.goormpopcorn.shop"
+
+# Grafana 설정
+grafana.ini:
+  server:
+    root_url: "https://grafana.goormpopcorn.shop"
+  
+  analytics:
+    check_for_updates: true
+  
+  log:
+    mode: console
+  
+  grafana_net:
+    url: https://grafana.net

@@ -1,0 +1,51 @@
+# ArgoCD 개발 환경 설정
+
+server:
+  replicas: 1
+  
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  
+  ingress:
+    enabled: false  # 개발 환경에서는 포트 포워딩 사용
+
+repoServer:
+  replicas: 1
+  
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+controller:
+  replicas: 1
+  
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+redis:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+configs:
+  params:
+    server.insecure: true
+    application.instanceLabelKey: argocd.argoproj.io/instance

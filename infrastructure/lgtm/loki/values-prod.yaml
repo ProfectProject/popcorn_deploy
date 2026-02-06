@@ -1,0 +1,78 @@
+# Loki 운영 환경 설정
+
+deploymentMode: SimpleScalable
+
+loki:
+  commonConfig:
+    replication_factor: 3
+  
+  limits_config:
+    retention_period: 168h  # 7일
+    max_query_lookback: 168h
+    ingestion_rate_mb: 10
+    ingestion_burst_size_mb: 20
+
+# 읽기 컴포넌트
+read:
+  replicas: 2
+  
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 70
+
+# 쓰기 컴포넌트
+write:
+  replicas: 3
+  
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  
+  persistence:
+    enabled: true
+    storageClass: gp3
+    size: 50Gi
+
+# 백엔드 컴포넌트
+backend:
+  replicas: 2
+  
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  
+  persistence:
+    enabled: true
+    storageClass: gp3
+    size: 50Gi
+
+# 게이트웨이
+gateway:
+  enabled: true
+  replicas: 2
+  
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi

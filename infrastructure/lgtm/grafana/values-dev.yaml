@@ -1,0 +1,27 @@
+# Grafana 개발 환경 설정
+
+replicas: 1
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+ingress:
+  enabled: false
+
+persistence:
+  enabled: true
+  size: 5Gi
+
+adminPassword: admin
+
+env:
+  GF_SERVER_ROOT_URL: "http://localhost:3000"
+
+grafana.ini:
+  server:
+    root_url: "http://localhost:3000"
