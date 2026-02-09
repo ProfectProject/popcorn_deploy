@@ -9,7 +9,7 @@ spec:
   project: default
   
   source:
-    repoURL: https://github.com/your-org/popcorn_deploy.git
+    repoURL: https://github.com/ProfectProject/popcorn_deploy.git
     targetRevision: main
     path: helm/popcorn-umbrella
     helm:
