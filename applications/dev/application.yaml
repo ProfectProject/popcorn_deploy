@@ -10,7 +10,7 @@ spec:
   
   source:
     repoURL: https://github.com/your-org/popcorn_deploy.git
-    targetRevision: HEAD
+    targetRevision: main
     path: helm/popcorn-umbrella
     helm:
       valueFiles:
