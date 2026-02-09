@@ -1,0 +1,24 @@
+dependencies:
+- name: gateway
+  repository: file://../charts/gateway
+  version: 1.0.0
+- name: users
+  repository: file://../charts/users
+  version: 1.0.0
+- name: stores
+  repository: file://../charts/stores
+  version: 1.0.0
+- name: order
+  repository: file://../charts/order
+  version: 1.0.0
+- name: payment
+  repository: file://../charts/payment
+  version: 1.0.0
+- name: orderQuery
+  repository: file://../charts/orderQuery
+  version: 1.0.0
+- name: checkIns
+  repository: file://../charts/checkIns
+  version: 1.0.0
+digest: sha256:e506940fe532e6d41c625f82ae54d0935e70b47b90dfa05c8db76b42cc43fc5a
+generated: "2026-02-09T14:32:40.499479+09:00"
