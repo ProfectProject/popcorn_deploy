@@ -1,0 +1,23 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: payment-api-keys
+  namespace: default
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: SecretStore
+  target:
+    name: payment-api-keys
+    creationPolicy: Owner
+    template:
+      engineVersion: v2
+      data:
+        # Toss Payments
+        TOSS_PAYMENTS_CLIENT_KEY: "{{ .toss_client_key }}"
+        TOSS_PAYMENTS_SECRET_KEY: "{{ .toss_secret_key }}"
+  
+  dataFrom:
+    - extract:
+        key: /goorm-popcorn/prod/external-apis/payment

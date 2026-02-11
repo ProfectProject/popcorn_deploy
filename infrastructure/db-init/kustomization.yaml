@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: default
+
+resources:
+  - db-init-job.yaml
+
+# ConfigMap을 파일에서 자동 생성
+configMapGenerator:
+  - name: db-init-v0-script
+    files:
+      - V0__init.sql
+    options:
+      labels:
+        app: db-init
+        version: v0
+      annotations:
+        description: "Global database schema initialization script (V0)"
+
+commonLabels:
+  app: db-init
+  managed-by: kustomize

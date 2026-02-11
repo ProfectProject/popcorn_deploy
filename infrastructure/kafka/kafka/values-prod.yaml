@@ -7,18 +7,18 @@ resources:
     cpu: 500m
     memory: 1Gi
   limits:
-    cpu: 2000m
+    cpu: 1000m
     memory: 2Gi
 
 persistence:
   enabled: true
   storageClass: "gp3"
-  size: 50Gi
+  size: 30Gi
 
 logPersistence:
   enabled: true
   storageClass: "gp3"
-  size: 20Gi
+  size: 10Gi
 
 config: |
   # 로그 보관 설정 (7일)

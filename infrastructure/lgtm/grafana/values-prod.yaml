@@ -1,24 +1,24 @@
 # Grafana 운영 환경 설정
 
-replicas: 2
+replicas: 1
 
 resources:
   requests:
     cpu: 200m
-    memory: 512Mi
+    memory: 256Mi
   limits:
-    cpu: 1000m
-    memory: 1Gi
+    cpu: 500m
+    memory: 512Mi
 
 ingress:
   enabled: true
   annotations:
-    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:375896310755:certificate/xxx"
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:375896310755:certificate/085e3315-785c-480d-93c2-57f656b60f7b"
     alb.ingress.kubernetes.io/ssl-redirect: "443"
 
 persistence:
   enabled: true
-  size: 20Gi
+  size: 10Gi
 
 # 운영 환경에서는 Secret으로 관리
 adminPassword: "CHANGE_ME"  # Kubernetes Secret으로 관리 권장
@@ -29,9 +29,9 @@ env:
 
 # 고가용성 설정
 autoscaling:
-  enabled: true
-  minReplicas: 2
-  maxReplicas: 5
+  enabled: false  # true → false
+  minReplicas: 1
+  maxReplicas: 3  # 5 → 3
   targetCPUUtilizationPercentage: 70
 
 # 추가 플러그인

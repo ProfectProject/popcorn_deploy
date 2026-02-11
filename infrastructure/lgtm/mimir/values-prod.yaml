@@ -20,82 +20,82 @@ mimir:
 
 # Distributor
 distributor:
-  replicas: 2
+  replicas: 1
   
   resources:
     requests:
-      cpu: 200m
-      memory: 512Mi
+      cpu: 150m
+      memory: 256Mi
     limits:
-      cpu: 1000m
-      memory: 1Gi
+      cpu: 300m
+      memory: 512Mi
   
   autoscaling:
-    enabled: true
-    minReplicas: 2
-    maxReplicas: 5
+    enabled: false  # true → false
+    minReplicas: 1
+    maxReplicas: 3  # 5 → 3
     targetCPUUtilizationPercentage: 70
 
 # Ingester
 ingester:
-  replicas: 3
+  replicas: 2
   
   resources:
     requests:
-      cpu: 500m
-      memory: 1Gi
+      cpu: 400m
+      memory: 768Mi
     limits:
-      cpu: 2000m
-      memory: 2Gi
+      cpu: 1000m
+      memory: 1.5Gi
   
   persistence:
     enabled: true
     storageClass: gp3
-    size: 50Gi
+    size: 30Gi
   
   zoneAwareReplication:
-    enabled: true
+    enabled: false  # true → false (단순화)
 
 # Querier
 querier:
-  replicas: 2
+  replicas: 1
   
   resources:
     requests:
       cpu: 200m
-      memory: 512Mi
+      memory: 384Mi
     limits:
-      cpu: 1000m
-      memory: 1Gi
+      cpu: 500m
+      memory: 768Mi
 
 # Query Frontend
 query_frontend:
-  replicas: 2
+  replicas: 1
   
   resources:
     requests:
-      cpu: 200m
-      memory: 512Mi
+      cpu: 150m
+      memory: 256Mi
     limits:
-      cpu: 1000m
-      memory: 1Gi
+      cpu: 300m
+      memory: 512Mi
 
 # Store Gateway
 store_gateway:
-  replicas: 2
+  replicas: 1
   
   resources:
     requests:
       cpu: 200m
-      memory: 512Mi
+      memory: 384Mi
     limits:
-      cpu: 1000m
-      memory: 1Gi
+      cpu: 500m
+      memory: 768Mi
   
   persistence:
     enabled: true
     storageClass: gp3
-    size: 50Gi
+    size: 30Gi
 
 # Compactor
 compactor:
@@ -104,12 +104,12 @@ compactor:
   resources:
     requests:
       cpu: 200m
-      memory: 512Mi
+      memory: 384Mi
     limits:
-      cpu: 1000m
-      memory: 1Gi
+      cpu: 500m
+      memory: 768Mi
   
   persistence:
     enabled: true
     storageClass: gp3
-    size: 50Gi
+    size: 30Gi

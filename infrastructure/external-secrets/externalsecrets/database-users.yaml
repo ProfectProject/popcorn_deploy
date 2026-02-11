@@ -1,0 +1,51 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: database-users
+  namespace: default
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: SecretStore
+  target:
+    name: database-users
+    creationPolicy: Owner
+    template:
+      engineVersion: v2
+      data:
+        # User Auth 모듈
+        USER_AUTH_DB_USERNAME: "{{ .user_auth_username }}"
+        USER_AUTH_DB_PASSWORD: "{{ .user_auth_password }}"
+        USER_AUTH_FLYWAY_USERNAME: "{{ .user_auth_flyway_username }}"
+        USER_AUTH_FLYWAY_PASSWORD: "{{ .user_auth_flyway_password }}"
+        
+        # Order 모듈
+        ORDER_DB_USERNAME: "{{ .order_username }}"
+        ORDER_DB_PASSWORD: "{{ .order_password }}"
+        ORDER_FLYWAY_USERNAME: "{{ .order_flyway_username }}"
+        ORDER_FLYWAY_PASSWORD: "{{ .order_flyway_password }}"
+        
+        # Payment 모듈
+        PAYMENT_DB_USERNAME: "{{ .payment_username }}"
+        PAYMENT_DB_PASSWORD: "{{ .payment_password }}"
+        PAYMENT_FLYWAY_USERNAME: "{{ .payment_flyway_username }}"
+        PAYMENT_FLYWAY_PASSWORD: "{{ .payment_flyway_password }}"
+        PAYMENT_MIGRATOR_PASSWORD: "{{ .payment_flyway_password }}"
+        
+        # Store 모듈
+        STORE_DB_USERNAME: "{{ .store_username }}"
+        STORE_DB_PASSWORD: "{{ .store_password }}"
+        STORE_FLYWAY_USERNAME: "{{ .store_flyway_username }}"
+        STORE_FLYWAY_PASSWORD: "{{ .store_flyway_password }}"
+        STORE_MIGRATOR_PASSWORD: "{{ .store_flyway_password }}"
+        
+        # QR/CheckIns 모듈
+        QR_DB_USERNAME: "{{ .qr_username }}"
+        QR_DB_PASSWORD: "{{ .qr_password }}"
+        QR_FLYWAY_USERNAME: "{{ .qr_flyway_username }}"
+        QR_FLYWAY_PASSWORD: "{{ .qr_flyway_password }}"
+  
+  dataFrom:
+    - extract:
+        key: /goorm-popcorn/prod/database/users

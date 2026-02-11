@@ -4,62 +4,62 @@ deploymentMode: Distributed
 
 # Distributor
 distributor:
-  replicas: 2
+  replicas: 1
   
   resources:
     requests:
-      cpu: 200m
-      memory: 512Mi
+      cpu: 150m
+      memory: 256Mi
     limits:
-      cpu: 1000m
-      memory: 1Gi
+      cpu: 300m
+      memory: 512Mi
   
   autoscaling:
-    enabled: true
-    minReplicas: 2
-    maxReplicas: 5
+    enabled: false  # true → false
+    minReplicas: 1
+    maxReplicas: 3  # 5 → 3
     targetCPUUtilizationPercentage: 70
 
 # Ingester
 ingester:
-  replicas: 3
+  replicas: 2
   
   resources:
     requests:
-      cpu: 200m
+      cpu: 250m
       memory: 512Mi
     limits:
-      cpu: 1000m
+      cpu: 500m
       memory: 1Gi
   
   persistence:
     enabled: true
     storageClass: gp3
-    size: 50Gi
+    size: 20Gi
 
 # Querier
 querier:
-  replicas: 2
+  replicas: 1
   
   resources:
     requests:
-      cpu: 200m
-      memory: 512Mi
+      cpu: 150m
+      memory: 256Mi
     limits:
-      cpu: 1000m
-      memory: 1Gi
+      cpu: 300m
+      memory: 512Mi
 
 # Query Frontend
 queryFrontend:
-  replicas: 2
+  replicas: 1
   
   resources:
     requests:
       cpu: 100m
-      memory: 256Mi
+      memory: 128Mi
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 200m
+      memory: 256Mi
 
 # Compactor
 compactor:
@@ -67,16 +67,16 @@ compactor:
   
   resources:
     requests:
-      cpu: 200m
-      memory: 512Mi
+      cpu: 150m
+      memory: 256Mi
     limits:
-      cpu: 1000m
-      memory: 1Gi
+      cpu: 300m
+      memory: 512Mi
   
   persistence:
     enabled: true
     storageClass: gp3
-    size: 50Gi
+    size: 20Gi
 
 tempo:
   retention: 168h  # 7일

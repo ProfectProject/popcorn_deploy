@@ -1,0 +1,29 @@
+# Kiro AI 분석 파일 (임시/분석 문서)
+.kiro/analysis/
+
+# 임시 파일
+**/temp-*.sh
+**/temp-*.md
+**/*-temp.*
+
+# 분석 보고서
+**/*-analysis-*.md
+**/*-review-*.md
+**/*-audit-*.md
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Helm
+charts/*.tgz
+.helmignore
+
+# Kubernetes
+*.kubeconfig

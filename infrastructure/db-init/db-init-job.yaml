@@ -1,0 +1,118 @@
+---
+# V0 글로벌 스키마 초기화 Job
+# RDS 생성 후 한 번만 실행되어야 함
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init-v0
+  namespace: default
+  labels:
+    app: db-init
+    version: v0
+  annotations:
+    description: "Initialize global database schema (V0__init.sql)"
+spec:
+  # 한 번만 실행
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 86400  # 24시간 후 자동 삭제
+  
+  template:
+    metadata:
+      labels:
+        app: db-init
+        version: v0
+    spec:
+      restartPolicy: Never
+      
+      # ServiceAccount (External Secrets 사용 시)
+      serviceAccountName: default
+      
+      containers:
+      - name: db-init
+        image: postgres:16-alpine
+        
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          echo "=== Starting V0 Database Initialization ==="
+          echo "Database Host: $DB_HOST"
+          echo "Database Name: $DB_NAME"
+          echo "Database User: $DB_USERNAME"
+          
+          # 연결 테스트
+          echo "Testing database connection..."
+          until pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USERNAME; do
+            echo "Waiting for database to be ready..."
+            sleep 2
+          done
+          
+          echo "Database is ready. Executing V0__init.sql..."
+          
+          # V0 스크립트 실행
+          PGPASSWORD=$DB_PASSWORD psql \
+            -h $DB_HOST \
+            -p $DB_PORT \
+            -U $DB_USERNAME \
+            -d $DB_NAME \
+            -f /scripts/V0__init.sql \
+            -v ON_ERROR_STOP=1
+          
+          if [ $? -eq 0 ]; then
+            echo "=== V0 Database Initialization Completed Successfully ==="
+          else
+            echo "=== V0 Database Initialization Failed ==="
+            exit 1
+          fi
+        
+        env:
+        # RDS 연결 정보 (External Secrets에서 주입)
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: rds-credentials
+              key: host
+        
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: rds-credentials
+              key: port
+        
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: rds-credentials
+              key: database
+        
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: rds-credentials
+              key: username
+        
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rds-credentials
+              key: password
+        
+        volumeMounts:
+        - name: init-script
+          mountPath: /scripts
+          readOnly: true
+        
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      
+      volumes:
+      - name: init-script
+        configMap:
+          name: db-init-v0-script
+          defaultMode: 0755
