@@ -1,0 +1,48 @@
+# Common Chart Values
+# 모든 마이크로서비스에서 공유하는 설정
+
+commonConfig:
+  enabled: true
+  
+  database:
+    host: "goorm-popcorn-rds-prod.xxxxxx.ap-northeast-2.rds.amazonaws.com"
+    port: "5432"
+    name: "popcorn_db"
+  
+  redis:
+    host: "master.goorm-popcorn-cache-prod.mkltth.apn2.cache.amazonaws.com"
+    port: "6379"
+    database: "0"
+  
+  kafka:
+    bootstrapServers: "kafka-1.kafka-headless.default.svc.cluster.local:9092,kafka-2.kafka-headless.default.svc.cluster.local:9092,kafka-3.kafka-headless.default.svc.cluster.local:9092"
+  
+  jpa:
+    ddlAuto: "none"
+    showSql: "false"
+    formatSql: "true"
+  
+  flyway:
+    enabled: "true"
+    baseline: "true"
+  
+  spring:
+    profilesActive: "prod"
+    cloudCompatibilityVerifierEnabled: "false"
+  
+  tossPayments:
+    baseUrl: "https://api.tosspayments.com"
+    testMode: "false"
+  
+  frontend:
+    baseUrl: "https://goormpopcorn.shop"
+
+# 서비스 URL (내부 통신)
+serviceUrls:
+  gateway: "http://popcorn-gateway.default.svc.cluster.local:8080"
+  users: "http://popcorn-users.default.svc.cluster.local:8082"
+  stores: "http://popcorn-stores.default.svc.cluster.local:8083"
+  order: "http://popcorn-order.default.svc.cluster.local:8084"
+  orderQuery: "http://popcorn-orderquery.default.svc.cluster.local:8085"
+  checkIns: "http://popcorn-checkins.default.svc.cluster.local:8086"
+  payment: "http://popcorn-payment.default.svc.cluster.local:8087"

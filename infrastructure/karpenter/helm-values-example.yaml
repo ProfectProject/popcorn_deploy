@@ -1,0 +1,93 @@
+# Helm 차트에서 Karpenter 노드를 사용하는 예제
+# 
+# 사용법:
+# helm install order-service ./helm/charts/order \
+#   -f infrastructure/karpenter/helm-values-example.yaml
+
+# Spot 노드에 배포 (비용 최적화)
+spotEnabled: true
+
+# Tolerations
+tolerations:
+  - key: karpenter.sh/spot
+    operator: Exists
+    effect: NoSchedule
+
+# Node Selector
+nodeSelector:
+  karpenter.sh/capacity-type: spot
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# Affinity (Spot 선호, ON_DEMAND 폴백)
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        preference:
+          matchExpressions:
+            - key: karpenter.sh/capacity-type
+              operator: In
+              values:
+                - spot
+      - weight: 50
+        preference:
+          matchExpressions:
+            - key: karpenter.sh/capacity-type
+              operator: In
+              values:
+                - on-demand
+
+# 리소스 요청 (Karpenter가 적절한 인스턴스 선택)
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+# 레플리카 수
+replicaCount: 3
+
+# HPA (Horizontal Pod Autoscaler)
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Graceful Shutdown (Spot 인터럽션 대비)
+terminationGracePeriodSeconds: 120
+
+# Readiness/Liveness Probe (빠른 헬스체크)
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+  initialDelaySeconds: 20
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Lifecycle Hooks (Graceful Shutdown)
+lifecycle:
+  preStop:
+    exec:
+      command:
+        - sh
+        - -c
+        - sleep 15 && kill -SIGTERM 1

@@ -1,0 +1,23 @@
+---
+# V0__init.sql을 ConfigMap으로 저장
+# 
+# 생성 방법:
+# kubectl create configmap db-init-v0-script \
+#   --from-file=V0__init.sql=./V0__init.sql \
+#   --namespace=default \
+#   --dry-run=client -o yaml | kubectl apply -f -
+#
+# 또는 kustomize 사용:
+# kubectl apply -k .
+#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-init-v0-script
+  namespace: default
+  labels:
+    app: db-init
+    version: v0
+  annotations:
+    description: "Global database schema initialization script (V0)"
+# data 섹션은 kubectl create configmap --from-file로 생성됨

@@ -1,0 +1,98 @@
+# External Secrets Operator Helm Values - Dev 환경
+
+# 레플리카 수 (Dev는 1개)
+replicaCount: 1
+
+# 이미지 설정
+image:
+  repository: ghcr.io/external-secrets/external-secrets
+  pullPolicy: IfNotPresent
+  tag: v0.9.13
+
+# 리소스 제한 (Dev는 최소)
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+# ServiceAccount 설정
+serviceAccount:
+  create: true
+  name: external-secrets-sa
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::375896310755:role/ExternalSecretsRole-goorm-popcorn-dev
+
+# 보안 컨텍스트
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# 로그 레벨
+logLevel: info
+
+# Webhook 설정
+webhook:
+  create: true
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+# Cert Controller 설정
+certController:
+  create: true
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+# 메트릭 설정
+metrics:
+  enabled: true
+  service:
+    enabled: true
+    port: 8080
+
+# 프로메테우스 모니터링
+prometheus:
+  enabled: true
+  service:
+    port: 8080
+
+# Node Selector (Karpenter 노드 허용)
+nodeSelector: {}
+
+# Tolerations (Spot 노드 허용)
+tolerations:
+  - key: karpenter.sh/spot
+    operator: Exists
+    effect: NoSchedule
+
+# Affinity (Spot 노드 선호)
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        preference:
+          matchExpressions:
+            - key: karpenter.sh/capacity-type
+              operator: In
+              values:
+                - spot

@@ -95,8 +95,27 @@ configs:
 
 ## Notifications (선택사항)
 notifications:
-  enabled: false
+  enabled: true
   argocdUrl: https://argocd.goormpopcorn.shop
+  
+  # 리소스 설정
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  
+  # 메트릭
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+  
+  # Secret과 ConfigMap은 별도 파일로 관리
+  # - notifications-secret.yaml
+  # - notifications-cm.yaml
 
 ## ApplicationSet Controller
 applicationSet:

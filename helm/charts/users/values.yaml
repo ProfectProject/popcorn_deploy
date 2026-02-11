@@ -17,12 +17,64 @@ env:
   SPRING_PROFILES_ACTIVE: "default"
   SERVER_PORT: "8080"
   JAVA_OPTS: "-Xms256m -Xmx512m"
+  # RDS 연결 정보 (ESO로 생성된 Secret 참조)
+  DB_HOST:
+    valueFrom:
+      secretKeyRef:
+        name: rds-credentials
+        key: host
+  DB_PORT:
+    valueFrom:
+      secretKeyRef:
+        name: rds-credentials
+        key: port
+  DB_NAME:
+    valueFrom:
+      secretKeyRef:
+        name: rds-credentials
+        key: database
+  DB_USERNAME:
+    valueFrom:
+      secretKeyRef:
+        name: rds-credentials
+        key: username
+  DB_PASSWORD:
+    valueFrom:
+      secretKeyRef:
+        name: rds-credentials
+        key: password
+  # Redis 연결 정보
+  REDIS_HOST:
+    valueFrom:
+      secretKeyRef:
+        name: redis-credentials
+        key: host
+  REDIS_PORT:
+    valueFrom:
+      secretKeyRef:
+        name: redis-credentials
+        key: port
+  REDIS_PASSWORD:
+    valueFrom:
+      secretKeyRef:
+        name: redis-credentials
+        key: password
+  # JWT 시크릿
+  JWT_SECRET_KEY:
+    valueFrom:
+      secretKeyRef:
+        name: jwt-secret
+        key: secret-key
+  # Passport 시크릿
+  PASSPORT_SECRET_KEY:
+    valueFrom:
+      secretKeyRef:
+        name: passport-secret
+        key: secret-key
 
 envFrom:
   - configMapRef:
       name: users-config
-  - secretRef:
-      name: users-secret
       optional: true
 
 resources:

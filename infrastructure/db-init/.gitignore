@@ -1,0 +1,6 @@
+# Kustomize 생성 파일
+kustomization.yaml.bak
+
+# 임시 파일
+*.tmp
+*.bak

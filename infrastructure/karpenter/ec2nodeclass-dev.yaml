@@ -1,0 +1,63 @@
+apiVersion: karpenter.k8s.aws/v1beta1
+kind: EC2NodeClass
+metadata:
+  name: default
+spec:
+  # AMI 선택 전략
+  amiFamily: AL2 # Amazon Linux 2
+  
+  # 서브넷 선택 (Private 서브넷)
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: goorm-popcorn-dev
+  
+  # 보안 그룹 선택
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: goorm-popcorn-dev
+  
+  # IAM 역할
+  role: KarpenterNodeRole-goorm-popcorn-dev
+  
+  # 인스턴스 프로필
+  instanceProfile: KarpenterNodeInstanceProfile-goorm-popcorn-dev
+  
+  # 사용자 데이터 (부트스트랩 스크립트)
+  userData: |
+    #!/bin/bash
+    set -e
+    
+    # EKS 부트스트랩
+    /etc/eks/bootstrap.sh goorm-popcorn-dev \
+      --kubelet-extra-args '--max-pods=110' \
+      --b64-cluster-ca $CLUSTER_CA \
+      --apiserver-endpoint $CLUSTER_ENDPOINT
+    
+    # CloudWatch 에이전트 설치 (선택사항)
+    # wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
+    # rpm -U ./amazon-cloudwatch-agent.rpm
+  
+  # 블록 디바이스 매핑
+  blockDeviceMappings:
+    - deviceName: /dev/xvda
+      ebs:
+        volumeSize: 20Gi
+        volumeType: gp3
+        iops: 3000
+        throughput: 125
+        encrypted: true
+        deleteOnTermination: true
+  
+  # 메타데이터 옵션 (보안 강화)
+  metadataOptions:
+    httpEndpoint: enabled
+    httpProtocolIPv6: disabled
+    httpPutResponseHopLimit: 2
+    httpTokens: required # IMDSv2 강제
+  
+  # 태그
+  tags:
+    Name: karpenter-node-dev
+    Environment: dev
+    ManagedBy: karpenter
+    Project: goorm-popcorn

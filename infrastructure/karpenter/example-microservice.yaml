@@ -1,0 +1,164 @@
+# 마이크로서비스를 Karpenter 노드에 배포하는 예제
+# 
+# 사용법:
+# 1. 이 파일을 각 서비스의 Helm 차트 values.yaml에 적용
+# 2. 또는 직접 Deployment에 추가
+
+---
+# 예제 1: Spot 노드에만 배포 (비용 최적화)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      # Spot 노드 Toleration
+      tolerations:
+        - key: karpenter.sh/spot
+          operator: Exists
+          effect: NoSchedule
+      
+      # Spot 노드 선호
+      nodeSelector:
+        karpenter.sh/capacity-type: spot
+      
+      # Pod Disruption Budget (고가용성)
+      # 별도 리소스로 정의 필요
+      
+      containers:
+        - name: order-service
+          image: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-order:latest
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+
+---
+# 예제 2: Spot 노드 선호하지만 ON_DEMAND도 허용 (유연성)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      # Spot 노드 Toleration
+      tolerations:
+        - key: karpenter.sh/spot
+          operator: Exists
+          effect: NoSchedule
+      
+      # Spot 노드 선호 (Affinity 사용)
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: karpenter.sh/capacity-type
+                    operator: In
+                    values:
+                      - spot
+            - weight: 50
+              preference:
+                matchExpressions:
+                  - key: karpenter.sh/capacity-type
+                    operator: In
+                    values:
+                      - on-demand
+      
+      containers:
+        - name: payment-service
+          image: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-payment:latest
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+
+---
+# 예제 3: 기본 노드(Managed Node Group)에만 배포 (안정성 우선)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: critical-service
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: critical-service
+  template:
+    metadata:
+      labels:
+        app: critical-service
+    spec:
+      # Karpenter 노드 제외
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-type
+                    operator: NotIn
+                    values:
+                      - karpenter
+      
+      containers:
+        - name: critical-service
+          image: nginx:alpine
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+---
+# Pod Disruption Budget (고가용성 보장)
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: order-service-pdb
+  namespace: default
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: order-service
+
+---
+# Pod Disruption Budget (최소 1개 유지)
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: payment-service-pdb
+  namespace: default
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: payment-service

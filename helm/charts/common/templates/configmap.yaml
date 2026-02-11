@@ -1,0 +1,39 @@
+{{- if .Values.commonConfig.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "common.fullname" . }}-config
+  labels:
+    {{- include "common.labels" . | nindent 4 }}
+data:
+  # 데이터베이스 연결 정보
+  DB_HOST: {{ .Values.commonConfig.database.host | quote }}
+  DB_PORT: {{ .Values.commonConfig.database.port | quote }}
+  DB_NAME: {{ .Values.commonConfig.database.name | quote }}
+  
+  # Redis 연결 정보
+  REDIS_HOST: {{ .Values.commonConfig.redis.host | quote }}
+  REDIS_PORT: {{ .Values.commonConfig.redis.port | quote }}
+  REDIS_DATABASE: {{ .Values.commonConfig.redis.database | quote }}
+  
+  # Kafka 설정
+  KAFKA_BOOTSTRAP_SERVERS: {{ .Values.commonConfig.kafka.bootstrapServers | quote }}
+  
+  # JPA/Flyway 설정
+  JPA_DDL_AUTO: {{ .Values.commonConfig.jpa.ddlAuto | quote }}
+  JPA_SHOW_SQL: {{ .Values.commonConfig.jpa.showSql | quote }}
+  JPA_FORMAT_SQL: {{ .Values.commonConfig.jpa.formatSql | quote }}
+  FLYWAY_ENABLED: {{ .Values.commonConfig.flyway.enabled | quote }}
+  FLYWAY_BASELINE: {{ .Values.commonConfig.flyway.baseline | quote }}
+  
+  # Spring 설정
+  SPRING_PROFILES_ACTIVE: {{ .Values.commonConfig.spring.profilesActive | quote }}
+  SPRING_CLOUD_COMPATIBILITY_VERIFIER_ENABLED: {{ .Values.commonConfig.spring.cloudCompatibilityVerifierEnabled | quote }}
+  
+  # Toss Payments 설정
+  TOSS_PAYMENTS_BASE_URL: {{ .Values.commonConfig.tossPayments.baseUrl | quote }}
+  TOSS_PAYMENTS_TEST_MODE: {{ .Values.commonConfig.tossPayments.testMode | quote }}
+  
+  # 프론트엔드 URL
+  FRONTEND_BASE_URL: {{ .Values.commonConfig.frontend.baseUrl | quote }}
+{{- end }}

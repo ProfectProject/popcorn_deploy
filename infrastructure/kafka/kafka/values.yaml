@@ -1,10 +1,12 @@
 # Kafka 기본 설정 (KRaft 모드)
 
 ## Kafka 이미지
+# Bitnami 무료 티어는 latest 태그만 지원 (2025년 8월 28일 이후)
+# 특정 버전 태그는 Bitnami Secure Images (유료) 필요
 image:
   registry: docker.io
   repository: bitnami/kafka
-  tag: 3.6.1
+  tag: latest
 
 ## KRaft 모드 활성화 (ZooKeeper 불필요)
 kraft:
@@ -17,15 +19,15 @@ replicaCount: 3
 resources:
   requests:
     cpu: 250m
-    memory: 512Mi
+    memory: 256Mi
   limits:
-    cpu: 1000m
-    memory: 1Gi
+    cpu: 500m
+    memory: 512Mi
 
 ## 스토리지 설정
 persistence:
   enabled: true
-  storageClass: "gp3"
+  storageClass: "gp3"  # gp3 StorageClass 사용
   size: 10Gi
 
 ## 리스너 설정
@@ -57,7 +59,7 @@ metrics:
 ## 로그 설정
 logPersistence:
   enabled: true
-  storageClass: "gp3"
+  storageClass: "gp3"  # gp3 StorageClass 사용
   size: 5Gi
 
 ## Kafka 설정
