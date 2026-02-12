@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-user
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "latest" 
 
 serviceAccount:
   create: true
