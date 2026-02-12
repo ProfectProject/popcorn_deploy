@@ -32,7 +32,7 @@ users:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-user
-    tag: dev-latest
+    tag: test-92, dev-latest
   resources:
     requests:
       cpu: 50m
