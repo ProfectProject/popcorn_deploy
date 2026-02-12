@@ -12,6 +12,9 @@ global:
 # 개발 환경 리소스 최소화
 gateway:
   replicaCount: 1
+  image:
+    repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-api-gateway
+    tag: dev-latest
   resources:
     requests:
       cpu: 50m
@@ -27,6 +30,9 @@ gateway:
 
 users:
   replicaCount: 1
+  image:
+    repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-user
+    tag: dev-latest
   resources:
     requests:
       cpu: 50m
@@ -40,6 +46,9 @@ users:
 
 stores:
   replicaCount: 1
+  image:
+    repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-store
+    tag: dev-latest
   resources:
     requests:
       cpu: 50m
@@ -52,6 +61,9 @@ stores:
 
 order:
   replicaCount: 1
+  image:
+    repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-order
+    tag: dev-latest
   resources:
     requests:
       cpu: 50m
@@ -65,9 +77,15 @@ order:
 # 개발 환경에서는 일부 서비스 비활성화 가능
 payment:
   enabled: false  # 개발 시 결제 서비스 비활성화
+  image:
+    repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-payment
+    tag: dev-latest
   
 orderQuery:
   replicaCount: 1
+  image:
+    repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-order-query
+    tag: dev-latest
   resources:
     requests:
       cpu: 50m
@@ -78,3 +96,6 @@ orderQuery:
 
 checkIns:
   enabled: false  # 개발 시 체크인 서비스 비활성화
+  image:
+    repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-checkin
+    tag: dev-latest

@@ -1,43 +1,43 @@
 # ArgoCD 운영 환경 설정
 
 server:
-  replicas: 2
+  replicas: 1
   
   resources:
     requests:
       cpu: 200m
       memory: 256Mi
     limits:
-      cpu: 1000m
+      cpu: 500m
       memory: 512Mi
   
   ingress:
     enabled: true
     annotations:
-      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:375896310755:certificate/xxx"
+      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:375896310755:certificate/085e3315-785c-480d-93c2-57f656b60f7b"
       alb.ingress.kubernetes.io/ssl-redirect: "443"
   
   autoscaling:
-    enabled: true
-    minReplicas: 2
-    maxReplicas: 5
+    enabled: false  # true → false (비활성화)
+    minReplicas: 1
+    maxReplicas: 3  # 5 → 3
     targetCPUUtilizationPercentage: 70
 
 repoServer:
-  replicas: 2
+  replicas: 1
   
   resources:
     requests:
       cpu: 200m
       memory: 256Mi
     limits:
-      cpu: 1000m
+      cpu: 500m
       memory: 512Mi
   
   autoscaling:
-    enabled: true
-    minReplicas: 2
-    maxReplicas: 5
+    enabled: false  # true → false
+    minReplicas: 1
+    maxReplicas: 3  # 5 → 3
     targetCPUUtilizationPercentage: 70
 
 controller:
@@ -45,15 +45,15 @@ controller:
   
   resources:
     requests:
-      cpu: 500m
-      memory: 1Gi
+      cpu: 300m
+      memory: 512Mi
     limits:
-      cpu: 2000m
-      memory: 2Gi
+      cpu: 1000m
+      memory: 1Gi
 
 redis-ha:
-  enabled: true
-  replicas: 3
+  enabled: false
+  replicas: 1
   
   resources:
     requests:
