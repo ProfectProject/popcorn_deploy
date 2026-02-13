@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "order.fullname" . }}-config
+  name: {{ include "common.fullname" . }}-config
   labels:
-    {{- include "order.labels" . | nindent 4 }}
+    {{- include "common.labels" . | nindent 4 }}
 data:
   # Order 서비스 전용 설정
   ORDER_PAYMENT_TIMEOUT: {{ .Values.config.paymentTimeout | quote }}
