@@ -45,3 +45,23 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
+
+# Order 서비스 전용 설정
+config:
+  paymentTimeout: "30000"
+  cancelTimeout: "60000"
+  maxQuantity: "100"
+  minQuantity: "1"
+  notificationEnabled: "true"
+  notificationRetry: "3"
+  reservationWaitTimeoutMs: "300000"
+  infoRequestTimeout: "5000"
+  infoCacheTtl: "300"
+  infoRetryCount: "3"
+
+# 서비스 URL
+serviceUrls:
+  gateway: "http://popcorn-gateway:8080"
+  users: "http://popcorn-users:8080"
+  stores: "http://popcorn-stores:8080"
+  payment: "http://popcorn-payment:8080"
