@@ -19,7 +19,7 @@ gateway:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-api-gateway
-    tag: test-117
+    tag: test-119
   resources:
     requests:
       cpu: 50m
@@ -36,7 +36,7 @@ users:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-user
-    tag: test-117
+    tag: test-119
   resources:
     requests:
       cpu: 50m
@@ -51,7 +51,7 @@ stores:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-store
-    tag: test-117
+    tag: test-119
   resources:
     requests:
       cpu: 50m
@@ -65,7 +65,7 @@ order:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-order
-    tag: test-117
+    tag: test-119
   resources:
     requests:
       cpu: 50m
@@ -81,7 +81,7 @@ payment:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-payment
-    tag: test-117
+    tag: test-119
   resources:
     requests:
       cpu: 50m
@@ -96,7 +96,7 @@ orderQuery:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-order-query
-    tag: test-117
+    tag: test-119
   resources:
     requests:
       cpu: 50m
@@ -111,7 +111,7 @@ checkIns:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-checkin
-    tag: test-118
+    tag: test-119
   resources:
     requests:
       cpu: 50m
