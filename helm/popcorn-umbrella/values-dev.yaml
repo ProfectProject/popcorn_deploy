@@ -1,7 +1,7 @@
 # Development environment overrides
 global:
   environment: dev
-  imageTag: dev-latest
+  imageTag: test-113
   
   # 개발 환경 데이터베이스 (로컬 또는 개발 RDS)
   database:
@@ -23,7 +23,7 @@ gateway:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-api-gateway
-    tag: dev-latest
+    tag: test-113
   resources:
     requests:
       cpu: 50m
@@ -41,7 +41,7 @@ users:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-user
-    tag: test-92, dev-latest
+    tag: test-113
   resources:
     requests:
       cpu: 50m
@@ -57,7 +57,7 @@ stores:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-store
-    tag: dev-latest
+    tag: test-113
   resources:
     requests:
       cpu: 50m
@@ -72,7 +72,7 @@ order:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-order
-    tag: dev-latest
+    tag: test-113
   resources:
     requests:
       cpu: 50m
@@ -83,18 +83,13 @@ order:
   env:
     SPRING_PROFILES_ACTIVE: "dev"
 
-# 개발 환경에서는 일부 서비스 비활성화 가능
+# 개발 환경에서는 모든 서비스 활성화
 payment:
-  enabled: false  # 개발 시 결제 서비스 비활성화
-  image:
-    repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-payment
-    tag: dev-latest
-  
-orderQuery:
+  enabled: true  # 활성화
   replicaCount: 1
   image:
-    repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-order-query
-    tag: dev-latest
+    repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-payment
+    tag: test-113
   resources:
     requests:
       cpu: 50m
@@ -102,9 +97,37 @@ orderQuery:
     limits:
       cpu: 200m
       memory: 256Mi
+  env:
+    SPRING_PROFILES_ACTIVE: "dev"
+  
+orderQuery:
+  enabled: true  # 활성화
+  replicaCount: 1
+  image:
+    repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-order-query
+    tag: test-113
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  env:
+    SPRING_PROFILES_ACTIVE: "dev"
 
 checkIns:
-  enabled: false  # 개발 시 체크인 서비스 비활성화
+  enabled: true  # 활성화
+  replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-checkin
-    tag: dev-latest
+    tag: test-113
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  env:
+    SPRING_PROFILES_ACTIVE: "dev"
