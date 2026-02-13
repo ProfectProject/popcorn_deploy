@@ -24,10 +24,8 @@ Thumbs.db
 # Helm
 charts/*.tgz
 .helmignore
-# Helm 의존성 파일 (helm dependency update로 생성)
-Chart.lock
-helm/popcorn-umbrella/charts/
-helm/charts/*/charts/
+# Helm 의존성 파일은 ArgoCD를 위해 Git에 포함
+# Chart.lock과 charts/ 디렉토리는 추적됨
 
 # Kubernetes
 *.kubeconfig
