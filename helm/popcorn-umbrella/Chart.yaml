@@ -40,3 +40,7 @@ dependencies:
   version: "1.0.0"
   repository: "file://../charts/checkins"
   condition: checkIns.enabled
+
+- name: common
+  version: "1.0.0"
+  repository: "file://../charts/common"

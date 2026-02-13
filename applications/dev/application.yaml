@@ -10,7 +10,7 @@ spec:
   
   source:
     repoURL: https://github.com/ProfectProject/popcorn_deploy.git
-    targetRevision: main
+    targetRevision: main #HAED
     path: helm/popcorn-umbrella
     helm:
       valueFiles:
