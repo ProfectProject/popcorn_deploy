@@ -111,7 +111,7 @@ checkIns:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-checkin
-    tag: test-117
+    tag: test-118
   resources:
     requests:
       cpu: 50m
