@@ -19,9 +19,9 @@ env:
 
 envFrom:
   - configMapRef:
-      name: stores-config
+      name: popcorn-stores-config
   - secretRef:
-      name: stores-secret
+      name: popcorn-stores-secret
       optional: true
 
 resources:

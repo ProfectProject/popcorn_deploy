@@ -74,7 +74,7 @@ env:
 
 envFrom:
   - configMapRef:
-      name: users-config
+      name: popcorn-users-config
       optional: true
 
 resources:

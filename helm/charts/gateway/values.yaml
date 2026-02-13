@@ -25,9 +25,9 @@ env:
 
 envFrom:
   - configMapRef:
-      name: gateway-config
+      name: popcorn-gateway-config
   - secretRef:
-      name: gateway-secret
+      name: popcorn-gateway-secret
       optional: true
 
 resources:

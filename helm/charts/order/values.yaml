@@ -19,9 +19,9 @@ env:
 
 envFrom:
   - configMapRef:
-      name: order-config
+      name: popcorn-order-config
   - secretRef:
-      name: order-secret
+      name: popcorn-order-secret
       optional: true
 
 resources:
