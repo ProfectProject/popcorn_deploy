@@ -3,15 +3,26 @@ global:
   environment: prod
   imageTag: latest
   
+  # 실제 RDS 엔드포인트
   database:
-    host: popcorn-db-prod.cluster-xxx.ap-northeast-2.rds.amazonaws.com
+    host: goorm-popcorn-prod-postgres.cds4g0gykt3t.ap-northeast-2.rds.amazonaws.com
+    port: 5432
+    name: popcorn
     
+  # 실제 ElastiCache 엔드포인트
   redis:
-    host: popcorn-redis-prod.xxx.cache.amazonaws.com
+    host: master.goorm-popcorn-cache-prod.mkltth.apn2.cache.amazonaws.com
+    port: 6379
+    
+  # Kafka 설정 (infrastructure/kafka에서 배포)
+  kafka:
+    bootstrapServers: kafka-controller-0.kafka-controller-headless.kafka.svc.cluster.local:9092,kafka-controller-1.kafka-controller-headless.kafka.svc.cluster.local:9092,kafka-controller-2.kafka-controller-headless.kafka.svc.cluster.local:9092
 
 # 운영 환경 고가용성 설정
 gateway:
   replicaCount: 3
+  image:
+    tag: latest
   resources:
     requests:
       cpu: 200m
@@ -29,13 +40,12 @@ gateway:
     LOGGING_LEVEL_ROOT: "WARN"
     JAVA_OPTS: "-Xms512m -Xmx1024m"
   ingress:
-    enabled: true
-    annotations:
-      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:375896310755:certificate/085e3315-785c-480d-93c2-57f656b60f7b"
-      alb.ingress.kubernetes.io/ssl-redirect: "443"
+    enabled: false  # 외부 노출 안 함 (내부 서비스 간 통신만)
 
 users:
   replicaCount: 3
+  image:
+    tag: latest
   resources:
     requests:
       cpu: 200m
@@ -53,6 +63,8 @@ users:
 
 stores:
   replicaCount: 2
+  image:
+    tag: latest
   resources:
     requests:
       cpu: 200m
@@ -70,6 +82,8 @@ stores:
 
 order:
   replicaCount: 3
+  image:
+    tag: latest
   resources:
     requests:
       cpu: 200m
@@ -88,6 +102,8 @@ order:
 payment:
   enabled: true
   replicaCount: 2
+  image:
+    tag: latest
   resources:
     requests:
       cpu: 200m
@@ -105,6 +121,8 @@ payment:
 
 orderQuery:
   replicaCount: 2
+  image:
+    tag: latest
   resources:
     requests:
       cpu: 200m
@@ -123,6 +141,8 @@ orderQuery:
 checkIns:
   enabled: true
   replicaCount: 2
+  image:
+    tag: latest
   resources:
     requests:
       cpu: 100m

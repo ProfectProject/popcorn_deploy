@@ -19,7 +19,7 @@ global:
   kafka:
     bootstrapServers: kafka:9092
 
-# Gateway Service
+# Gateway Service (내부 전용 - Ingress 비활성화)
 gateway:
   enabled: true
   replicaCount: 1
@@ -33,12 +33,7 @@ gateway:
       cpu: 500m
       memory: 512Mi
   ingress:
-    enabled: true
-    hosts:
-      - host: api.goormpopcorn.shop
-        paths:
-          - path: /
-            pathType: Prefix
+    enabled: false  # 외부 노출 안 함
 
 # Users Service
 users:

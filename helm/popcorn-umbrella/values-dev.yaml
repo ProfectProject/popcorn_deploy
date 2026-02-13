@@ -3,11 +3,20 @@ global:
   environment: dev
   imageTag: dev-latest
   
+  # 개발 환경 데이터베이스 (로컬 또는 개발 RDS)
   database:
-    host: popcorn-db-dev.cluster-xxx.ap-northeast-2.rds.amazonaws.com
+    host: postgres.popcorn-dev.svc.cluster.local
+    port: 5432
+    name: popcorn
     
+  # 개발 환경 Redis (로컬 또는 개발 ElastiCache)
   redis:
-    host: popcorn-redis-dev.xxx.cache.amazonaws.com
+    host: redis.popcorn-dev.svc.cluster.local
+    port: 6379
+    
+  # 개발 환경 Kafka
+  kafka:
+    bootstrapServers: kafka.popcorn-dev.svc.cluster.local:9092
 
 # 개발 환경 리소스 최소화
 gateway:
