@@ -1,0 +1,11 @@
+apiVersion: v2
+name: checkIns
+description: Popcorn CheckIn Service (includes QR functionality)
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+dependencies:
+- name: common
+  version: "1.0.0"
+  repository: "helm/popcorn-umbrella/charts/common"
