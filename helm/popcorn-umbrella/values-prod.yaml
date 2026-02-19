@@ -18,7 +18,7 @@ global:
 gateway:
   replicaCount: 3
   image:
-    tag: dev-b6ce252f
+    tag: dev-d8238806
   resources:
     requests:
       cpu: 200m
@@ -40,7 +40,7 @@ gateway:
 users:
   replicaCount: 3
   image:
-    tag: dev-b6ce252f
+    tag: dev-d8238806
   resources:
     requests:
       cpu: 200m
@@ -58,7 +58,7 @@ users:
 stores:
   replicaCount: 2
   image:
-    tag: dev-b6ce252f
+    tag: dev-d8238806
   resources:
     requests:
       cpu: 200m
@@ -76,7 +76,7 @@ stores:
 order:
   replicaCount: 3
   image:
-    tag: dev-b6ce252f
+    tag: dev-d8238806
   resources:
     requests:
       cpu: 200m
@@ -95,7 +95,7 @@ payment:
   enabled: true
   replicaCount: 2
   image:
-    tag: dev-b6ce252f
+    tag: dev-d8238806
   resources:
     requests:
       cpu: 200m
@@ -113,7 +113,7 @@ payment:
 orderQuery:
   replicaCount: 2
   image:
-    tag: dev-b6ce252f
+    tag: dev-d8238806
   resources:
     requests:
       cpu: 200m
@@ -132,7 +132,7 @@ checkIns:
   enabled: true
   replicaCount: 2
   image:
-    tag: dev-b6ce252f
+    tag: dev-d8238806
   resources:
     requests:
       cpu: 100m
