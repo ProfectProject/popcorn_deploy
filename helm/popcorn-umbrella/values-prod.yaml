@@ -2,29 +2,24 @@
 global:
   environment: prod
   imageTag: dev-latest
-  
   # 실제 RDS 엔드포인트
   database:
     host: goorm-popcorn-prod-postgres.cds4g0gykt3t.ap-northeast-2.rds.amazonaws.com
     port: 5432
     name: popcorn_prod
-    
   # 실제 ElastiCache 엔드포인트
   redis:
     host: master.goorm-popcorn-cache-prod.mkltth.apn2.cache.amazonaws.com
     port: 6379
-    
   # Kafka 설정 (infrastructure/kafka에서 배포)
   kafka:
     bootstrapServers: kafka-prod.kafka.svc.cluster.local:9092
-
   frontend:
     appUrl: "https://goormpopcorn.shop"
     apiBaseUrl: "https://api.goormpopcorn.shop"
     storeApiBaseUrl: "https://api.goormpopcorn.shop"
     orderQueryApiBaseUrl: "https://api.goormpopcorn.shop"
     paymentApiBaseUrl: "https://api.goormpopcorn.shop"
-
 # 운영 환경 고가용성 설정
 frontend:
   enabled: true
@@ -72,11 +67,10 @@ frontend:
         paths:
           - path: /
             pathType: Prefix
-
 gateway:
   replicaCount: 1
   image:
-    tag: dev-latest
+    tag: dev-39b89c52
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -174,11 +168,10 @@ gateway:
             pathType: Prefix
           - path: /actuator
             pathType: Prefix
-
 users:
   replicaCount: 1
   image:
-    tag: dev-latest
+    tag: dev-39b89c52
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -211,11 +204,10 @@ users:
         secretKeyRef:
           name: database-users
           key: USER_AUTH_DB_PASSWORD
-
 stores:
   replicaCount: 1
   image:
-    tag: dev-latest
+    tag: dev-39b89c52
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -248,11 +240,10 @@ stores:
           name: database-users
           key: STORE_DB_PASSWORD
     SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: "store"
-
 order:
   replicaCount: 1
   image:
-    tag: dev-latest
+    tag: dev-39b89c52
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -281,18 +272,16 @@ order:
     USER_SERVICE_BASE_URL: "http://popcorn-prod-gateway:8080"
     STORE_SERVICE_BASE_URL: "http://popcorn-prod-gateway:8080"
     ORDERQUERY_SERVICE_BASE_URL: "http://popcorn-prod-gateway:8080"
-
   serviceUrls:
     gateway: "http://{{ .Release.Name }}-gateway:8080"
     users: "http://{{ .Release.Name }}-users:8080"
     stores: "http://{{ .Release.Name }}-stores:8080"
     payment: "http://{{ .Release.Name }}-payment:8080"
-
 payment:
   enabled: true
   replicaCount: 1
   image:
-    tag: dev-latest
+    tag: dev-39b89c52
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -340,7 +329,6 @@ payment:
     SPRING_FLYWAY_DEFAULT_SCHEMA: "payment"
     SPRING_FLYWAY_SCHEMAS: "payment"
     SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: "payment"
-
 order-query:
   replicaCount: 1
   image:
@@ -419,7 +407,6 @@ order-query:
     SPRING_FLYWAY_DEFAULT_SCHEMA: "order_query"
     SPRING_FLYWAY_SCHEMAS: "order_query"
     SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: "order_query"
-
 checkins:
   enabled: true
   replicaCount: 1
@@ -462,3 +449,9 @@ checkins:
     SPRING_FLYWAY_DEFAULT_SCHEMA: "checkins"
     SPRING_FLYWAY_SCHEMAS: "checkins"
     SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: "checkins"
+orderQuery:
+  image:
+    tag: dev-39b89c52
+checkIns:
+  image:
+    tag: dev-39b89c52
