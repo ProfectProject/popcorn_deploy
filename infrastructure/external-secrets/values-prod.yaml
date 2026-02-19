@@ -7,29 +7,28 @@ replicaCount: 2
 image:
   repository: ghcr.io/external-secrets/external-secrets
   pullPolicy: IfNotPresent
-  tag: v0.9.13
+  tag: v2.0.0
 
 # 리소스 제한 (Prod는 충분한 리소스)
 resources:
   requests:
-    cpu: 200m
-    memory: 256Mi
+    cpu: 100m
+    memory: 128Mi
   limits:
-    cpu: 1000m
-    memory: 512Mi
+    cpu: 500m
+    memory: 256Mi
 
 # ServiceAccount 설정
 serviceAccount:
   create: true
   name: external-secrets-sa
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::375896310755:role/ExternalSecretsRole-goorm-popcorn-prod
+    eks.amazonaws.com/role-arn: arn:aws:iam::375896310755:role/goorm-popcorn-prod-external-secrets
 
 # 보안 컨텍스트
 securityContext:
   runAsNonRoot: true
   runAsUser: 1000
-  fsGroup: 1000
 
 podSecurityContext:
   runAsNonRoot: true
@@ -45,11 +44,11 @@ webhook:
   replicaCount: 2
   resources:
     requests:
-      cpu: 100m
-      memory: 128Mi
+      cpu: 50m
+      memory: 64Mi
     limits:
-      cpu: 500m
-      memory: 256Mi
+      cpu: 250m
+      memory: 192Mi
 
 # Cert Controller 설정
 certController:
@@ -57,11 +56,11 @@ certController:
   replicaCount: 2
   resources:
     requests:
-      cpu: 100m
-      memory: 128Mi
+      cpu: 50m
+      memory: 64Mi
     limits:
-      cpu: 500m
-      memory: 256Mi
+      cpu: 250m
+      memory: 192Mi
 
 # 메트릭 설정
 metrics:

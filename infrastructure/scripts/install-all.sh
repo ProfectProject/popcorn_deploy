@@ -13,7 +13,7 @@ echo "=========================================="
 
 # 1. ArgoCD 설치 (GitOps 도구 먼저 설치)
 echo ""
-echo "1/3: ArgoCD 설치 중..."
+echo "1/4: ArgoCD 설치 중..."
 ./install-argocd.sh $ENVIRONMENT
 
 echo ""
@@ -22,7 +22,7 @@ sleep 10
 
 # 2. Kafka 설치 (이벤트 스트리밍)
 echo ""
-echo "2/3: Kafka 설치 중..."
+echo "2/4: Kafka 설치 중..."
 ./install-kafka.sh $ENVIRONMENT
 
 echo ""
@@ -31,8 +31,17 @@ sleep 10
 
 # 3. LGTM Stack 설치 (모니터링)
 echo ""
-echo "3/3: LGTM Stack 설치 중..."
+echo "3/4: LGTM Stack 설치 중..."
 ./install-lgtm.sh $ENVIRONMENT
+
+echo ""
+echo "LGTM Stack 설치 완료! 잠시 대기 중..."
+sleep 10
+
+# 4. OTel Collector 설치 (관측 데이터 수집/전송)
+echo ""
+echo "4/4: OpenTelemetry Collector 설치 중..."
+./install-otel.sh $ENVIRONMENT
 
 echo ""
 echo "=========================================="
@@ -44,6 +53,7 @@ echo "설치된 컴포넌트:"
 echo "- ArgoCD (namespace: argocd)"
 echo "- Kafka + Kafka UI (namespace: kafka)"
 echo "- LGTM Stack (namespace: monitoring)"
+echo "- OpenTelemetry Collector (namespace: monitoring)"
 
 echo ""
 echo "다음 단계:"
@@ -51,6 +61,6 @@ echo "1. ArgoCD에서 Popcorn MSA Application 생성"
 echo "   kubectl apply -f ../../applications/dev/application.yaml"
 echo ""
 echo "2. 각 서비스 접속:"
-echo "   - ArgoCD: kubectl port-forward -n argocd svc/argocd-server 8080:443"
+echo "   - ArgoCD: kubectl port-forward -n argocd svc/argocd-server 8080:80"
 echo "   - Kafka UI: kubectl port-forward -n kafka svc/kafka-ui 8080:80"
 echo "   - Grafana: kubectl port-forward -n monitoring svc/grafana 3000:80"

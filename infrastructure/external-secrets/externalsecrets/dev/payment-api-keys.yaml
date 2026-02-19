@@ -1,0 +1,23 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: payment-api-keys
+  namespace: popcorn-dev
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: ClusterSecretStore
+  target:
+    name: payment-api-keys
+    creationPolicy: Owner
+    template:
+      engineVersion: v2
+      data:
+        # Toss Payments
+        TOSS_PAYMENTS_CLIENT_KEY: "{{ .toss_client_key }}"
+        TOSS_PAYMENTS_SECRET_KEY: "{{ .toss_secret_key }}"
+  
+  dataFrom:
+    - extract:
+        key: /goorm-popcorn/dev/external-apis/payment

@@ -16,6 +16,7 @@ popcorn_deploy/
 │   │   ├── stores/               # Store Service
 │   │   ├── order/                # Order Service
 │   │   ├── payment/              # Payment Service
+│   │   ├── frontend/             # Frontend Service
 │   │   ├── orderQuery/           # Order Query Service
 │   │   └── checkIns/             # CheckIn Service
 │   └── popcorn-umbrella/         # Umbrella Chart
@@ -51,8 +52,9 @@ popcorn_deploy/
 3. **stores** - 스토어 서비스
 4. **order** - 주문 서비스 (Command)
 5. **payment** - 결제 서비스
-6. **orderQuery** - 주문 조회 서비스 (Query, CQRS)
-7. **checkIns** - 체크인 서비스 (QR 코드 포함)
+6. **frontend** - 프론트엔드 서비스 (Next.js)
+7. **orderQuery** - 주문 조회 서비스 (Query, CQRS)
+8. **checkIns** - 체크인 서비스 (QR 코드 포함)
 
 ## ECR 이미지 주소
 
@@ -62,6 +64,7 @@ popcorn_deploy/
 {aws_account_id}.dkr.ecr.{region}.amazonaws.com/goorm-popcorn-store
 {aws_account_id}.dkr.ecr.{region}.amazonaws.com/goorm-popcorn-order
 {aws_account_id}.dkr.ecr.{region}.amazonaws.com/goorm-popcorn-payment
+{aws_account_id}.dkr.ecr.{region}.amazonaws.com/goorm-popcorn-front
 {aws_account_id}.dkr.ecr.{region}.amazonaws.com/goorm-popcorn-order-query
 {aws_account_id}.dkr.ecr.{region}.amazonaws.com/goorm-popcorn-checkin
 ```

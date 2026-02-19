@@ -1,36 +1,51 @@
 # Kafka 기본 설정 (KRaft 모드)
 
-## Kafka 이미지
-# Bitnami 무료 티어는 latest 태그만 지원 (2025년 8월 28일 이후)
-# 특정 버전 태그는 Bitnami Secure Images (유료) 필요
+# Bitnami 무료 티어 제약으로 latest 태그를 사용
 image:
   registry: docker.io
   repository: bitnami/kafka
   tag: latest
 
-## KRaft 모드 활성화 (ZooKeeper 불필요)
-kraft:
-  enabled: true
+# controller 노드가 broker 역할을 함께 수행하는 KRaft 구성
+controller:
+  replicaCount: 3
+  controllerOnly: false
 
-## 클러스터 설정
-replicaCount: 3
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 
-## 리소스 설정
-resources:
-  requests:
-    cpu: 250m
-    memory: 256Mi
-  limits:
-    cpu: 500m
-    memory: 512Mi
+  persistence:
+    enabled: true
+    storageClass: gp3
+    size: 10Gi
 
-## 스토리지 설정
-persistence:
-  enabled: true
-  storageClass: "gp3"  # gp3 StorageClass 사용
-  size: 10Gi
+  logPersistence:
+    enabled: true
+    storageClass: gp3
+    size: 5Gi
 
-## 리스너 설정
+  pdb:
+    create: true
+    minAvailable: 2
+
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: kafka
+            topologyKey: topology.kubernetes.io/zone
+
+broker:
+  replicaCount: 0
+
 listeners:
   client:
     protocol: PLAINTEXT
@@ -41,74 +56,39 @@ listeners:
   external:
     protocol: PLAINTEXT
 
-## 서비스 설정
 service:
   type: ClusterIP
   ports:
     client: 9092
     controller: 9093
     interbroker: 9094
+    external: 9095
 
-## 메트릭 설정
+externalAccess:
+  enabled: false
+
 metrics:
-  kafka:
-    enabled: true
   jmx:
     enabled: true
 
-## 로그 설정
-logPersistence:
-  enabled: true
-  storageClass: "gp3"  # gp3 StorageClass 사용
-  size: 5Gi
-
-## Kafka 설정
-config: |
+config:
   # 로그 보관 설정
-  log.retention.hours=168
-  log.retention.bytes=1073741824
-  log.segment.bytes=1073741824
-  
+  log.retention.hours: 168
+  log.retention.bytes: 1073741824
+  log.segment.bytes: 1073741824
+
   # 복제 설정
-  default.replication.factor=3
-  min.insync.replicas=2
-  
+  offsets.topic.replication.factor: 3
+  transaction.state.log.replication.factor: 3
+  transaction.state.log.min.isr: 2
+  default.replication.factor: 3
+  min.insync.replicas: 2
+
   # 압축 설정
-  compression.type=producer
-  
+  compression.type: producer
+
   # 자동 토픽 생성
-  auto.create.topics.enable=true
-  
+  auto.create.topics.enable: true
+
   # 파티션 설정
-  num.partitions=3
-
-## 헬스체크
-livenessProbe:
-  enabled: true
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
-
-readinessProbe:
-  enabled: true
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 6
-
-## Pod Disruption Budget
-pdb:
-  create: true
-  minAvailable: 2
-
-## Anti-affinity (Multi-AZ 배치)
-affinity:
-  podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: kafka
-          topologyKey: topology.kubernetes.io/zone
+  num.partitions: 3

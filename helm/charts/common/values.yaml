@@ -43,6 +43,6 @@ serviceUrls:
   users: "http://popcorn-users.default.svc.cluster.local:8082"
   stores: "http://popcorn-stores.default.svc.cluster.local:8083"
   order: "http://popcorn-order.default.svc.cluster.local:8084"
-  orderQuery: "http://popcorn-orderquery.default.svc.cluster.local:8085"
-  checkIns: "http://popcorn-checkins.default.svc.cluster.local:8086"
+  order-query: "http://popcorn-order-query.default.svc.cluster.local:8085"
+  checkins: "http://popcorn-checkins.default.svc.cluster.local:8086"
   payment: "http://popcorn-payment.default.svc.cluster.local:8087"

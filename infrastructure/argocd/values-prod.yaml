@@ -5,10 +5,10 @@ server:
   
   resources:
     requests:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 100m
+      memory: 192Mi
     limits:
-      cpu: 500m
+      cpu: 300m
       memory: 512Mi
   
   ingress:
@@ -28,10 +28,10 @@ repoServer:
   
   resources:
     requests:
-      cpu: 200m
+      cpu: 100m
       memory: 256Mi
     limits:
-      cpu: 500m
+      cpu: 300m
       memory: 512Mi
   
   autoscaling:
@@ -45,10 +45,10 @@ controller:
   
   resources:
     requests:
-      cpu: 300m
+      cpu: 150m
       memory: 512Mi
     limits:
-      cpu: 1000m
+      cpu: 700m
       memory: 1Gi
 
 redis-ha:

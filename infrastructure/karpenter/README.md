@@ -1,223 +1,328 @@
-# Karpenter 설정
-
-Karpenter는 Kubernetes 클러스터의 노드 오토스케일링을 담당합니다.
+# Karpenter 설치 및 설정 가이드
 
 ## 개요
 
-Karpenter는 Terraform에서 Helm 차트로 설치되며, 이 디렉터리는 NodePool과 EC2NodeClass 매니페스트를 관리합니다.
-
-## 빠른 시작
-
-```bash
-# 1. 클러스터 연결
-aws eks update-kubeconfig --region ap-northeast-2 --name goorm-popcorn-prod
-
-# 2. Karpenter 리소스 설치
-./install-karpenter-resources.sh prod
-
-# 3. 테스트 워크로드 배포
-kubectl apply -f test-workload.yaml
-
-# 4. 노드 프로비저닝 확인
-kubectl get nodes -l karpenter.sh/capacity-type=spot -w
-```
-
-자세한 내용은 [QUICKSTART.md](./QUICKSTART.md)를 참조하세요.
+Karpenter는 Kubernetes 클러스터의 자동 스케일링을 담당하는 오픈소스 프로젝트입니다.
+기본 노드(t3.large 3개)는 시스템 워크로드용으로 고정하고, 애플리케이션 워크로드는 Karpenter가 Spot 인스턴스로 자동 프로비저닝합니다.
 
 ## 아키텍처
 
-### 기본 노드 (Managed Node Group)
-- **목적**: 클러스터 안정성 보장
-- **용량 타입**: ON_DEMAND
-- **워크로드**: 시스템 컴포넌트, Karpenter 자체, 인프라 서비스
-- **Dev**: t3.medium x 2개 고정
-- **Prod**: t3.medium x 3개 고정 (Multi-AZ)
-
-### 오토스케일링 노드 (Karpenter)
-- **목적**: 비용 최적화 및 탄력적 확장
-- **용량 타입**: SPOT 우선 (Prod는 ON_DEMAND 폴백)
-- **워크로드**: 무상태 마이크로서비스, 배치 작업
-- **Dev**: t3.medium, SPOT, 0-10개
-- **Prod**: t3.medium/t3.large, SPOT 우선, 0-20개
-
-## 파일 구조
-
 ```
-karpenter/
-├── README.md                           # 이 파일
-├── QUICKSTART.md                       # 빠른 시작 가이드
-├── DEPLOYMENT_GUIDE.md                 # 상세 배포 가이드
-├── install-karpenter-resources.sh      # 설치 스크립트
-├── nodepool-dev.yaml                   # Dev 환경 NodePool
-├── nodepool-prod.yaml                  # Prod 환경 NodePool
-├── ec2nodeclass-dev.yaml               # Dev 환경 EC2NodeClass
-├── ec2nodeclass-prod.yaml              # Prod 환경 EC2NodeClass
-├── test-workload.yaml                  # 테스트 워크로드
-├── example-microservice.yaml           # 마이크로서비스 예제
-└── helm-values-example.yaml            # Helm values 예제
+┌─────────────────────────────────────────────────────────┐
+│ EKS 클러스터: goorm-popcorn-prod                         │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│ [기본 노드 그룹] (고정)                                   │
+│ ├─ t3.large × 3 (ON_DEMAND)                             │
+│ ├─ 용도: 시스템 워크로드                                  │
+│ │   ├─ CoreDNS                                          │
+│ │   ├─ AWS Load Balancer Controller                    │
+│ │   ├─ Karpenter                                        │
+│ │   ├─ ArgoCD                                           │
+│ │   └─ 기타 인프라 서비스                                │
+│ └─ 총 리소스: 6 vCPU, 24GB 메모리                        │
+│                                                          │
+│ [Karpenter 관리 노드] (동적)                             │
+│ ├─ t3.medium/large/xlarge (SPOT 우선)                   │
+│ ├─ 용도: 애플리케이션 워크로드                            │
+│ │   ├─ Gateway                                          │
+│ │   ├─ Users, Stores, Order                            │
+│ │   ├─ Payment, CheckIns                                │
+│ │   └─ OrderQuery                                       │
+│ └─ 자동 스케일링: 0 ~ 20 vCPU                            │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
 ```
 
-## 배포 방법
+## 사전 요구사항
 
-### 1. Terraform으로 Karpenter 설치 (이미 완료)
+1. **Terraform으로 인프라 배포 완료**
+   - EKS 클러스터 생성
+   - Karpenter IAM 역할 생성
+   - SQS 큐 및 EventBridge 규칙 생성
+
+2. **kubectl 설정**
+   ```bash
+   aws eks update-kubeconfig --name goorm-popcorn-prod --region ap-northeast-2
+   ```
+
+3. **Helm 설치 확인**
+   ```bash
+   helm version
+   ```
+
+## 설치 순서
+
+### 1단계: Terraform 적용
 
 ```bash
 cd popcorn-terraform-feature/envs/prod
+
+# 변경사항 확인
+terraform plan
+
+# 적용
 terraform apply
+
+# 출력 확인
+terraform output
 ```
 
-생성되는 리소스:
-- Karpenter Helm 차트
-- Karpenter IAM 역할
-- SQS 큐 (Spot 인터럽션용)
-- EventBridge 규칙
+**예상 변경사항**:
+- EKS 노드 그룹: t3.medium → t3.large
+- Karpenter Helm 차트 설치
+- Karpenter IAM 역할 생성
+- SQS 큐 생성
+- EventBridge 규칙 생성
 
-### 2. NodePool 및 EC2NodeClass 적용
-
-#### 자동 설치 (권장)
-```bash
-cd popcorn_deploy/infrastructure/karpenter
-
-# Prod 환경
-./install-karpenter-resources.sh prod
-
-# Dev 환경
-./install-karpenter-resources.sh dev
-```
-
-#### 수동 설치
-```bash
-# EC2NodeClass 적용
-kubectl apply -f ec2nodeclass-prod.yaml
-
-# NodePool 적용
-kubectl apply -f nodepool-prod.yaml
-```
-
-### 3. 확인
+### 2단계: Karpenter 설치 확인
 
 ```bash
-# NodePool 확인
-kubectl get nodepools
+# Karpenter Pod 확인
+kubectl get pods -n karpenter
 
-# EC2NodeClass 확인
-kubectl get ec2nodeclasses
+# 예상 출력:
+# NAME                         READY   STATUS    RESTARTS   AGE
+# karpenter-5d8f9c7b6d-xxxxx   1/1     Running   0          2m
+# karpenter-5d8f9c7b6d-yyyyy   1/1     Running   0          2m
 
 # Karpenter 로그 확인
 kubectl logs -n karpenter -l app.kubernetes.io/name=karpenter -f
 ```
 
-## 주요 기능
+### 3단계: NodePool 및 EC2NodeClass 배포
 
-### Spot 인터럽션 처리
-- **SQS 큐**: Spot 인터럽션 알림 수신
-- **EventBridge**: AWS 이벤트를 SQS로 전달
-- **Graceful Shutdown**: 2분 전 알림으로 Pod 안전하게 종료
+```bash
+cd popcorn_deploy/infrastructure/karpenter
 
-### 인스턴스 선택
-- **다양한 타입**: Karpenter가 워크로드에 맞는 인스턴스 자동 선택
-- **가용 영역**: Multi-AZ 분산 배치
-- **비용 최적화**: 가장 저렴한 인스턴스 우선 선택
+# EC2NodeClass 배포
+kubectl apply -f ec2nodeclass.yaml
 
-### 리소스 제한
-- **최대 노드 수**: Dev 10개, Prod 20개
-- **TTL**: 유휴 노드 자동 제거 (30초)
-- **Consolidation**: 리소스 효율적 재배치
+# NodePool 배포
+kubectl apply -f nodepool.yaml
 
-## 워크로드 스케줄링
-
-### Karpenter 노드에 배포 (무상태 마이크로서비스)
-```yaml
-spec:
-  tolerations:
-  - key: karpenter.sh/spot
-    operator: Exists
-    effect: NoSchedule
-  
-  affinity:
-    nodeAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        preference:
-          matchExpressions:
-          - key: karpenter.sh/capacity-type
-            operator: In
-            values:
-            - spot
+# 확인
+kubectl get nodepool
+kubectl get ec2nodeclass
 ```
 
-### 기본 노드에 배포 (시스템 컴포넌트)
+### 4단계: 테스트 배포
+
+```bash
+# 테스트 Deployment 생성
+kubectl create deployment test-karpenter \
+  --image=nginx:latest \
+  --replicas=5 \
+  -n default
+
+# Pod 스케줄링 확인
+kubectl get pods -n default -w
+
+# 새 노드 생성 확인 (1-2분 소요)
+kubectl get nodes -w
+
+# Karpenter 이벤트 확인
+kubectl get events -n karpenter --sort-by='.lastTimestamp'
+```
+
+### 5단계: 정리
+
+```bash
+# 테스트 Deployment 삭제
+kubectl delete deployment test-karpenter -n default
+
+# 노드 자동 축소 확인 (30초 후)
+kubectl get nodes -w
+```
+
+## NodePool 설정 설명
+
+### default NodePool
+
+**용도**: 일반 애플리케이션 워크로드
+
+**특징**:
+- Spot 우선, On-Demand 대체
+- t3.medium/large/xlarge 지원
+- 최대 20 vCPU, 40GB 메모리
+- 자동 통합 (Consolidation)
+
+**적용 대상**:
+- Gateway, Users, Stores
+- Order, Payment, CheckIns
+- OrderQuery
+
+### spot-only NodePool
+
+**용도**: 배치 작업, 중단 가능한 워크로드
+
+**특징**:
+- Spot 전용
+- Taint 적용 (workload-type=batch)
+- 최대 10 vCPU, 20GB 메모리
+
+**적용 대상**:
+- 배치 작업
+- 데이터 처리
+- 테스트 환경
+
+## 애플리케이션 배포 시 설정
+
+### Spot 인스턴스 사용 (권장)
+
 ```yaml
+# Deployment 예시
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
 spec:
-  nodeSelector:
-    eks.amazonaws.com/nodegroup: goorm-popcorn-prod
-  
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-        - matchExpressions:
-          - key: karpenter.sh/capacity-type
-            operator: DoesNotExist
+  replicas: 2
+  template:
+    spec:
+      # Karpenter가 관리하는 노드에 배포
+      nodeSelector:
+        workload-type: application
+      
+      # Spot 중단 대비
+      tolerations:
+        - key: karpenter.sh/disruption
+          operator: Exists
+      
+      # Pod Disruption Budget 설정
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: gateway
+```
+
+### On-Demand 인스턴스 강제 (중요 서비스)
+
+```yaml
+# Deployment 예시
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment
+spec:
+  template:
+    spec:
+      nodeSelector:
+        karpenter.sh/capacity-type: on-demand
+```
+
+### 기본 노드 사용 (시스템 서비스)
+
+```yaml
+# Deployment 예시
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-server
+  namespace: argocd
+spec:
+  template:
+    spec:
+      # 기본 노드 그룹에 배포
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: goorm-popcorn-prod-nodes
+```
+
+## 비용 최적화
+
+### 예상 비용 (월간)
+
+**기본 노드 (고정)**:
+- t3.large × 3 = $182/월
+
+**Karpenter 노드 (변동)**:
+- Spot 인스턴스 평균 70% 할인
+- 예상 사용량: t3.medium × 2 (평균)
+- 비용: $27/월 (Spot 가격 기준)
+
+**총 예상 비용**: $209/월
+
+**기존 대비 절감**:
+- t3.medium 5노드: $152/월
+- t3.large 4노드: $243/월
+- **절감액**: 없음 (안정성 향상)
+
+### 비용 모니터링
+
+```bash
+# Karpenter 노드 비용 확인
+kubectl get nodes -l karpenter.sh/nodepool \
+  -o custom-columns=NAME:.metadata.name,\
+INSTANCE-TYPE:.metadata.labels.node\\.kubernetes\\.io/instance-type,\
+CAPACITY-TYPE:.metadata.labels.karpenter\\.sh/capacity-type,\
+ZONE:.metadata.labels.topology\\.kubernetes\\.io/zone
 ```
 
 ## 모니터링
 
-### 메트릭
-- `karpenter_nodes_total`: 총 노드 수
-- `karpenter_pods_state`: Pod 상태
-- `karpenter_interruption_received_messages`: 인터럽션 메시지 수
+### Karpenter 메트릭
 
-### 로그
 ```bash
-kubectl logs -n karpenter -l app.kubernetes.io/name=karpenter --tail=100 -f
+# Prometheus 메트릭 확인
+kubectl port-forward -n karpenter svc/karpenter 8080:8080
+
+# 브라우저에서 접속
+open http://localhost:8080/metrics
 ```
 
-### 노드 상태
+### 주요 메트릭
+
+- `karpenter_nodes_created`: 생성된 노드 수
+- `karpenter_nodes_terminated`: 종료된 노드 수
+- `karpenter_pods_startup_duration_seconds`: Pod 시작 시간
+- `karpenter_interruption_actions_performed`: Spot 중단 처리 횟수
+
+### CloudWatch 대시보드
+
+Terraform으로 자동 생성된 대시보드:
+- EKS 클러스터 메트릭
+- 노드 리소스 사용률
+- Karpenter 이벤트
+
+## 트러블슈팅
+
+### 노드가 생성되지 않음
+
 ```bash
-# 모든 노드
-kubectl get nodes -L karpenter.sh/capacity-type,node-type
+# Karpenter 로그 확인
+kubectl logs -n karpenter -l app.kubernetes.io/name=karpenter --tail=100
 
-# Karpenter 노드만
-kubectl get nodes -l karpenter.sh/capacity-type=spot
-
-# 리소스 사용량
-kubectl top nodes
+# 일반적인 원인:
+# 1. IAM 권한 부족
+# 2. 서브넷 태그 누락
+# 3. 보안 그룹 설정 오류
 ```
 
-## 문제 해결
+### Spot 중단 처리
 
-### NodePool이 노드를 생성하지 않음
-1. NodePool 상태 확인: `kubectl describe nodepool default`
-2. EC2NodeClass 상태 확인: `kubectl describe ec2nodeclass default`
-3. Karpenter 로그 확인: `kubectl logs -n karpenter -l app.kubernetes.io/name=karpenter`
-4. IAM 역할 확인: Karpenter 역할에 필요한 권한이 있는지 확인
+```bash
+# Spot 중단 이벤트 확인
+kubectl get events -n karpenter | grep interruption
 
-### Spot 인터럽션 처리 안됨
-1. SQS 큐 확인: AWS 콘솔에서 메시지 수신 여부 확인
-2. EventBridge 규칙 확인: 규칙이 활성화되어 있는지 확인
-3. Karpenter 설정 확인: `interruptionQueue` 설정 확인
+# Pod 재스케줄링 확인
+kubectl get pods --all-namespaces -o wide | grep Terminating
+```
 
-### Pod가 Pending 상태로 남음
-1. Pod 이벤트 확인: `kubectl describe pod <pod-name>`
-2. NodePool 제약 확인: `kubectl get nodepool default -o yaml`
-3. 리소스 제한 확인: NodePool의 `limits` 확인
+### 노드가 축소되지 않음
 
-## 비용 최적화
+```bash
+# NodePool 설정 확인
+kubectl describe nodepool default
 
-### Spot 인스턴스 전략
-- **Dev**: 100% Spot (최대 비용 절감)
-- **Prod**: Spot 우선, ON_DEMAND 폴백 (안정성 + 비용 절감)
-
-### 예상 비용 절감
-- Spot 인스턴스: 최대 90% 절감
-- Consolidation: 추가 10-20% 절감
-- 유휴 노드 제거: 추가 5-10% 절감
+# Pod가 노드를 점유하고 있는지 확인
+kubectl describe node <node-name> | grep -A 10 "Non-terminated Pods"
+```
 
 ## 참고 자료
 
 - [Karpenter 공식 문서](https://karpenter.sh/)
-- [AWS Karpenter 모범 사례](https://aws.github.io/aws-eks-best-practices/karpenter/)
-- [Spot 인스턴스 가이드](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html)
-- [상세 배포 가이드](./DEPLOYMENT_GUIDE.md)
-- [빠른 시작 가이드](./QUICKSTART.md)
+- [AWS EKS Best Practices](https://aws.github.io/aws-eks-best-practices/)
+- [Spot Instance Best Practices](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-best-practices.html)

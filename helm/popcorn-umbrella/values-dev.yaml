@@ -2,24 +2,62 @@
 global:
   environment: dev
   imageTag: test-113
+  
   # 개발 환경 데이터베이스 (로컬 또는 개발 RDS)
   database:
     host: postgres.popcorn-dev.svc.cluster.local
     port: 5432
     name: popcorn
+    
   # 개발 환경 Redis (로컬 또는 개발 ElastiCache)
   redis:
     host: redis.popcorn-dev.svc.cluster.local
     port: 6379
+    
   # 개발 환경 Kafka
   kafka:
     bootstrapServers: kafka.popcorn-dev.svc.cluster.local:9092
+
+  frontend:
+    appUrl: "https://dev.goormpopcorn.shop"
+    apiBaseUrl: "https://api-dev.goormpopcorn.shop"
+    storeApiBaseUrl: "https://api-dev.goormpopcorn.shop"
+    orderQueryApiBaseUrl: "https://api-dev.goormpopcorn.shop"
+    paymentApiBaseUrl: "https://api-dev.goormpopcorn.shop"
+
 # 개발 환경 리소스 최소화
+frontend:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-front
+    tag: test-113
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  env:
+    NEXT_PUBLIC_APP_URL: "{{ .Values.global.frontend.appUrl }}"
+    NEXT_PUBLIC_API_BASE_URL: "{{ .Values.global.frontend.apiBaseUrl }}"
+    NEXT_PUBLIC_STORE_API_BASE_URL: "{{ .Values.global.frontend.storeApiBaseUrl }}"
+    NEXT_PUBLIC_ORDERQUERY_API_BASE_URL: "{{ .Values.global.frontend.orderQueryApiBaseUrl }}"
+    NEXT_PUBLIC_PAYMENT_API_BASE_URL: "{{ .Values.global.frontend.paymentApiBaseUrl }}"
+    NEXT_PUBLIC_TOSS_CLIENT_KEY:
+      valueFrom:
+        secretKeyRef:
+          name: payment-api-keys
+          key: TOSS_PAYMENTS_CLIENT_KEY
+  ingress:
+    enabled: false
+
 gateway:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-api-gateway
-    tag: dev-dc00c528
+    tag: test-113
   resources:
     requests:
       cpu: 50m
@@ -30,13 +68,20 @@ gateway:
   env:
     SPRING_PROFILES_ACTIVE: "dev"
     LOGGING_LEVEL_ROOT: "DEBUG"
+  envFrom:
+    - configMapRef:
+        name: "{{ .Release.Name }}-gateway-config"
+    - secretRef:
+        name: "{{ .Release.Name }}-gateway-secret"
+        optional: true
   ingress:
-    enabled: false # 개발 환경에서는 Ingress 비활성화
+    enabled: false  # 개발 환경에서는 Ingress 비활성화
+
 users:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-user
-    tag: dev-dc00c528
+    tag: test-113
   resources:
     requests:
       cpu: 50m
@@ -47,11 +92,15 @@ users:
   env:
     SPRING_PROFILES_ACTIVE: "dev"
     SPRING_JPA_SHOW_SQL: "true"
+  envFrom:
+    - configMapRef:
+        name: "{{ .Release.Name }}-users-config"
+
 stores:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-store
-    tag: dev-dc00c528
+    tag: test-113
   resources:
     requests:
       cpu: 50m
@@ -61,11 +110,18 @@ stores:
       memory: 256Mi
   env:
     SPRING_PROFILES_ACTIVE: "dev"
+  envFrom:
+    - configMapRef:
+        name: "{{ .Release.Name }}-stores-config"
+    - secretRef:
+        name: "{{ .Release.Name }}-stores-secret"
+        optional: true
+
 order:
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-order
-    tag: dev-dc00c528
+    tag: test-113
   resources:
     requests:
       cpu: 50m
@@ -75,13 +131,20 @@ order:
       memory: 256Mi
   env:
     SPRING_PROFILES_ACTIVE: "dev"
+  envFrom:
+    - configMapRef:
+        name: "{{ .Release.Name }}-order-config"
+    - secretRef:
+        name: "{{ .Release.Name }}-order-secret"
+        optional: true
+
 # 개발 환경에서는 모든 서비스 활성화
 payment:
-  enabled: true # 활성화
+  enabled: true  # 활성화
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-payment
-    tag: dev-dc00c528
+    tag: test-113
   resources:
     requests:
       cpu: 50m
@@ -91,12 +154,19 @@ payment:
       memory: 256Mi
   env:
     SPRING_PROFILES_ACTIVE: "dev"
-orderQuery:
-  enabled: true # 활성화
+  envFrom:
+    - configMapRef:
+        name: "{{ .Release.Name }}-payment-config"
+    - secretRef:
+        name: "{{ .Release.Name }}-payment-secret"
+        optional: true
+  
+order-query:
+  enabled: true  # 활성화
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-order-query
-    tag: dev-dc00c528
+    tag: test-113
   resources:
     requests:
       cpu: 50m
@@ -106,12 +176,19 @@ orderQuery:
       memory: 256Mi
   env:
     SPRING_PROFILES_ACTIVE: "dev"
-checkIns:
-  enabled: true # 활성화
+  envFrom:
+    - configMapRef:
+        name: "{{ .Release.Name }}-order-query-config"
+    - secretRef:
+        name: "{{ .Release.Name }}-order-query-secret"
+        optional: true
+
+checkins:
+  enabled: true  # 활성화
   replicaCount: 1
   image:
     repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-checkin
-    tag: dev-dc00c528
+    tag: test-113
   resources:
     requests:
       cpu: 50m
@@ -121,3 +198,9 @@ checkIns:
       memory: 256Mi
   env:
     SPRING_PROFILES_ACTIVE: "dev"
+  envFrom:
+    - configMapRef:
+        name: "{{ .Release.Name }}-checkins-config"
+    - secretRef:
+        name: "{{ .Release.Name }}-checkins-secret"
+        optional: true

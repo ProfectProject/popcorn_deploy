@@ -1,0 +1,11 @@
+# OpenTelemetry Collector 운영 환경 설정
+
+replicaCount: 2
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 400m
+    memory: 768Mi

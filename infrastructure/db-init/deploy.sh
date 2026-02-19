@@ -131,7 +131,7 @@ echo "  - user_auth"
 echo "  - store"
 echo "  - orders"
 echo "  - payment"
-echo "  - checkIns"
+echo "  - checkins"
 echo "  - order_query"
 echo ""
 

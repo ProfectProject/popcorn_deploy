@@ -6,6 +6,11 @@ version: 1.0.0
 appVersion: "1.0.0"
 
 dependencies:
+- name: frontend
+  version: "1.0.0"
+  repository: "file://../charts/frontend"
+  condition: frontend.enabled
+
 - name: gateway
   version: "1.0.0"
   repository: "file://../charts/gateway"
@@ -34,12 +39,12 @@ dependencies:
 - name: order-query
   version: "1.0.0"
   repository: "file://../charts/order-query"
-  condition: orderQuery.enabled
+  condition: order-query.enabled
 
 - name: checkins
   version: "1.0.0"
   repository: "file://../charts/checkins"
-  condition: checkIns.enabled
+  condition: checkins.enabled
 
 - name: common
   version: "1.0.0"

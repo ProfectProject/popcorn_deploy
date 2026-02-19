@@ -1,4 +1,7 @@
 dependencies:
+- name: frontend
+  repository: file://../charts/frontend
+  version: 1.0.0
 - name: gateway
   repository: file://../charts/gateway
   version: 1.0.0
@@ -23,5 +26,5 @@ dependencies:
 - name: common
   repository: file://../charts/common
   version: 1.0.0
-digest: sha256:9b19f5687fac0430357d939aee48ce0c1eb5284dc29aa5fa3962acb6c8b25da1
-generated: "2026-02-13T14:34:25.120307+09:00"
+digest: sha256:ed019f6aaf9824239631c403431a2f82cee33c16489c39d4939088dea07fc4cf
+generated: "2026-02-19T13:31:35.619166+09:00"

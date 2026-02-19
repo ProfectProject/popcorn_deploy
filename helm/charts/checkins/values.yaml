@@ -19,9 +19,16 @@ env:
 
 envFrom:
   - configMapRef:
-      name: checkins-config
+      name: "{{ .Release.Name }}-checkins-config"
+      optional: true
   - secretRef:
-      name: checkins-secret
+      name: rds-credentials
+      optional: true
+  - secretRef:
+      name: redis-credentials
+      optional: true
+  - secretRef:
+      name: database-users
       optional: true
 
 resources:

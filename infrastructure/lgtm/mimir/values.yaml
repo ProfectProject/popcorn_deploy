@@ -1,56 +1,107 @@
-# Mimir 기본 설정 (Prometheus 호환)
-
-# 배포 모드
-deploymentMode: SingleBinary
+# Mimir 공통 기본 설정 (mimir-distributed chart 5.8.x 기준)
 
 mimir:
   structuredConfig:
-    # 멀티테넌시 비활성화
     multitenancy_enabled: false
-    
-    # 블록 스토리지
-    blocks_storage:
-      backend: filesystem
-      filesystem:
-        dir: /data/blocks
-    
-    # 압축기
-    compactor:
-      data_dir: /data/compactor
-    
-    # 수집 제한
-    limits:
-      ingestion_rate: 10000
-      ingestion_burst_size: 20000
+    ingester:
+      ring:
+        # ingester를 1개만 운영할 때(default replication_factor=3) quorum(2) 미충족으로 ingest/query가 실패하므로 1로 고정
+        replication_factor: 1
 
-# 단일 바이너리
-mimir-distributed:
+# 운영 단순화를 위해 비핵심 컴포넌트 비활성화
+alertmanager:
   enabled: false
 
-# 리소스
-resources:
-  requests:
-    cpu: 100m
-    memory: 256Mi
-  limits:
-    cpu: 500m
-    memory: 512Mi
-
-# 영구 스토리지
-persistence:
-  enabled: true
-  storageClass: gp3
-  size: 10Gi
-
-# 서비스
-service:
-  type: ClusterIP
-  port: 8080
-
-# 메트릭
-metrics:
-  enabled: true
-
-# 테스트 비활성화
-test:
+ruler:
   enabled: false
+
+rollout_operator:
+  enabled: false
+
+# 핵심 컴포넌트 최소 복제수
+
+distributor:
+  replicas: 1
+  tolerations:
+    - key: karpenter.sh/spot
+      operator: Exists
+      effect: NoSchedule
+
+ingester:
+  replicas: 1
+  zoneAwareReplication:
+    enabled: false
+  persistentVolume:
+    enabled: true
+    size: 10Gi
+    storageClass: gp3
+  tolerations:
+    - key: karpenter.sh/spot
+      operator: Exists
+      effect: NoSchedule
+
+querier:
+  replicas: 1
+  tolerations:
+    - key: karpenter.sh/spot
+      operator: Exists
+      effect: NoSchedule
+
+query_frontend:
+  replicas: 1
+  tolerations:
+    - key: karpenter.sh/spot
+      operator: Exists
+      effect: NoSchedule
+
+query_scheduler:
+  replicas: 1
+  tolerations:
+    - key: karpenter.sh/spot
+      operator: Exists
+      effect: NoSchedule
+
+store_gateway:
+  replicas: 1
+  zoneAwareReplication:
+    enabled: false
+  persistentVolume:
+    enabled: true
+    size: 10Gi
+    storageClass: gp3
+  tolerations:
+    - key: karpenter.sh/spot
+      operator: Exists
+      effect: NoSchedule
+
+compactor:
+  replicas: 1
+  persistentVolume:
+    enabled: true
+    size: 10Gi
+    storageClass: gp3
+  tolerations:
+    - key: karpenter.sh/spot
+      operator: Exists
+      effect: NoSchedule
+
+# 객체 스토리지는 내장 MinIO 사용
+gateway:
+  enabled: true
+  replicas: 1
+  tolerations:
+    - key: karpenter.sh/spot
+      operator: Exists
+      effect: NoSchedule
+
+minio:
+  enabled: true
+  mode: standalone
+  tolerations:
+    - key: karpenter.sh/spot
+      operator: Exists
+      effect: NoSchedule
+  persistence:
+    enabled: true
+    size: 20Gi
+    storageClass: gp3

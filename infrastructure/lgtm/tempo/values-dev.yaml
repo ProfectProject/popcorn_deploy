@@ -1,8 +1,13 @@
 # Tempo 개발 환경 설정
 
-singleBinary:
-  replicas: 1
-  
+persistence:
+  enabled: true
+  storageClassName: gp3
+  size: 5Gi
+
+tempo:
+  retention: 24h
+
   resources:
     requests:
       cpu: 50m
@@ -10,10 +15,3 @@ singleBinary:
     limits:
       cpu: 200m
       memory: 256Mi
-  
-  persistence:
-    enabled: true
-    size: 5Gi
-
-tempo:
-  retention: 24h  # 1일

@@ -18,7 +18,7 @@ data:
   ORDER_INFO_RETRY_COUNT: {{ .Values.config.infoRetryCount | quote }}
   
   # 서비스 URL
-  GATEWAY_SERVICE_URL: {{ .Values.serviceUrls.gateway | quote }}
-  USER_SERVICE_URL: {{ .Values.serviceUrls.users | quote }}
-  STORE_SERVICE_URL: {{ .Values.serviceUrls.stores | quote }}
-  PAYMENT_SERVICE_URL: {{ .Values.serviceUrls.payment | quote }}
+  GATEWAY_SERVICE_URL: {{ tpl .Values.serviceUrls.gateway . | quote }}
+  USER_SERVICE_URL: {{ tpl .Values.serviceUrls.users . | quote }}
+  STORE_SERVICE_URL: {{ tpl .Values.serviceUrls.stores . | quote }}
+  PAYMENT_SERVICE_URL: {{ tpl .Values.serviceUrls.payment . | quote }}

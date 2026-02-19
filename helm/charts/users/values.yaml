@@ -59,22 +59,25 @@ env:
       secretKeyRef:
         name: redis-credentials
         key: password
-  # JWT 시크릿
-  JWT_SECRET_KEY:
+  # JWT 시크릿 (코드에서 JWT_SECRET 사용)
+  JWT_SECRET:
     valueFrom:
       secretKeyRef:
         name: jwt-secret
-        key: secret-key
+        key: JWT_SECRET
   # Passport 시크릿
-  PASSPORT_SECRET_KEY:
+  PASSPORT_SECRET:
     valueFrom:
       secretKeyRef:
         name: passport-secret
-        key: secret-key
+        key: PASSPORT_SECRET
 
 envFrom:
   - configMapRef:
-      name: popcorn-users-config
+      name: "{{ .Release.Name }}-users-config"
+      optional: true
+  - secretRef:
+      name: database-users
       optional: true
 
 resources:

@@ -31,13 +31,33 @@ helm upgrade --install argocd argo/argo-cd \
 ## 접속 정보
 
 ### ArgoCD UI
+
+#### 1) 외부 노출(권장)
+
+현재 `argocd-server`는 AWS ALB(Ingress)로 노출되어 있습니다.
+
 ```bash
-# 포트 포워딩
-kubectl port-forward -n argocd svc/argocd-server 8080:443
+kubectl -n argocd get ingress argocd-server
+```
+
+출력된 `HOSTS`/`ADDRESS`를 사용해 접속합니다.
+
+```bash
+open https://argocd.goormpopcorn.shop
+```
+
+#### 2) 로컬 포트포워드(디버깅용)
+
+서비스 포트 매핑(`80`, `443` -> Pod `8080`) 때문에 포트포워드는 다음처럼 `80` 기준으로 실행합니다.
+
+```bash
+kubectl port-forward -n argocd svc/argocd-server 18080:80
 
 # 브라우저에서 접속
-open https://localhost:8080
+open http://localhost:18080
 ```
+
+`443`으로 직접 포트포워드한 경우 연결이 끊기는 현상이 있었으므로, 동일 환경에서는 위 방식으로 재현이 쉬운 80 경로를 우선 사용하세요.
 
 ### 초기 비밀번호
 ```bash
@@ -52,7 +72,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret \
 brew install argocd
 
 # 로그인
-argocd login localhost:8080
+argocd login localhost:18080
 ```
 
 ## Application 관리

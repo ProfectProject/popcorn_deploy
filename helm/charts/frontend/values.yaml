@@ -1,0 +1,72 @@
+replicaCount: 1
+
+image:
+  repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-front
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 3000
+
+env:
+  NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+  NEXT_PUBLIC_API_BASE_URL: "http://localhost:8080"
+  NEXT_PUBLIC_STORE_API_BASE_URL: "http://localhost:8080"
+  NEXT_PUBLIC_ORDERQUERY_API_BASE_URL: "http://localhost:8080"
+  NEXT_PUBLIC_PAYMENT_API_BASE_URL: "http://localhost:8080"
+  NEXT_PUBLIC_TOSS_CLIENT_KEY:
+    valueFrom:
+      secretKeyRef:
+        name: payment-api-keys
+        key: TOSS_PAYMENTS_CLIENT_KEY
+
+envFrom: []
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+healthCheck:
+  enabled: true
+  path: /
+  livenessPath: /
+  readinessPath: /
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+ingress:
+  enabled: false
+  className: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  hosts:
+    - host: goormpopcorn.shop
+      paths:
+        - path: /
+          pathType: Prefix

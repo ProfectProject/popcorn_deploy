@@ -1,10 +1,10 @@
 # Kafka UI 운영 환경 설정
 
-replicas: 1
+replicaCount: 1
 
 resources:
   requests:
-    cpu: 100m
+    cpu: 50m
     memory: 128Mi
   limits:
     cpu: 200m
@@ -12,20 +12,21 @@ resources:
 
 ingress:
   enabled: true
+  ingressClassName: alb
   annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:375896310755:certificate/085e3315-785c-480d-93c2-57f656b60f7b"
     alb.ingress.kubernetes.io/ssl-redirect: "443"
-  hosts:
-    - host: kafka-ui.goormpopcorn.shop
-      paths:
-        - path: /
-          pathType: Prefix
+  host: kafka.goormpopcorn.shop
+  path: /
+  pathType: Prefix
 
 yamlApplicationConfig:
   kafka:
     clusters:
       - name: popcorn-kafka
-        bootstrapServers: kafka:9092
+        bootstrapServers: kafka-prod:9092
         properties:
           security.protocol: PLAINTEXT
   
@@ -41,6 +42,6 @@ env:
   - name: KAFKA_CLUSTERS_0_NAME
     value: "popcorn-kafka"
   - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
-    value: "kafka:9092"
+    value: "kafka-prod:9092"
   - name: DYNAMIC_CONFIG_ENABLED
     value: "true"

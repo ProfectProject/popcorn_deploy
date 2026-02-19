@@ -19,7 +19,30 @@ global:
   kafka:
     bootstrapServers: kafka:9092
 
+  # 프론트 전역 URL
+  frontend:
+    appUrl: "http://localhost:3000"
+    apiBaseUrl: "http://localhost:8080"
+    storeApiBaseUrl: "http://localhost:8080"
+    orderQueryApiBaseUrl: "http://localhost:8080"
+    paymentApiBaseUrl: "http://localhost:8080"
+
 # Gateway Service (내부 전용 - Ingress 비활성화)
+frontend:
+  enabled: true
+  replicaCount: 1
+  image:
+    tag: latest
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  ingress:
+    enabled: false
+
 gateway:
   enabled: true
   replicaCount: 1
@@ -92,7 +115,7 @@ payment:
       memory: 512Mi
 
 # Order Query Service (CQRS)
-orderQuery:
+order-query:
   enabled: true
   replicaCount: 1
   image:
@@ -106,7 +129,7 @@ orderQuery:
       memory: 512Mi
 
 # CheckIns Service (includes QR functionality)
-checkIns:
+checkins:
   enabled: true
   replicaCount: 1
   image:

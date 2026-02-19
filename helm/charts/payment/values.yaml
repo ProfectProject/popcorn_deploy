@@ -19,9 +19,19 @@ env:
 
 envFrom:
   - configMapRef:
-      name: payment-config
+      name: "{{ .Release.Name }}-payment-config"
+      optional: true
   - secretRef:
-      name: payment-secret
+      name: rds-credentials
+      optional: true
+  - secretRef:
+      name: redis-credentials
+      optional: true
+  - secretRef:
+      name: database-users
+      optional: true
+  - secretRef:
+      name: payment-api-keys
       optional: true
 
 resources:

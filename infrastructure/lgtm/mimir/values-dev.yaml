@@ -1,20 +1,81 @@
 # Mimir 개발 환경 설정
 
-resources:
-  requests:
-    cpu: 50m
-    memory: 128Mi
-  limits:
-    cpu: 200m
-    memory: 256Mi
-
-persistence:
-  enabled: true
-  size: 5Gi
-
-mimir:
-  structuredConfig:
+distributor:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
     limits:
-      ingestion_rate: 5000
-      ingestion_burst_size: 10000
-      max_global_series_per_user: 100000
+      cpu: 200m
+      memory: 256Mi
+
+ingester:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 192Mi
+    limits:
+      cpu: 300m
+      memory: 384Mi
+  persistentVolume:
+    size: 5Gi
+
+querier:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+query_frontend:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+query_scheduler:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+store_gateway:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 192Mi
+    limits:
+      cpu: 300m
+      memory: 384Mi
+  persistentVolume:
+    size: 5Gi
+
+compactor:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 192Mi
+    limits:
+      cpu: 300m
+      memory: 384Mi
+  persistentVolume:
+    size: 5Gi
+
+minio:
+  persistence:
+    size: 5Gi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi

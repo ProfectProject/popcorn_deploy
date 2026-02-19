@@ -499,13 +499,13 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA payment TO payment_app;
 ALTER DEFAULT PRIVILEGES IN SCHEMA payment GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO payment_app;
 ALTER DEFAULT PRIVILEGES IN SCHEMA payment GRANT USAGE, SELECT ON SEQUENCES TO payment_app;
 
--- 4) checkIns (QR)
+-- 4) checkins (QR)
 RESET ROLE;
 SET ROLE qr_migrator;
 
-CREATE SCHEMA IF NOT EXISTS checkIns AUTHORIZATION qr_migrator;
+CREATE SCHEMA IF NOT EXISTS checkins AUTHORIZATION qr_migrator;
 
-CREATE TABLE IF NOT EXISTS checkIns.qr_order_qr_codes (
+CREATE TABLE IF NOT EXISTS checkins.qr_order_qr_codes (
     qr_id       UUID PRIMARY KEY,
     order_id    UUID NOT NULL,
     qr_code     VARCHAR(255) NOT NULL,
@@ -517,11 +517,11 @@ CREATE TABLE IF NOT EXISTS checkIns.qr_order_qr_codes (
     order_goods_id UUID
 );
 
-ALTER TABLE checkIns.qr_order_qr_codes
+ALTER TABLE checkins.qr_order_qr_codes
     ADD COLUMN IF NOT EXISTS popup_id UUID,
     ADD COLUMN IF NOT EXISTS order_goods_id UUID;
 
-CREATE TABLE IF NOT EXISTS checkIns.qr_checkins (
+CREATE TABLE IF NOT EXISTS checkins.qr_checkins (
     checkin_id       UUID PRIMARY KEY,
     order_id         UUID NOT NULL,
     order_qr_code_id UUID NOT NULL,
@@ -533,25 +533,25 @@ CREATE TABLE IF NOT EXISTS checkIns.qr_checkins (
 );
 
 DO $$ BEGIN
-    ALTER TABLE checkIns.qr_checkins
+    ALTER TABLE checkins.qr_checkins
         ADD CONSTRAINT fk_checkins_qr
-            FOREIGN KEY (order_qr_code_id) REFERENCES checkIns.qr_order_qr_codes(qr_id);
+            FOREIGN KEY (order_qr_code_id) REFERENCES checkins.qr_order_qr_codes(qr_id);
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE INDEX IF NOT EXISTS idx_qr_codes_order_id ON checkIns.qr_order_qr_codes(order_id);
-CREATE INDEX IF NOT EXISTS idx_qr_codes_expires_at ON checkIns.qr_order_qr_codes(expires_at);
-CREATE INDEX IF NOT EXISTS idx_checkins_order_id ON checkIns.qr_checkins(order_id);
-CREATE INDEX IF NOT EXISTS idx_checkins_created_at ON checkIns.qr_checkins(created_at);
+CREATE INDEX IF NOT EXISTS idx_qr_codes_order_id ON checkins.qr_order_qr_codes(order_id);
+CREATE INDEX IF NOT EXISTS idx_qr_codes_expires_at ON checkins.qr_order_qr_codes(expires_at);
+CREATE INDEX IF NOT EXISTS idx_checkins_order_id ON checkins.qr_checkins(order_id);
+CREATE INDEX IF NOT EXISTS idx_checkins_created_at ON checkins.qr_checkins(created_at);
 
-CREATE INDEX IF NOT EXISTS idx_qr_codes_store_id ON checkIns.qr_order_qr_codes(store_id);
-CREATE INDEX IF NOT EXISTS idx_qr_codes_popup_id ON checkIns.qr_order_qr_codes(popup_id);
-CREATE INDEX IF NOT EXISTS idx_qr_codes_order_goods_id ON checkIns.qr_order_qr_codes(order_goods_id);
+CREATE INDEX IF NOT EXISTS idx_qr_codes_store_id ON checkins.qr_order_qr_codes(store_id);
+CREATE INDEX IF NOT EXISTS idx_qr_codes_popup_id ON checkins.qr_order_qr_codes(popup_id);
+CREATE INDEX IF NOT EXISTS idx_qr_codes_order_goods_id ON checkins.qr_order_qr_codes(order_goods_id);
 
-CREATE INDEX IF NOT EXISTS idx_checkins_store_id ON checkIns.qr_checkins(store_id);
-CREATE INDEX IF NOT EXISTS idx_checkins_popup_id ON checkIns.qr_checkins(popup_id);
-CREATE INDEX IF NOT EXISTS idx_checkins_order_goods_id ON checkIns.qr_checkins(order_goods_id);
+CREATE INDEX IF NOT EXISTS idx_checkins_store_id ON checkins.qr_checkins(store_id);
+CREATE INDEX IF NOT EXISTS idx_checkins_popup_id ON checkins.qr_checkins(popup_id);
+CREATE INDEX IF NOT EXISTS idx_checkins_order_goods_id ON checkins.qr_checkins(order_goods_id);
 
-CREATE TABLE IF NOT EXISTS checkIns.outbox_events (
+CREATE TABLE IF NOT EXISTS checkins.outbox_events (
     id             BIGSERIAL PRIMARY KEY,
     event_id       UUID          NOT NULL,
     aggregate_type VARCHAR(100)  NOT NULL,
@@ -568,25 +568,25 @@ CREATE TABLE IF NOT EXISTS checkIns.outbox_events (
     CONSTRAINT uq_checkins_outbox_event_id UNIQUE (event_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_outbox_created_at ON checkIns.outbox_events (created_at);
-CREATE INDEX IF NOT EXISTS idx_outbox_aggregate ON checkIns.outbox_events (aggregate_type, aggregate_id);
-CREATE INDEX IF NOT EXISTS idx_outbox_event_type ON checkIns.outbox_events (event_type);
-CREATE INDEX IF NOT EXISTS idx_outbox_partition_key ON checkIns.outbox_events (partition_key);
-CREATE INDEX IF NOT EXISTS idx_outbox_popup_id ON checkIns.outbox_events(popup_id);
-CREATE INDEX IF NOT EXISTS idx_outbox_order_goods_id ON checkIns.outbox_events(order_goods_id);
-CREATE INDEX IF NOT EXISTS idx_outbox_popup_order_goods ON checkIns.outbox_events(popup_id, order_goods_id);
+CREATE INDEX IF NOT EXISTS idx_outbox_created_at ON checkins.outbox_events (created_at);
+CREATE INDEX IF NOT EXISTS idx_outbox_aggregate ON checkins.outbox_events (aggregate_type, aggregate_id);
+CREATE INDEX IF NOT EXISTS idx_outbox_event_type ON checkins.outbox_events (event_type);
+CREATE INDEX IF NOT EXISTS idx_outbox_partition_key ON checkins.outbox_events (partition_key);
+CREATE INDEX IF NOT EXISTS idx_outbox_popup_id ON checkins.outbox_events(popup_id);
+CREATE INDEX IF NOT EXISTS idx_outbox_order_goods_id ON checkins.outbox_events(order_goods_id);
+CREATE INDEX IF NOT EXISTS idx_outbox_popup_order_goods ON checkins.outbox_events(popup_id, order_goods_id);
 
--- checkIns privileges
-GRANT ALL PRIVILEGES ON SCHEMA checkIns TO qr_migrator;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA checkIns TO qr_migrator;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA checkIns TO qr_migrator;
+-- checkins privileges
+GRANT ALL PRIVILEGES ON SCHEMA checkins TO qr_migrator;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA checkins TO qr_migrator;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA checkins TO qr_migrator;
 
-GRANT USAGE ON SCHEMA checkIns TO qr_app;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA checkIns TO qr_app;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA checkIns TO qr_app;
+GRANT USAGE ON SCHEMA checkins TO qr_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA checkins TO qr_app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA checkins TO qr_app;
 
-ALTER DEFAULT PRIVILEGES IN SCHEMA checkIns GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO qr_app;
-ALTER DEFAULT PRIVILEGES IN SCHEMA checkIns GRANT USAGE, SELECT ON SEQUENCES TO qr_app;
+ALTER DEFAULT PRIVILEGES IN SCHEMA checkins GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO qr_app;
+ALTER DEFAULT PRIVILEGES IN SCHEMA checkins GRANT USAGE, SELECT ON SEQUENCES TO qr_app;
 
 -- 5) order_query (read model)
 RESET ROLE;

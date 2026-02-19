@@ -103,7 +103,7 @@ kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
 # ArgoCD 서버 접속
-kubectl port-forward svc/argocd-server -n argocd 8080:443
+kubectl port-forward svc/argocd-server -n argocd 8080:80
 
 # 초기 비밀번호 확인
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
@@ -121,7 +121,7 @@ kubectl apply -f applications/prod/application.yaml
 #### ArgoCD UI에서 확인
 ```bash
 # ArgoCD UI 접속
-open https://localhost:8080
+open http://localhost:8080
 
 # 또는 CLI로 확인
 argocd app list

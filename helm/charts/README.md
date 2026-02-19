@@ -68,7 +68,17 @@
 - 결제 처리
 - 외부 결제 게이트웨이 연동
 
-### 7. orderQuery
+### 7. frontend
+**서비스**: Frontend Service  
+**기술**: Next.js  
+**포트**: 3000  
+**ECR**: goorm-popcorn-front
+
+**특징**:
+- 사용자 진입점(웹/모바일 웹) 제공
+- API 호출을 위한 환경변수 기반 서비스 연동
+
+### 8. orderQuery
 **서비스**: Order Query Service  
 **기술**: Spring Boot  
 **포트**: 8080  
@@ -79,7 +89,7 @@
 - CQRS 패턴의 Query 측
 - Kafka 이벤트 소비
 
-### 8. checkIns
+### 9. checkIns
 **서비스**: CheckIn Service  
 **기술**: Spring Boot  
 **포트**: 8080  

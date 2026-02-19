@@ -19,9 +19,16 @@ env:
 
 envFrom:
   - configMapRef:
-      name: popcorn-stores-config
+      name: "{{ .Release.Name }}-stores-config"
+      optional: true
   - secretRef:
-      name: popcorn-stores-secret
+      name: rds-credentials
+      optional: true
+  - secretRef:
+      name: redis-credentials
+      optional: true
+  - secretRef:
+      name: database-users
       optional: true
 
 resources:

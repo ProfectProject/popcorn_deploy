@@ -1,115 +1,79 @@
 # Mimir 운영 환경 설정
 
-# 분산 모드
-deploymentMode: Distributed
-
-mimir:
-  structuredConfig:
-    multitenancy_enabled: false
-    
-    blocks_storage:
-      backend: filesystem
-      filesystem:
-        dir: /data/blocks
-    
-    limits:
-      ingestion_rate: 50000
-      ingestion_burst_size: 100000
-      max_global_series_per_user: 1000000
-      max_global_series_per_metric: 100000
-
-# Distributor
 distributor:
-  replicas: 1
-  
   resources:
     requests:
-      cpu: 150m
-      memory: 256Mi
+      cpu: 100m
+      memory: 192Mi
     limits:
       cpu: 300m
       memory: 512Mi
-  
-  autoscaling:
-    enabled: false  # true → false
-    minReplicas: 1
-    maxReplicas: 3  # 5 → 3
-    targetCPUUtilizationPercentage: 70
 
-# Ingester
 ingester:
-  replicas: 2
-  
-  resources:
-    requests:
-      cpu: 400m
-      memory: 768Mi
-    limits:
-      cpu: 1000m
-      memory: 1.5Gi
-  
-  persistence:
-    enabled: true
-    storageClass: gp3
-    size: 30Gi
-  
-  zoneAwareReplication:
-    enabled: false  # true → false (단순화)
-
-# Querier
-querier:
-  replicas: 1
-  
   resources:
     requests:
       cpu: 200m
       memory: 384Mi
     limits:
-      cpu: 500m
-      memory: 768Mi
+      cpu: 600m
+      memory: 1Gi
+  persistentVolume:
+    size: 20Gi
 
-# Query Frontend
-query_frontend:
-  replicas: 1
-  
+querier:
   resources:
     requests:
-      cpu: 150m
-      memory: 256Mi
+      cpu: 80m
+      memory: 192Mi
     limits:
-      cpu: 300m
+      cpu: 250m
       memory: 512Mi
 
-# Store Gateway
-store_gateway:
-  replicas: 1
-  
+query_frontend:
   resources:
     requests:
-      cpu: 200m
-      memory: 384Mi
+      cpu: 80m
+      memory: 128Mi
     limits:
-      cpu: 500m
-      memory: 768Mi
-  
-  persistence:
-    enabled: true
-    storageClass: gp3
-    size: 30Gi
+      cpu: 250m
+      memory: 384Mi
 
-# Compactor
-compactor:
-  replicas: 1
-  
+query_scheduler:
   resources:
     requests:
-      cpu: 200m
-      memory: 384Mi
+      cpu: 80m
+      memory: 128Mi
     limits:
-      cpu: 500m
-      memory: 768Mi
-  
-  persistence:
-    enabled: true
-    storageClass: gp3
-    size: 30Gi
+      cpu: 250m
+      memory: 384Mi
+
+store_gateway:
+  resources:
+    requests:
+      cpu: 120m
+      memory: 256Mi
+  limits:
+      cpu: 400m
+      memory: 640Mi
+  persistentVolume:
+    size: 20Gi
+
+compactor:
+  resources:
+    requests:
+      cpu: 120m
+      memory: 256Mi
+  limits:
+      cpu: 400m
+      memory: 640Mi
+  persistentVolume:
+    size: 20Gi
+
+minio:
+  resources:
+    requests:
+      cpu: 80m
+      memory: 128Mi
+  limits:
+      cpu: 250m
+      memory: 384Mi

@@ -1,86 +1,17 @@
 # Tempo 운영 환경 설정
 
-deploymentMode: Distributed
+persistence:
+  enabled: true
+  storageClassName: gp3
+  size: 20Gi
 
-# Distributor
-distributor:
-  replicas: 1
-  
-  resources:
-    requests:
-      cpu: 150m
-      memory: 256Mi
-    limits:
-      cpu: 300m
-      memory: 512Mi
-  
-  autoscaling:
-    enabled: false  # true → false
-    minReplicas: 1
-    maxReplicas: 3  # 5 → 3
-    targetCPUUtilizationPercentage: 70
+tempo:
+  retention: 168h
 
-# Ingester
-ingester:
-  replicas: 2
-  
-  resources:
-    requests:
-      cpu: 250m
-      memory: 512Mi
-    limits:
-      cpu: 500m
-      memory: 1Gi
-  
-  persistence:
-    enabled: true
-    storageClass: gp3
-    size: 20Gi
-
-# Querier
-querier:
-  replicas: 1
-  
-  resources:
-    requests:
-      cpu: 150m
-      memory: 256Mi
-    limits:
-      cpu: 300m
-      memory: 512Mi
-
-# Query Frontend
-queryFrontend:
-  replicas: 1
-  
   resources:
     requests:
       cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 200m
-      memory: 256Mi
-
-# Compactor
-compactor:
-  replicas: 1
-  
-  resources:
-    requests:
-      cpu: 150m
       memory: 256Mi
     limits:
-      cpu: 300m
-      memory: 512Mi
-  
-  persistence:
-    enabled: true
-    storageClass: gp3
-    size: 20Gi
-
-tempo:
-  retention: 168h  # 7일
-  
-  storage:
-    trace:
-      backend: local
+      cpu: 500m
+      memory: 1Gi
