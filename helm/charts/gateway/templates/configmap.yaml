@@ -5,85 +5,12 @@ metadata:
   labels:
     {{- include "common.labels" . | nindent 4 }}
 data:
-  # Spring Cloud Gateway 라우팅 설정
-  SPRING_CLOUD_GATEWAY_ROUTES_0_ID: "users-service"
-  SPRING_CLOUD_GATEWAY_ROUTES_0_URI: "http://{{ .Release.Name }}-users:8080"
-  SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0: "Path=/api/users/**"
-  
-  SPRING_CLOUD_GATEWAY_ROUTES_1_ID: "stores-service"
-  SPRING_CLOUD_GATEWAY_ROUTES_1_URI: "http://{{ .Release.Name }}-stores:8080"
-  SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: "Path=/api/stores/**"
-  
-  SPRING_CLOUD_GATEWAY_ROUTES_2_ID: "order-service"
-  SPRING_CLOUD_GATEWAY_ROUTES_2_URI: "http://{{ .Release.Name }}-order:8080"
-  SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0: "Path=/api/orders/**"
-  
-  SPRING_CLOUD_GATEWAY_ROUTES_3_ID: "payment-service"
-  SPRING_CLOUD_GATEWAY_ROUTES_3_URI: "http://{{ .Release.Name }}-payment:8080"
-  SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0: "Path=/api/payments/**"
-  
-  SPRING_CLOUD_GATEWAY_ROUTES_4_ID: "orderquery-service"
-  SPRING_CLOUD_GATEWAY_ROUTES_4_URI: "http://{{ .Release.Name }}-order-query:8080"
-  SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0: "Path=/api/orders/query/**"
-  
-  SPRING_CLOUD_GATEWAY_ROUTES_5_ID: "checkins-service"
-  SPRING_CLOUD_GATEWAY_ROUTES_5_URI: "http://{{ .Release.Name }}-checkins:8080"
-  SPRING_CLOUD_GATEWAY_ROUTES_5_PREDICATES_0: "Path=/api/checkins/**,/api/qr/**"
-
-  # Swagger(OpenAPI) 문서 프록시
-  # - 목적: Swagger UI가 gateway 도메인에서 각 서비스의 /v3/api-docs 를 읽을 수 있게 한다.
-  # - 배경: 서비스는 /v3/api-docs 를 제공하지만, gateway 라우팅 prefix(/api/{service})가 붙으면 403/404가 발생한다.
-  # - 해결: 요청 경로는 유지(/api/.../v3/api-docs)하되, upstream에는 SetPath로 /v3/api-docs 로 전달한다.
-  # - 주의: 기존 /api/*/** 라우트보다 먼저 매칭되도록 order=-1로 우선순위를 올린다.
-
-  SPRING_CLOUD_GATEWAY_ROUTES_6_ID: "users-openapi"
-  SPRING_CLOUD_GATEWAY_ROUTES_6_URI: "http://{{ .Release.Name }}-users:8080"
-  SPRING_CLOUD_GATEWAY_ROUTES_6_ORDER: "-1"
-  SPRING_CLOUD_GATEWAY_ROUTES_6_PREDICATES_0: "Path=/api/users/v3/api-docs"
-  SPRING_CLOUD_GATEWAY_ROUTES_6_FILTERS_0: "SetPath=/v3/api-docs"
-
-  SPRING_CLOUD_GATEWAY_ROUTES_7_ID: "stores-openapi-public"
-  SPRING_CLOUD_GATEWAY_ROUTES_7_URI: "http://{{ .Release.Name }}-stores:8080"
-  SPRING_CLOUD_GATEWAY_ROUTES_7_ORDER: "-1"
-  SPRING_CLOUD_GATEWAY_ROUTES_7_PREDICATES_0: "Path=/api/stores/v3/api-docs/public"
-  SPRING_CLOUD_GATEWAY_ROUTES_7_FILTERS_0: "SetPath=/v3/api-docs"
-
-  SPRING_CLOUD_GATEWAY_ROUTES_8_ID: "stores-openapi-owner"
-  SPRING_CLOUD_GATEWAY_ROUTES_8_URI: "http://{{ .Release.Name }}-stores:8080"
-  SPRING_CLOUD_GATEWAY_ROUTES_8_ORDER: "-1"
-  SPRING_CLOUD_GATEWAY_ROUTES_8_PREDICATES_0: "Path=/api/stores/v3/api-docs/owner"
-  SPRING_CLOUD_GATEWAY_ROUTES_8_FILTERS_0: "SetPath=/v3/api-docs"
-
-  SPRING_CLOUD_GATEWAY_ROUTES_9_ID: "order-openapi"
-  SPRING_CLOUD_GATEWAY_ROUTES_9_URI: "http://{{ .Release.Name }}-order:8080"
-  SPRING_CLOUD_GATEWAY_ROUTES_9_ORDER: "-1"
-  SPRING_CLOUD_GATEWAY_ROUTES_9_PREDICATES_0: "Path=/api/orders/v3/api-docs"
-  SPRING_CLOUD_GATEWAY_ROUTES_9_FILTERS_0: "SetPath=/v3/api-docs"
-
-  SPRING_CLOUD_GATEWAY_ROUTES_10_ID: "payment-openapi"
-  SPRING_CLOUD_GATEWAY_ROUTES_10_URI: "http://{{ .Release.Name }}-payment:8080"
-  SPRING_CLOUD_GATEWAY_ROUTES_10_ORDER: "-1"
-  SPRING_CLOUD_GATEWAY_ROUTES_10_PREDICATES_0: "Path=/api/payments/v3/api-docs"
-  SPRING_CLOUD_GATEWAY_ROUTES_10_FILTERS_0: "SetPath=/v3/api-docs"
-
-  SPRING_CLOUD_GATEWAY_ROUTES_11_ID: "orderquery-openapi"
-  SPRING_CLOUD_GATEWAY_ROUTES_11_URI: "http://{{ .Release.Name }}-order-query:8080"
-  SPRING_CLOUD_GATEWAY_ROUTES_11_ORDER: "-1"
-  SPRING_CLOUD_GATEWAY_ROUTES_11_PREDICATES_0: "Path=/api/orderquery/v3/api-docs"
-  SPRING_CLOUD_GATEWAY_ROUTES_11_FILTERS_0: "SetPath=/v3/api-docs"
-
-  SPRING_CLOUD_GATEWAY_ROUTES_12_ID: "checkins-openapi"
-  SPRING_CLOUD_GATEWAY_ROUTES_12_URI: "http://{{ .Release.Name }}-checkins:8080"
-  SPRING_CLOUD_GATEWAY_ROUTES_12_ORDER: "-1"
-  SPRING_CLOUD_GATEWAY_ROUTES_12_PREDICATES_0: "Path=/api/checkins/v3/api-docs"
-  SPRING_CLOUD_GATEWAY_ROUTES_12_FILTERS_0: "SetPath=/v3/api-docs"
-  
-  # CORS 설정 (application.yaml 형식으로 변경 필요)
-  SPRING_CLOUD_GATEWAY_GLOBALCORS_CORSCONFIGURATIONS_0_ALLOWEDORIGINS: "https://goormpopcorn.shop"
-  SPRING_CLOUD_GATEWAY_GLOBALCORS_CORSCONFIGURATIONS_0_ALLOWEDMETHODS: "GET,POST,PUT,DELETE,OPTIONS"
-  SPRING_CLOUD_GATEWAY_GLOBALCORS_CORSCONFIGURATIONS_0_ALLOWEDHEADERS: "*"
-  SPRING_CLOUD_GATEWAY_GLOBALCORS_CORSCONFIGURATIONS_0_ALLOWCREDENTIALS: "true"
-  
-  # Actuator 설정
-  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics,prometheus"
-  MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "always"
+  CHECKIN_SERVICE_URL: "http://popcorn-prod-checkins:8080/"
+  COUPON_SERVICE_URL: "http://popcorn-prod-coupon:8080/"
+  BACKEND_SERVICE_URL: "http://popcorn-prod-backend:8080/"
+  USER_SERVICE_URL: "http://popcorn-prod-users:8080/"
+  STORE_SERVICE_URL: "http://popcorn-prod-stores:8080/"
+  ORDER_SERVICE_URL: "http://popcorn-prod-order:8080/"
+  PAYMENT_SERVICE_URL: "http://popcorn-prod-payment:8080/"
+  ORDERQUERY_SERVICE_URL: "http://popcorn-prod-order-query:8080/"
+  GATEWAY_SERVICE_URL: "https://api.goormpopcorn.shop/"

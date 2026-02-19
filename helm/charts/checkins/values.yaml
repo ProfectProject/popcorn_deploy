@@ -16,6 +16,21 @@ env:
   SPRING_PROFILES_ACTIVE: "default"
   SERVER_PORT: "8080"
   JAVA_OPTS: "-Xms256m -Xmx512m"
+  PASSPORT_SECRET:
+    valueFrom:
+      secretKeyRef:
+        name: passport-secret
+        key: PASSPORT_SECRET
+  SPRING_FLYWAY_USER:
+    valueFrom:
+      secretKeyRef:
+        name: database-users
+        key: QR_FLYWAY_USERNAME
+  SPRING_FLYWAY_PASSWORD:
+    valueFrom:
+      secretKeyRef:
+        name: database-users
+        key: QR_FLYWAY_PASSWORD
 
 envFrom:
   - configMapRef:

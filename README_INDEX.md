@@ -12,6 +12,8 @@ popcorn_deploy/
 ├── 📄 STRUCTURE.md                       📖 전체 파일 구조
 ├── 📄 DEPLOYMENT_GUIDE.md                🚀 배포 가이드
 ├── 📄 README_INDEX.md                    📚 이 문서 (문서 인덱스)
+├── 📂 .kiro/analysis/                   🗃️ 분석/리포트 인덱스
+│   └── 📄 analysis-index.md             🔎 분석 문서(리포트/트러블슈팅/리뷰) 단일 진입점
 ├── 📁 docs/                              # 운영/튜닝 문서 모음
 │   ├── 📄 README.md                      📖 운영 문서 인덱스
 │   ├── 📄 node-cost-review-prod-2026-02-18.md   📖 노드 비용 효율성 검토
@@ -54,6 +56,13 @@ popcorn_deploy/
 **대상**: 전체 파일 구조를 보고 싶은 사용자  
 **내용**: 트리 형태의 전체 파일 구조  
 **읽는 시점**: 특정 파일의 위치를 찾을 때
+
+### 📦 분석 문서
+
+#### [.kiro/analysis/analysis-index.md](.kiro/analysis/analysis-index.md)
+**대상**: 운영 분석/리포트/트러블슈팅 문서 이용자  
+**내용**: 분석 문서(리포트, 리뷰, 트러블슈팅, 스크립트) 카테고리별 목록  
+**읽는 시점**: 분석 자료를 빠르게 찾을 때
 
 ### 🚀 배포 관련
 
@@ -211,6 +220,9 @@ popcorn_deploy/
 - 노드 비용 검토: [docs/node-cost-review-prod-2026-02-18.md](docs/node-cost-review-prod-2026-02-18.md)
 - 리소스 튜닝 실행: [docs/resource-tuning-step1-prod-2026-02-18.md](docs/resource-tuning-step1-prod-2026-02-18.md)
 - 운영 문서 카테고리: [docs/README.md](docs/README.md)
+
+### 분석/리포트
+- 분석 문서 목록: [.kiro/analysis/analysis-index.md](.kiro/analysis/analysis-index.md)
 
 ### 구조 관련
 - 디렉터리 가이드: [DIRECTORY_GUIDE.md](DIRECTORY_GUIDE.md)

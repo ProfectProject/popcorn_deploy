@@ -5,20 +5,21 @@ metadata:
   labels:
     {{- include "common.labels" . | nindent 4 }}
 data:
-  # Order 서비스 전용 설정
-  ORDER_PAYMENT_TIMEOUT: {{ .Values.config.paymentTimeout | quote }}
-  ORDER_CANCEL_TIMEOUT: {{ .Values.config.cancelTimeout | quote }}
-  ORDER_MAX_QUANTITY: {{ .Values.config.maxQuantity | quote }}
-  ORDER_MIN_QUANTITY: {{ .Values.config.minQuantity | quote }}
-  ORDER_NOTIFICATION_ENABLED: {{ .Values.config.notificationEnabled | quote }}
-  ORDER_NOTIFICATION_RETRY: {{ .Values.config.notificationRetry | quote }}
-  ORDER_RESERVATION_WAIT_TIMEOUT_MS: {{ .Values.config.reservationWaitTimeoutMs | quote }}
-  ORDER_INFO_REQUEST_TIMEOUT: {{ .Values.config.infoRequestTimeout | quote }}
-  ORDER_INFO_CACHE_TTL: {{ .Values.config.infoCacheTtl | quote }}
-  ORDER_INFO_RETRY_COUNT: {{ .Values.config.infoRetryCount | quote }}
-  
-  # 서비스 URL
-  GATEWAY_SERVICE_URL: {{ tpl .Values.serviceUrls.gateway . | quote }}
-  USER_SERVICE_URL: {{ tpl .Values.serviceUrls.users . | quote }}
-  STORE_SERVICE_URL: {{ tpl .Values.serviceUrls.stores . | quote }}
-  PAYMENT_SERVICE_URL: {{ tpl .Values.serviceUrls.payment . | quote }}
+  DB_HOST: "goorm-popcorn-prod-postgres.cds4g0gykt3t.ap-northeast-2.rds.amazonaws.com"
+  DB_PORT: "5432"
+  DB_NAME: "popcorn_prod"
+  REDIS_HOST: "master.goorm-popcorn-cache-prod.mkltth.apn2.cache.amazonaws.com"
+  REDIS_PORT: "6379"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka-prod.kafka.svc.cluster.local:9092"
+  FRONTEND_BASE_URL: "https://dev.goormpopcorn.shop"
+  USER_SERVICE_BASE_URL: "http://popcorn-prod-gateway:8080/"
+  STORE_SERVICE_BASE_URL: "http://popcorn-prod-gateway:8080/"
+  ORDERQUERY_SERVICE_BASE_URL: "http://popcorn-prod-gateway:8080/"
+  ORDER_PAYMENT_TIMEOUT: "15000"
+  ORDER_CANCEL_TIMEOUT: "900"
+  ORDER_RESERVATION_WAIT_TIMEOUT_MS: "0"
+  ORDER_MAX_QUANTITY: "50"
+  ORDER_MIN_QUANTITY: "1"
+  ORDER_NOTIFICATION_ENABLED: "true"
+  ORDER_NOTIFICATION_RETRY: "5"
+  ORDER_ORDERQUERY_TIMEOUT: "3000"
