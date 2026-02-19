@@ -7,6 +7,8 @@
   - Prod 노드 사용량, 요청량, 비용 효율성 판단과 1순위 실행결과 정리
 - [리소스 튜닝 1순위 실행 내역](resource-tuning-step1-prod-2026-02-18.md)  
   - 노드/컴포넌트 요청량 조정 대상, 적용값, 검증 체크리스트 정리
+- [LGTM + OTel 연동 운영 가이드](lgtm-otel-integration-guide-2026-02-19.md)  
+  - LGTM 3종(Tempo/Loki/Mimir)과 OTel Collector 연동, 수집 항목, 쿼리/검증 절차
 
 ## 전체 문서 인덱스
 - [프로젝트 문서 인덱스](../README_INDEX.md)  
