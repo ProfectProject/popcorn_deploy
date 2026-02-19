@@ -1,21 +1,23 @@
-# Tempo 기본 설정
+# Tempo 공통 기본 설정
+
+service:
+  type: ClusterIP
+
+tolerations:
+  - key: karpenter.sh/spot
+    operator: Exists
+    effect: NoSchedule
+
+persistence:
+  enabled: true
+  storageClassName: gp3
+  size: 10Gi
 
 tempo:
-  repository: grafana/tempo
-  tag: 2.3.1
   pullPolicy: IfNotPresent
-  
-  # 스토리지 설정
-  storage:
-    trace:
-      backend: local
-      local:
-        path: /var/tempo/traces
-  
-  # 보관 기간
-  retention: 168h  # 7일
-  
-  # 수신 설정
+  retention: 168h
+
+  # OTel Collector가 전송할 수신 포트
   receivers:
     otlp:
       protocols:
@@ -24,35 +26,25 @@ tempo:
         http:
           endpoint: 0.0.0.0:4318
 
-# 배포 모드
-deploymentMode: SingleBinary
+  storage:
+    trace:
+      backend: local
+      local:
+        path: /var/tempo/traces
+      wal:
+        path: /var/tempo/wal
 
-singleBinary:
-  replicas: 1
-  
+  metricsGenerator:
+    enabled: false
+
   resources:
     requests:
       cpu: 100m
       memory: 256Mi
     limits:
-      cpu: 500m
+      cpu: 400m
       memory: 512Mi
-  
-  persistence:
-    enabled: true
-    storageClass: gp3
-    size: 10Gi
 
-# 서비스
-service:
-  type: ClusterIP
-
-# 메트릭
-metrics:
-  enabled: true
-  serviceMonitor:
-    enabled: false
-
-# 테스트 비활성화
+# 차트 테스트 비활성화
 test:
   enabled: false

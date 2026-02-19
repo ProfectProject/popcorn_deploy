@@ -1,67 +1,71 @@
-apiVersion: karpenter.k8s.aws/v1beta1
+apiVersion: karpenter.k8s.aws/v1
 kind: EC2NodeClass
 metadata:
   name: default
 spec:
-  # AMI 선택 전략
-  amiFamily: AL2 # Amazon Linux 2
-  
-  # 서브넷 선택 (Private 서브넷, Multi-AZ)
+  # Amazon Linux 2023 기반 AMI 사용
+  amiFamily: AL2023
+  amiSelectorTerms:
+    - alias: al2023@latest
+
+  # Private 서브넷, 다중 AZ
   subnetSelectorTerms:
     - tags:
-        karpenter.sh/discovery: goorm-popcorn-prod
-  
+        kubernetes.io/cluster/goorm-popcorn-prod: owned
+        kubernetes.io/role/internal-elb: "1"
+
   # 보안 그룹 선택
   securityGroupSelectorTerms:
     - tags:
-        karpenter.sh/discovery: goorm-popcorn-prod
-  
-  # IAM 역할 (role 또는 instanceProfile 중 하나만 지정)
+        kubernetes.io/cluster/goorm-popcorn-prod: owned
+
+  # IAM 역할
   role: KarpenterNodeRole-goorm-popcorn-prod
-  
-  # 사용자 데이터 (부트스트랩 스크립트)
+
+  # 사용자 데이터
   userData: |
-    #!/bin/bash
-    set -e
-    
-    # EKS 부트스트랩
-    /etc/eks/bootstrap.sh goorm-popcorn-prod \
-      --kubelet-extra-args '--max-pods=110' \
-      --b64-cluster-ca $CLUSTER_CA \
-      --apiserver-endpoint $CLUSTER_ENDPOINT
-    
-    # CloudWatch 에이전트 설치
-    wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
-    rpm -U ./amazon-cloudwatch-agent.rpm
-    
-    # 시스템 튜닝 (프로덕션 최적화)
-    echo "net.ipv4.tcp_tw_reuse = 1" >> /etc/sysctl.conf
-    echo "net.ipv4.ip_local_port_range = 1024 65535" >> /etc/sysctl.conf
-    echo "net.core.somaxconn = 32768" >> /etc/sysctl.conf
-    sysctl -p
-  
-  # 블록 디바이스 매핑
+    MIME-Version: 1.0
+    Content-Type: multipart/mixed; boundary="==BOUNDARY=="
+
+    --==BOUNDARY==
+    Content-Type: application/node.eks.aws
+
+    apiVersion: node.eks.aws/v1alpha1
+    kind: NodeConfig
+    spec:
+      cluster:
+        name: goorm-popcorn-prod
+        apiServerEndpoint: https://D5B0E84D76FFB4045F42B8F326A51B8F.yl4.ap-northeast-2.eks.amazonaws.com
+        certificateAuthority: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCVENDQWUyZ0F3SUJBZ0lJZE1IT29wMUJEQ293RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TmpBeU1Ea3hNREV3TXpGYUZ3MHpOakF5TURjeE1ERTFNekZhTUJVeApFekFSQmdOVkJBTVRDbXQxWW1WeWJtVjBaWE13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLCkFvSUJBUUN1M1AxSEgvdXhldU5jRUs4OUk0aWg3dWU4NVVpRVBYYW5jQkFwcnlZcnVoWWJVTDZZWkpkbGlJRlUKRUp1eEZBQUsxaVVXY3NhZW5hbzdid3VlQjFBNjUzSzNqajZJVTdKSU9RVC8wUUFXbHlkV04vZkJ2UVUrT05NZAp5dHk4MFJMb3kwOUVxSlVVMDlpMDl6VHZScmorLzVYUC9jRktqTFQxQ284M1ZwMVVhT1lMem9rUEQxL0hHYitQCnFDd2x1dDdOM1VERThxYkN1TzRMVytFZXIrUGFJemRnZlgxMzdBVWJPSitCSXlxWUg5cXFwcHdGd25FWFRpcGsKU2hlcnJ5NUF1eGR1NGlUVmdyd3d5T1JYTjEzR2RWTWpBWVB4RXEwVEpYNUk0c0FiTDl6VVdqMTNRTUQvWERaZQorMW9JREQwZWNncExoMzQ4THhpYzBRTVF2b0s1QWdNQkFBR2pXVEJYTUE0R0ExVWREd0VCL3dRRUF3SUNwREFQCkJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJUc0M5Vm1DWDg4QkREY0oxQmtkejFkOWpRaGVqQVYKQmdOVkhSRUVEakFNZ2dwcmRXSmxjbTVsZEdWek1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQlNxMmhKUlNKRgpsTXg3MUV1amFUVHd2dXU2bERDYTN0OWdVZ1JsR2gwM0xuL2R3K21vTUM4SmxEbnE4UndDRDIyLyswamxubEFUCldFUnFpTkVTNWd4UDB6ZzNWc3dKa3dnZVU3bUJKZm96eTJHUkNuRGo3a0l3ajRIVzJlbU1wY3RrZkNCb0RVS2QKUFRud1pGdnltN1drYkpVZ05vRFZXNGowUHFOYUpqWGdkSll0dXZPTVFsQkZ2dG5RdExCYjZrUnFtaGV0WHdWRQpwMUZZWjNzVnJCd2dUTDFYWGZIZkJuY1ZmZU90VXBhNGo1dDIwOHZZSjM2Zk1HcUdHS0JQTTNtUlhhcFdHZGhFClU3T3lqNExmT3JoZWFXYUN5WVZzN2xoSUE2UThsMTlpSEtSOGVNTXdwekV0R2dWdTBSdHQzdHBFQ2RTMWU3eFAKV1Zwb2k4ODRUUTVECi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+        cidr: 172.20.0.0/16
+      kubelet:
+        config:
+          maxPods: 110
+
+    --==BOUNDARY==--
+
+  # 볼륨 구성
   blockDeviceMappings:
     - deviceName: /dev/xvda
       ebs:
-        volumeSize: 50Gi # Prod는 더 큰 볼륨
+        volumeSize: 50Gi
         volumeType: gp3
         iops: 3000
         throughput: 125
         encrypted: true
         deleteOnTermination: true
-  
-  # 메타데이터 옵션 (보안 강화)
+
+  # 메타데이터 옵션
   metadataOptions:
     httpEndpoint: enabled
     httpProtocolIPv6: disabled
     httpPutResponseHopLimit: 2
-    httpTokens: required # IMDSv2 강제
-  
-  # 상세 모니터링 활성화 (프로덕션)
+    httpTokens: required
+
+  # 상세 모니터링
   detailedMonitoring: true
-  
-  # 태그
+
+  # 노드 태그
   tags:
     Name: karpenter-node-prod
     Environment: prod

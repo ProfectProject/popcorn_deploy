@@ -4,19 +4,23 @@ metadata:
   name: {{ include "common.fullname" . }}-config
   labels:
     {{- include "common.labels" . | nindent 4 }}
+{{- $global := .Values.global | default (dict) }}
+{{- $database := $global.database | default (dict) }}
+{{- $redis := $global.redis | default (dict) }}
+{{- $kafka := $global.kafka | default (dict) }}
 data:
   # Database 설정 (환경별로 오버라이드)
-  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/popcorn"
+  SPRING_DATASOURCE_URL: {{ printf "jdbc:postgresql://%s:%v/%s" ($database.host | default "postgres") ($database.port | default 5432) ($database.name | default "popcorn") | quote }}
   SPRING_DATASOURCE_USERNAME: "popcorn"
   SPRING_JPA_HIBERNATE_DDL_AUTO: "validate"
   SPRING_JPA_SHOW_SQL: "false"
   
   # Redis 설정
-  SPRING_REDIS_HOST: "redis"
-  SPRING_REDIS_PORT: "6379"
+  SPRING_REDIS_HOST: {{ $redis.host | default "redis" | quote }}
+  SPRING_REDIS_PORT: {{ $redis.port | default 6379 | quote }}
   
   # Kafka 설정
-  SPRING_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: {{ $kafka.bootstrapServers | default "kafka:9092" | quote }}
   SPRING_KAFKA_CONSUMER_GROUP_ID: "users-service-group"
   
   # Actuator 설정

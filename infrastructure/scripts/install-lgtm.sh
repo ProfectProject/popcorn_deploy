@@ -6,6 +6,8 @@ set -e
 
 NAMESPACE="monitoring"
 ENVIRONMENT=${1:-prod}
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+VALUES_DIR="${SCRIPT_DIR}/../lgtm"
 
 echo "=========================================="
 echo "LGTM Stack 설치 시작"
@@ -25,8 +27,8 @@ kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f 
 echo "Loki 설치 중..."
 helm upgrade --install loki grafana/loki \
   --namespace $NAMESPACE \
-  --values ../lgtm/loki/values.yaml \
-  --values ../lgtm/loki/values-${ENVIRONMENT}.yaml \
+  --values "${VALUES_DIR}/loki/values.yaml" \
+  --values "${VALUES_DIR}/loki/values-${ENVIRONMENT}.yaml" \
   --wait
 
 echo "Loki 설치 완료!"
@@ -35,9 +37,10 @@ echo "Loki 설치 완료!"
 echo "Tempo 설치 중..."
 helm upgrade --install tempo grafana/tempo \
   --namespace $NAMESPACE \
-  --values ../lgtm/tempo/values.yaml \
-  --values ../lgtm/tempo/values-${ENVIRONMENT}.yaml \
-  --wait
+  --values "${VALUES_DIR}/tempo/values.yaml" \
+  --values "${VALUES_DIR}/tempo/values-${ENVIRONMENT}.yaml" \
+  --wait \
+  --timeout 10m
 
 echo "Tempo 설치 완료!"
 
@@ -45,10 +48,11 @@ echo "Tempo 설치 완료!"
 echo "Mimir 설치 중..."
 helm upgrade --install mimir grafana/mimir-distributed \
   --namespace $NAMESPACE \
-  --values ../lgtm/mimir/values.yaml \
-  --values ../lgtm/mimir/values-${ENVIRONMENT}.yaml \
+  --version 5.8.0 \
+  --values "${VALUES_DIR}/mimir/values.yaml" \
+  --values "${VALUES_DIR}/mimir/values-${ENVIRONMENT}.yaml" \
   --wait \
-  --timeout 10m
+  --timeout 20m
 
 echo "Mimir 설치 완료!"
 
@@ -56,8 +60,8 @@ echo "Mimir 설치 완료!"
 echo "Grafana 설치 중..."
 helm upgrade --install grafana grafana/grafana \
   --namespace $NAMESPACE \
-  --values ../lgtm/grafana/values.yaml \
-  --values ../lgtm/grafana/values-${ENVIRONMENT}.yaml \
+  --values "${VALUES_DIR}/grafana/values.yaml" \
+  --values "${VALUES_DIR}/grafana/values-${ENVIRONMENT}.yaml" \
   --wait
 
 echo "=========================================="

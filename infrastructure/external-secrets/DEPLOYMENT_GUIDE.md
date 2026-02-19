@@ -122,27 +122,23 @@ external-secrets-cert-controller-5b7c8d9f4-xxxxx   1/1     Running   0          
 external-secrets-webhook-6f8d7c5b4d-xxxxx          1/1     Running   0          30s
 ```
 
-## 3단계: SecretStore 생성
+## 3단계: ClusterSecretStore 생성
 
 ```bash
-# Prod 환경
-kubectl apply -f secretstore-prod.yaml
-
-# Dev 환경
-kubectl apply -f secretstore-dev.yaml
+kubectl apply -f clustersecretstore.yaml
 ```
 
-SecretStore 상태 확인:
+ClusterSecretStore 상태 확인:
 ```bash
-kubectl get secretstore
+kubectl get clustersecretstore aws-secrets-manager
 
-kubectl describe secretstore aws-secrets-manager
+kubectl describe clustersecretstore aws-secrets-manager
 ```
 
 예상 출력:
 ```
 Name:         aws-secrets-manager
-Namespace:    default
+Scope:        Cluster
 Status:
   Conditions:
     Status:  True
@@ -152,25 +148,20 @@ Status:
 ## 4단계: ExternalSecret 생성
 
 ```bash
-# 모든 ExternalSecret 적용
-kubectl apply -f externalsecrets/
+# Prod 환경
+kubectl apply -f externalsecrets/prod/
 
-# 또는 개별 적용
-kubectl apply -f externalsecrets/rds-credentials.yaml
-kubectl apply -f externalsecrets/redis-credentials.yaml
-kubectl apply -f externalsecrets/jwt-secret.yaml
-kubectl apply -f externalsecrets/passport-secret.yaml
-kubectl apply -f externalsecrets/payment-api-keys.yaml
-kubectl apply -f externalsecrets/database-users.yaml
+# Dev 환경
+kubectl apply -f externalsecrets/dev/
 ```
 
 ExternalSecret 상태 확인:
 ```bash
 # 모든 ExternalSecret 상태
-kubectl get externalsecrets
+kubectl get externalsecrets -n popcorn-prod
 
 # 특정 ExternalSecret 상세 정보
-kubectl describe externalsecret rds-credentials
+kubectl describe externalsecret rds-credentials -n popcorn-prod
 ```
 
 예상 출력:
@@ -188,16 +179,16 @@ database-users       aws-secrets-manager    1h                 SecretSynced   Tr
 
 ```bash
 # 생성된 Secret 목록
-kubectl get secrets | grep -E "rds-credentials|redis-credentials|jwt-secret|passport-secret|payment-api-keys|database-users"
+kubectl get secrets -n popcorn-prod | grep -E "rds-credentials|redis-credentials|jwt-secret|passport-secret|payment-api-keys|database-users"
 
 # 특정 Secret 상세 정보
-kubectl describe secret rds-credentials
+kubectl describe secret rds-credentials -n popcorn-prod
 
 # Secret 키 목록 확인
-kubectl get secret rds-credentials -o jsonpath='{.data}' | jq 'keys'
+kubectl get secret rds-credentials -n popcorn-prod -o jsonpath='{.data}' | jq 'keys'
 
 # Secret 값 확인 (Base64 디코딩)
-kubectl get secret rds-credentials -o jsonpath='{.data.DB_HOST}' | base64 -d
+kubectl get secret rds-credentials -n popcorn-prod -o jsonpath='{.data.DB_HOST}' | base64 -d
 ```
 
 ## 6단계: 애플리케이션 배포
@@ -263,13 +254,13 @@ spec:
 helm upgrade --install popcorn \
   ./helm/popcorn-umbrella \
   -f ./helm/popcorn-umbrella/values-prod.yaml \
-  --namespace default
+  --namespace popcorn-prod
 
 # 개별 서비스 배포
 helm upgrade --install users \
   ./helm/charts/users \
   -f ./helm/charts/users/values-prod.yaml \
-  --namespace default
+  --namespace popcorn-prod
 ```
 
 ## 7단계: 검증
@@ -310,9 +301,9 @@ redis-cli -h $REDIS_HOST -p $REDIS_PORT -a $REDIS_PASSWORD ping
 
 ### ExternalSecret이 동기화되지 않음
 
-1. **SecretStore 상태 확인**
+1. **ClusterSecretStore 상태 확인**
 ```bash
-kubectl describe secretstore aws-secrets-manager
+kubectl describe clustersecretstore aws-secrets-manager
 ```
 
 2. **IRSA 권한 확인**
@@ -347,12 +338,12 @@ kubectl logs -n external-secrets -l app.kubernetes.io/name=external-secrets --ta
 
 1. **ExternalSecret 이벤트 확인**
 ```bash
-kubectl describe externalsecret rds-credentials
+kubectl describe externalsecret rds-credentials -n popcorn-prod
 ```
 
 2. **네임스페이스 확인**
 ```bash
-kubectl get externalsecret rds-credentials -o yaml | grep namespace
+kubectl get externalsecret rds-credentials -n popcorn-prod -o yaml | grep namespace
 ```
 
 3. **시크릿 경로 확인**
@@ -398,8 +389,8 @@ aws secretsmanager put-secret-value \
   --region ap-northeast-2
 
 # 2. ExternalSecret 재동기화 (즉시 반영)
-kubectl delete externalsecret jwt-secret
-kubectl apply -f externalsecrets/jwt-secret.yaml
+kubectl delete externalsecret jwt-secret -n popcorn-prod
+kubectl apply -f externalsecrets/prod/jwt-secret.yaml
 
 # 3. Pod 재시작 (환경변수 갱신)
 kubectl rollout restart deployment/popcorn-users

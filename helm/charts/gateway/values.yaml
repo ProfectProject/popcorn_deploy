@@ -25,9 +25,9 @@ env:
 
 envFrom:
   - configMapRef:
-      name: popcorn-gateway-config
+      name: "{{ .Release.Name }}-gateway-config"
   - secretRef:
-      name: popcorn-gateway-secret
+      name: "{{ .Release.Name }}-gateway-secret"
       optional: true
 
 resources:
@@ -67,7 +67,7 @@ ingress:
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
+    alb.ingress.kubernetes.io/healthcheck-path: /actuator/health/liveness
   hosts:
     - host: api.goormpopcorn.shop
       paths:

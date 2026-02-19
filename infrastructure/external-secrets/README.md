@@ -71,56 +71,54 @@ cd popcorn_deploy/infrastructure/external-secrets
 ./install-eso.sh dev
 ```
 
+`install-eso.sh`는 다음을 자동으로 수행합니다.
+- ESO Helm 설치 (`external-secrets` 네임스페이스)
+- 앱 네임스페이스 생성 (`popcorn-prod` 또는 `popcorn-dev`)
+- 공용 `ClusterSecretStore` 적용
+- 환경별 `ExternalSecret` 적용 (`externalsecrets/prod`, `externalsecrets/dev`)
+
 설치 확인:
 ```bash
 kubectl get pods -n external-secrets
 kubectl logs -n external-secrets -l app.kubernetes.io/name=external-secrets
 ```
 
-### 5단계: SecretStore 생성
+### 5단계: ClusterSecretStore 생성 (수동 적용 시)
+
+```bash
+kubectl apply -f clustersecretstore.yaml
+```
+
+ClusterSecretStore 상태 확인:
+```bash
+kubectl get clustersecretstore aws-secrets-manager
+kubectl describe clustersecretstore aws-secrets-manager
+```
+
+### 6단계: ExternalSecret 생성 (수동 적용 시)
 
 ```bash
 # Prod 환경
-kubectl apply -f secretstore-prod.yaml
+kubectl apply -f externalsecrets/prod/
 
 # Dev 환경
-kubectl apply -f secretstore-dev.yaml
-```
-
-SecretStore 상태 확인:
-```bash
-kubectl get secretstore
-kubectl describe secretstore aws-secrets-manager
-```
-
-### 6단계: ExternalSecret 생성
-
-```bash
-# 모든 ExternalSecret 적용
-kubectl apply -f externalsecrets/
-
-# 개별 적용
-kubectl apply -f externalsecrets/rds-credentials.yaml
-kubectl apply -f externalsecrets/redis-credentials.yaml
-kubectl apply -f externalsecrets/jwt-secret.yaml
-kubectl apply -f externalsecrets/passport-secret.yaml
-kubectl apply -f externalsecrets/payment-api-keys.yaml
+kubectl apply -f externalsecrets/dev/
 ```
 
 ExternalSecret 상태 확인:
 ```bash
-kubectl get externalsecrets
-kubectl describe externalsecret rds-credentials
+kubectl get externalsecrets -n popcorn-prod
+kubectl describe externalsecret rds-credentials -n popcorn-prod
 ```
 
 ### 7단계: Kubernetes Secret 생성 확인
 
 ESO가 자동으로 생성한 Secret 확인:
 ```bash
-kubectl get secrets
+kubectl get secrets -n popcorn-prod
 
 # Secret 내용 확인 (Base64 디코딩)
-kubectl get secret rds-credentials -o jsonpath='{.data.password}' | base64 -d
+kubectl get secret rds-credentials -n popcorn-prod -o jsonpath='{.data.password}' | base64 -d
 ```
 
 ## 파일 구조
@@ -131,14 +129,10 @@ external-secrets/
 ├── install-eso.sh              # ESO 설치 스크립트
 ├── values-dev.yaml             # Dev 환경 Helm values
 ├── values-prod.yaml            # Prod 환경 Helm values
-├── secretstore-dev.yaml        # Dev SecretStore
-├── secretstore-prod.yaml       # Prod SecretStore
+├── clustersecretstore.yaml     # 공용 ClusterSecretStore
 ├── externalsecrets/            # ExternalSecret 매니페스트
-│   ├── rds-credentials.yaml
-│   ├── redis-credentials.yaml
-│   ├── jwt-secret.yaml
-│   ├── passport-secret.yaml
-│   └── payment-api-keys.yaml
+│   ├── prod/
+│   └── dev/
 └── scripts/                    # 유틸리티 스크립트
     ├── create-secrets.sh       # AWS Secrets Manager 시크릿 생성
     └── verify-secrets.sh       # 시크릿 검증
@@ -146,8 +140,8 @@ external-secrets/
 
 ## 주요 개념
 
-### SecretStore
-AWS Secrets Manager와의 연결 설정. IRSA 역할을 사용하여 인증합니다.
+### ClusterSecretStore
+클러스터 공용 AWS Secrets Manager 연결 설정. IRSA 역할을 사용하여 인증합니다.
 
 ### ExternalSecret
 동기화할 시크릿 정의. AWS Secrets Manager의 어떤 시크릿을 Kubernetes Secret으로 가져올지 지정합니다.
@@ -215,34 +209,34 @@ kubectl logs -n external-secrets -l app.kubernetes.io/name=external-secrets -f
 ### ExternalSecret 상태 확인
 ```bash
 # 모든 ExternalSecret 상태
-kubectl get externalsecrets
+kubectl get externalsecrets -n popcorn-prod
 
 # 특정 ExternalSecret 상세 정보
-kubectl describe externalsecret rds-credentials
+kubectl describe externalsecret rds-credentials -n popcorn-prod
 ```
 
 ### Secret 생성 확인
 ```bash
 # 모든 Secret 목록
-kubectl get secrets
+kubectl get secrets -n popcorn-prod
 
 # 특정 Secret 확인
-kubectl describe secret rds-credentials
+kubectl describe secret rds-credentials -n popcorn-prod
 ```
 
 ### 동기화 상태 확인
 ```bash
 # ExternalSecret의 Status 필드 확인
-kubectl get externalsecret rds-credentials -o yaml | grep -A 10 status
+kubectl get externalsecret rds-credentials -n popcorn-prod -o yaml | grep -A 10 status
 ```
 
 ## 문제 해결
 
 ### ExternalSecret이 동기화되지 않음
 
-1. **SecretStore 상태 확인**
+1. **ClusterSecretStore 상태 확인**
 ```bash
-kubectl describe secretstore aws-secrets-manager
+kubectl describe clustersecretstore aws-secrets-manager
 ```
 
 2. **IRSA 권한 확인**
@@ -266,14 +260,14 @@ kubectl logs -n external-secrets -l app.kubernetes.io/name=external-secrets
 
 1. **ExternalSecret 이벤트 확인**
 ```bash
-kubectl describe externalsecret rds-credentials
+kubectl describe externalsecret rds-credentials -n popcorn-prod
 ```
 
 2. **네임스페이스 확인**
 ```bash
 # ExternalSecret과 Secret이 같은 네임스페이스에 있는지 확인
-kubectl get externalsecret rds-credentials -o yaml | grep namespace
-kubectl get secret rds-credentials -o yaml | grep namespace
+kubectl get externalsecret rds-credentials -n popcorn-prod -o yaml | grep namespace
+kubectl get secret rds-credentials -n popcorn-prod -o yaml | grep namespace
 ```
 
 3. **시크릿 경로 확인**
@@ -324,13 +318,13 @@ ESO는 기본적으로 1시간마다 자동으로 동기화합니다. 즉시 동
 
 ```bash
 # ExternalSecret 재생성
-kubectl delete externalsecret jwt-secret
-kubectl apply -f externalsecrets/jwt-secret.yaml
+kubectl delete externalsecret jwt-secret -n popcorn-prod
+kubectl apply -f externalsecrets/prod/jwt-secret.yaml
 ```
 
 ### 동기화 주기 변경
 
-`externalsecrets/*.yaml` 파일에서 `refreshInterval` 수정:
+`externalsecrets/prod/*.yaml` 또는 `externalsecrets/dev/*.yaml` 파일에서 `refreshInterval` 수정:
 
 ```yaml
 spec:

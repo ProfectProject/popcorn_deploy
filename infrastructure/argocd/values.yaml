@@ -16,7 +16,8 @@ server:
     annotations:
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/backend-protocol: HTTPS
+      # ALB가 TLS 종료 시 백엔드는 HTTP로 동작해야 함
+      alb.ingress.kubernetes.io/backend-protocol: HTTP
       alb.ingress.kubernetes.io/healthcheck-path: /healthz
     hosts:
       - argocd.goormpopcorn.shop

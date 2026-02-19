@@ -37,7 +37,7 @@ echo "=========================================="
 # 초기 비밀번호 확인
 echo ""
 echo "ArgoCD 접속 정보:"
-echo "URL: https://localhost:8080"
+echo "URL: http://localhost:8080"
 echo "Username: admin"
 echo -n "Password: "
 kubectl -n $NAMESPACE get secret argocd-initial-admin-secret \
@@ -46,4 +46,4 @@ echo ""
 
 echo ""
 echo "포트 포워딩 명령어:"
-echo "kubectl port-forward -n $NAMESPACE svc/argocd-server 8080:443"
+echo "kubectl port-forward -n $NAMESPACE svc/argocd-server 8080:80"

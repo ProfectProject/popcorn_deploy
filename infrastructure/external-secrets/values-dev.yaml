@@ -7,7 +7,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/external-secrets/external-secrets
   pullPolicy: IfNotPresent
-  tag: v0.9.13
+  tag: v2.0.0
 
 # 리소스 제한 (Dev는 최소)
 resources:
@@ -23,13 +23,12 @@ serviceAccount:
   create: true
   name: external-secrets-sa
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::375896310755:role/ExternalSecretsRole-goorm-popcorn-dev
+    eks.amazonaws.com/role-arn: arn:aws:iam::375896310755:role/goorm-popcorn-dev-external-secrets
 
 # 보안 컨텍스트
 securityContext:
   runAsNonRoot: true
   runAsUser: 1000
-  fsGroup: 1000
 
 podSecurityContext:
   runAsNonRoot: true

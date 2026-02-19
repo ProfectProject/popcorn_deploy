@@ -13,6 +13,7 @@ helm/
 │   ├── stores/               # Store Service
 │   ├── order/                # Order Service
 │   ├── payment/              # Payment Service
+│   ├── frontend/             # Frontend Service
 │   ├── orderQuery/           # Order Query Service
 │   └── checkIns/             # CheckIn Service
 └── popcorn-umbrella/         # Umbrella Chart (통합 관리)
@@ -31,6 +32,7 @@ helm/
 | stores | 스토어 서비스 | goorm-popcorn-store |
 | order | 주문 서비스 (Command) | goorm-popcorn-order |
 | payment | 결제 서비스 | goorm-popcorn-payment |
+| frontend | 프론트엔드 서비스 (Next.js) | goorm-popcorn-front |
 | orderQuery | 주문 조회 서비스 (Query, CQRS) | goorm-popcorn-order-query |
 | checkIns | 체크인 서비스 (QR 포함) | goorm-popcorn-checkin |
 

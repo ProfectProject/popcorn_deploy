@@ -33,14 +33,43 @@ spec:
           protocol: TCP
         {{- if .Values.env }}
         env:
-        {{- range $key, $value := .Values.env }}
-        - name: {{ $key }}
-          value: {{ $value | quote }}
-        {{- end }}
+{{- range $key, $value := .Values.env }}
+          - name: {{ $key }}
+{{- if kindIs "map" $value }}
+{{ toYaml $value | nindent 12 }}
+{{- else if kindIs "string" $value }}
+            value: {{ tpl $value $ | quote }}
+{{- else if kindIs "bool" $value }}
+            value: {{ $value | quote }}
+{{- else if kindIs "int" $value }}
+            value: {{ $value | quote }}
+{{- else if kindIs "float64" $value }}
+            value: {{ $value | quote }}
+{{- else if kindIs "slice" $value }}
+            value: {{ toJson $value | quote }}
+{{- else }}
+            value: {{ $value | quote }}
+{{- end }}
+{{- end }}
         {{- end }}
         {{- if .Values.envFrom }}
         envFrom:
-        {{- toYaml .Values.envFrom | nindent 8 }}
+{{- range .Values.envFrom }}
+{{- if .configMapRef }}
+          - configMapRef:
+              name: {{ tpl .configMapRef.name $ | quote }}
+{{- if hasKey .configMapRef "optional" }}
+              optional: {{ .configMapRef.optional }}
+{{- end }}
+{{- end }}
+{{- if .secretRef }}
+          - secretRef:
+              name: {{ tpl .secretRef.name $ | quote }}
+{{- if hasKey .secretRef "optional" }}
+              optional: {{ .secretRef.optional }}
+{{- end }}
+{{- end }}
+{{- end }}
         {{- end }}
         {{- if .Values.resources }}
         resources:

@@ -5,6 +5,9 @@ set -e
 
 ENVIRONMENT=${1:-dev}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_NAMESPACE="popcorn-${ENVIRONMENT}"
+CLUSTER_SECRETSTORE_FILE="$SCRIPT_DIR/clustersecretstore.yaml"
+EXTERNALSECRETS_DIR="$SCRIPT_DIR/externalsecrets/${ENVIRONMENT}"
 
 echo "=========================================="
 echo "External Secrets Operator 설치"
@@ -15,6 +18,16 @@ echo "=========================================="
 if [[ "$ENVIRONMENT" != "dev" && "$ENVIRONMENT" != "prod" ]]; then
     echo "❌ 오류: 환경은 'dev' 또는 'prod'여야 합니다"
     echo "사용법: $0 <dev|prod>"
+    exit 1
+fi
+
+if [[ ! -f "$CLUSTER_SECRETSTORE_FILE" ]]; then
+    echo "❌ 오류: ClusterSecretStore 파일이 없습니다: $CLUSTER_SECRETSTORE_FILE"
+    exit 1
+fi
+
+if [[ ! -d "$EXTERNALSECRETS_DIR" ]]; then
+    echo "❌ 오류: ExternalSecret 디렉터리가 없습니다: $EXTERNALSECRETS_DIR"
     exit 1
 fi
 
@@ -58,6 +71,7 @@ helm repo update
 echo ""
 echo "📁 네임스페이스 생성 중..."
 kubectl create namespace external-secrets --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace "$APP_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
 
 # ESO 설치
 echo ""
@@ -78,15 +92,30 @@ echo ""
 kubectl get crds | grep external-secrets
 
 echo ""
+echo "🔐 ClusterSecretStore/ExternalSecret 적용 중..."
+kubectl apply -f "$CLUSTER_SECRETSTORE_FILE"
+kubectl apply -f "$EXTERNALSECRETS_DIR/"
+
+echo ""
+echo "⏳ ExternalSecret 동기화 대기 중..."
+kubectl wait --for=condition=Ready externalsecret --all -n "$APP_NAMESPACE" --timeout=180s || true
+
+echo ""
+echo "📊 동기화 상태:"
+kubectl get clustersecretstore aws-secrets-manager
+kubectl get externalsecret -n "$APP_NAMESPACE"
+kubectl get secret -n "$APP_NAMESPACE" | grep -E "rds-credentials|redis-credentials|jwt-secret|passport-secret|payment-api-keys|database-users" || true
+
+echo ""
 echo "=========================================="
 echo "다음 단계:"
 echo "=========================================="
-echo "1. SecretStore 생성:"
-echo "   kubectl apply -f $SCRIPT_DIR/secretstore-$ENVIRONMENT.yaml"
+echo "1. ClusterSecretStore 상태 확인:"
+echo "   kubectl describe clustersecretstore aws-secrets-manager"
 echo ""
-echo "2. ExternalSecret 생성:"
-echo "   kubectl apply -f $SCRIPT_DIR/externalsecrets/"
+echo "2. ExternalSecret 상태 확인:"
+echo "   kubectl describe externalsecret rds-credentials -n $APP_NAMESPACE"
 echo ""
 echo "3. Secret 생성 확인:"
-echo "   kubectl get secrets"
+echo "   kubectl get secrets -n $APP_NAMESPACE"
 echo ""

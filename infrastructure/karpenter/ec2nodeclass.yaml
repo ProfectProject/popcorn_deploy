@@ -1,0 +1,55 @@
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: default
+spec:
+  # AMI 선택
+  amiSelectorTerms:
+    - alias: al2023@latest  # Amazon Linux 2023 최신 버전
+  
+  # 서브넷 선택 (Private 서브넷)
+  subnetSelectorTerms:
+    - tags:
+        Name: "goorm-popcorn-prod-private-*"
+  
+  # 보안 그룹 선택
+  securityGroupSelectorTerms:
+    - tags:
+        Name: "goorm-popcorn-prod-node-group-sg"
+  
+  # IAM 역할
+  role: "goorm-popcorn-prod-node-group-role"
+  
+  # 사용자 데이터 (선택적)
+  userData: |
+    #!/bin/bash
+    # EKS 부트스트랩
+    /etc/eks/bootstrap.sh goorm-popcorn-prod
+    
+    # CloudWatch 에이전트 설치
+    wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
+    rpm -U ./amazon-cloudwatch-agent.rpm
+  
+  # 블록 디바이스 매핑
+  blockDeviceMappings:
+    - deviceName: /dev/xvda
+      ebs:
+        volumeSize: 20Gi
+        volumeType: gp3
+        encrypted: true
+        deleteOnTermination: true
+  
+  # 메타데이터 옵션
+  metadataOptions:
+    httpEndpoint: enabled
+    httpProtocolIPv6: disabled
+    httpPutResponseHopLimit: 2
+    httpTokens: required  # IMDSv2 강제
+  
+  # 태그
+  tags:
+    Name: "karpenter-node"
+    Environment: "prod"
+    Project: "goorm-popcorn"
+    ManagedBy: "karpenter"
+    "karpenter.sh/discovery": "goorm-popcorn-prod"

@@ -11,6 +11,10 @@ service:
   type: ClusterIP
   port: 80
 
+# RWO PVC 사용 시 롤링업데이트에서 Multi-Attach를 방지
+deploymentStrategy:
+  type: Recreate
+
 ingress:
   enabled: false
   ingressClassName: alb
@@ -28,6 +32,11 @@ resources:
     cpu: 500m
     memory: 512Mi
 
+tolerations:
+  - key: karpenter.sh/spot
+    operator: Exists
+    effect: NoSchedule
+
 # 관리자 설정
 adminUser: admin
 adminPassword: admin  # 운영 환경에서는 변경 필요
@@ -39,15 +48,17 @@ datasources:
     datasources:
       # Loki
       - name: Loki
+        uid: loki
         type: loki
         access: proxy
-        url: http://loki-gateway
+        url: http://loki:3100
         isDefault: false
         jsonData:
           maxLines: 1000
       
       # Tempo
       - name: Tempo
+        uid: tempo
         type: tempo
         access: proxy
         url: http://tempo:3100
@@ -60,9 +71,10 @@ datasources:
       
       # Mimir (Prometheus)
       - name: Mimir
+        uid: mimir
         type: prometheus
         access: proxy
-        url: http://mimir-query-frontend:8080/prometheus
+        url: http://mimir-nginx/prometheus
         isDefault: true
         jsonData:
           timeInterval: 30s
@@ -112,8 +124,6 @@ persistence:
 
 # 환경 변수
 env:
-  GF_SECURITY_ADMIN_USER: admin
-  GF_SECURITY_ADMIN_PASSWORD: admin
   GF_USERS_ALLOW_SIGN_UP: false
   GF_SERVER_ROOT_URL: "https://grafana.goormpopcorn.shop"
 

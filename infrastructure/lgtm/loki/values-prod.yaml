@@ -1,78 +1,54 @@
 # Loki 운영 환경 설정
 
-deploymentMode: SimpleScalable
+# 운영 안정성을 위해 파일시스템 기반 단일 바이너리 모드 사용
+deploymentMode: SingleBinary
 
 loki:
   commonConfig:
-    replication_factor: 3
-  
+    replication_factor: 1
+
   limits_config:
     retention_period: 168h  # 7일
     max_query_lookback: 168h
     ingestion_rate_mb: 10
     ingestion_burst_size_mb: 20
 
-# 읽기 컴포넌트
-read:
+singleBinary:
   replicas: 1
-  
-  resources:
-    requests:
-      cpu: 150m
-      memory: 256Mi
-    limits:
-      cpu: 300m
-      memory: 512Mi
-  
-  autoscaling:
-    enabled: false  # true → false
-    minReplicas: 1
-    maxReplicas: 3  # 6 → 3
-    targetCPUUtilizationPercentage: 70
 
-# 쓰기 컴포넌트
-write:
-  replicas: 2
-  
-  resources:
-    requests:
-      cpu: 200m
-      memory: 384Mi
-    limits:
-      cpu: 500m
-      memory: 768Mi
-  
-  persistence:
-    enabled: true
-    storageClass: gp3
-    size: 20Gi
-
-# 백엔드 컴포넌트
-backend:
-  replicas: 1
-  
-  resources:
-    requests:
-      cpu: 200m
-      memory: 384Mi
-    limits:
-      cpu: 500m
-      memory: 768Mi
-  
-  persistence:
-    enabled: true
-    storageClass: gp3
-    size: 20Gi
-
-# 게이트웨이
-gateway:
-  enabled: true
-  replicas: 1
-  
   resources:
     requests:
       cpu: 100m
-      memory: 128Mi
+      memory: 192Mi
     limits:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 300m
+      memory: 512Mi
+
+  persistence:
+    enabled: true
+    storageClass: gp3
+    size: 20Gi
+
+  tolerations:
+    - key: karpenter.sh/spot
+      operator: Exists
+      effect: NoSchedule
+
+read:
+  replicas: 0
+
+write:
+  replicas: 0
+
+backend:
+  replicas: 0
+
+gateway:
+  enabled: false
+
+# 메모리 사용량이 큰 기본 memcached 캐시는 비활성화
+chunksCache:
+  enabled: false
+
+resultsCache:
+  enabled: false

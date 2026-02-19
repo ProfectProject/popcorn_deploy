@@ -1,31 +1,35 @@
 # Kafka 개발 환경 설정
 
-replicaCount: 1
+controller:
+  replicaCount: 1
 
-resources:
-  requests:
-    cpu: 100m
-    memory: 256Mi
-  limits:
-    cpu: 500m
-    memory: 512Mi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 
-persistence:
-  enabled: true
-  size: 5Gi
+  persistence:
+    enabled: true
+    size: 5Gi
 
-logPersistence:
-  enabled: false
+  logPersistence:
+    enabled: false
 
-config: |
-  log.retention.hours=24
-  log.retention.bytes=536870912
-  default.replication.factor=1
-  min.insync.replicas=1
-  auto.create.topics.enable=true
-  num.partitions=1
+  pdb:
+    create: false
 
-pdb:
-  create: false
+  affinity: {}
 
-affinity: {}
+config:
+  log.retention.hours: 24
+  log.retention.bytes: 536870912
+  offsets.topic.replication.factor: 1
+  transaction.state.log.replication.factor: 1
+  transaction.state.log.min.isr: 1
+  default.replication.factor: 1
+  min.insync.replicas: 1
+  auto.create.topics.enable: true
+  num.partitions: 1

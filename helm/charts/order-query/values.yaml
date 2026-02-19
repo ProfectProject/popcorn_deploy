@@ -19,9 +19,16 @@ env:
 
 envFrom:
   - configMapRef:
-      name: popcorn-order-query-config
+      name: "{{ .Release.Name }}-order-query-config"
+      optional: true
   - secretRef:
-      name: popcorn-order-query-secret
+      name: rds-credentials
+      optional: true
+  - secretRef:
+      name: redis-credentials
+      optional: true
+  - secretRef:
+      name: database-users
       optional: true
 
 resources:

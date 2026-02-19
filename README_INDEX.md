@@ -12,6 +12,10 @@ popcorn_deploy/
 ├── 📄 STRUCTURE.md                       📖 전체 파일 구조
 ├── 📄 DEPLOYMENT_GUIDE.md                🚀 배포 가이드
 ├── 📄 README_INDEX.md                    📚 이 문서 (문서 인덱스)
+├── 📁 docs/                              # 운영/튜닝 문서 모음
+│   ├── 📄 README.md                      📖 운영 문서 인덱스
+│   ├── 📄 node-cost-review-prod-2026-02-18.md   📖 노드 비용 효율성 검토
+│   └── 📄 resource-tuning-step1-prod-2026-02-18.md   📖 리소스 튜닝 실행 내역
 │
 ├── 📁 helm/                              # 애플리케이션 Helm Charts
 │   ├── 📄 README.md                      📖 Helm Chart 사용 가이드
@@ -102,6 +106,23 @@ popcorn_deploy/
 **내용**: LGTM Stack 설치 방법, 데이터 소스 구성  
 **읽는 시점**: 모니터링 스택을 설치할 때
 
+### 📈 운영/튜닝
+
+#### [docs/node-cost-review-prod-2026-02-18.md](docs/node-cost-review-prod-2026-02-18.md)
+**대상**: 운영자  
+**내용**: 노드 사용량, 요청량, 비용 효율성 판단 및 1순위 실행 체크  
+**읽는 시점**: 비용/성능 튜닝이 필요할 때
+
+#### [docs/resource-tuning-step1-prod-2026-02-18.md](docs/resource-tuning-step1-prod-2026-02-18.md)
+**대상**: 운영자  
+**내용**: 1순위 리소스 튜닝 대상과 적용값, 검증 체크리스트 정리  
+**읽는 시점**: prod 자원 조정이 필요할 때
+
+#### [docs/README.md](docs/README.md)
+**대상**: 문서 이용자  
+**내용**: 운영 문서 카테고리 조회  
+**읽는 시점**: 운영 문서를 빠르게 찾고 싶을 때
+
 ## 🎯 시나리오별 문서 가이드
 
 ### 시나리오 1: 처음 프로젝트를 접하는 경우
@@ -148,6 +169,13 @@ popcorn_deploy/
 3. infrastructure/VALUES_SUMMARY.md  # 설정 확인
 ```
 
+### 시나리오 7: 운영 리소스 최적화
+```
+1. docs/node-cost-review-prod-2026-02-18.md  # 노드 사용량 분석
+2. docs/resource-tuning-step1-prod-2026-02-18.md  # 1순위 튜닝 내역
+3. docs/README.md  # 운영 문서 인덱스
+```
+
 ## 📊 문서 완성도
 
 | 디렉터리 | README 존재 | 내용 완성도 | 비고 |
@@ -178,6 +206,11 @@ popcorn_deploy/
 - Values 요약: [infrastructure/VALUES_SUMMARY.md](infrastructure/VALUES_SUMMARY.md)
 - Helm Values: [helm/README.md](helm/README.md)
 - 환경별 설정: [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+
+### 운영/튜닝
+- 노드 비용 검토: [docs/node-cost-review-prod-2026-02-18.md](docs/node-cost-review-prod-2026-02-18.md)
+- 리소스 튜닝 실행: [docs/resource-tuning-step1-prod-2026-02-18.md](docs/resource-tuning-step1-prod-2026-02-18.md)
+- 운영 문서 카테고리: [docs/README.md](docs/README.md)
 
 ### 구조 관련
 - 디렉터리 가이드: [DIRECTORY_GUIDE.md](DIRECTORY_GUIDE.md)

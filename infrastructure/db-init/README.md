@@ -173,7 +173,7 @@ psql -h $RDS_ENDPOINT -U postgres -d popcorn
 #   store
 #   orders
 #   payment
-#   checkIns
+#   checkins
 #   order_query
 
 # 역할 확인
@@ -194,7 +194,7 @@ psql -h $RDS_ENDPOINT -U postgres -d popcorn
 -- 각 스키마별 테이블 확인
 SELECT schemaname, tablename 
 FROM pg_tables 
-WHERE schemaname IN ('user_auth', 'store', 'orders', 'payment', 'checkIns', 'order_query')
+WHERE schemaname IN ('user_auth', 'store', 'orders', 'payment', 'checkins', 'order_query')
 ORDER BY schemaname, tablename;
 ```
 

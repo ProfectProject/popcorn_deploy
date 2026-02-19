@@ -19,9 +19,16 @@ env:
 
 envFrom:
   - configMapRef:
-      name: popcorn-order-config
+      name: "{{ .Release.Name }}-order-config"
+      optional: true
   - secretRef:
-      name: popcorn-order-secret
+      name: rds-credentials
+      optional: true
+  - secretRef:
+      name: redis-credentials
+      optional: true
+  - secretRef:
+      name: database-users
       optional: true
 
 resources:
@@ -61,7 +68,7 @@ config:
 
 # 서비스 URL
 serviceUrls:
-  gateway: "http://popcorn-gateway:8080"
-  users: "http://popcorn-users:8080"
-  stores: "http://popcorn-stores:8080"
-  payment: "http://popcorn-payment:8080"
+  gateway: "http://{{ .Release.Name }}-gateway:8080"
+  users: "http://{{ .Release.Name }}-users:8080"
+  stores: "http://{{ .Release.Name }}-stores:8080"
+  payment: "http://{{ .Release.Name }}-payment:8080"

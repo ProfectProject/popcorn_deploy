@@ -4,10 +4,10 @@ replicas: 1
 
 resources:
   requests:
-    cpu: 200m
-    memory: 256Mi
+    cpu: 100m
+    memory: 128Mi
   limits:
-    cpu: 500m
+    cpu: 300m
     memory: 512Mi
 
 ingress:
@@ -25,7 +25,6 @@ adminPassword: "CHANGE_ME"  # Kubernetes Secret으로 관리 권장
 
 env:
   GF_SERVER_ROOT_URL: "https://grafana.goormpopcorn.shop"
-  GF_SECURITY_ADMIN_PASSWORD__FILE: /etc/secrets/admin-password
 
 # 고가용성 설정
 autoscaling:

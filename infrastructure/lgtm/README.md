@@ -48,6 +48,7 @@ helm upgrade --install tempo grafana/tempo \
 # Mimir
 helm upgrade --install mimir grafana/mimir-distributed \
   --namespace monitoring \
+  --version 5.8.0 \
   --values mimir/values.yaml \
   --values mimir/values-prod.yaml
 
@@ -74,7 +75,7 @@ kubectl get secret -n monitoring grafana -o jsonpath="{.data.admin-password}" | 
 Grafana에서 다음 데이터 소스를 자동으로 구성:
 - Loki: `http://loki:3100`
 - Tempo: `http://tempo:3100`
-- Mimir: `http://mimir-query-frontend:8080/prometheus`
+- Mimir: `http://mimir-nginx/prometheus`
 
 ## 대시보드
 
