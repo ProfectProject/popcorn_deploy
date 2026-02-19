@@ -70,7 +70,7 @@ frontend:
 gateway:
   replicaCount: 1
   image:
-    tag: dev-39b89c52
+    tag: dev-1e443671
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -171,7 +171,7 @@ gateway:
 users:
   replicaCount: 1
   image:
-    tag: dev-39b89c52
+    tag: dev-1e443671
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -207,7 +207,7 @@ users:
 stores:
   replicaCount: 1
   image:
-    tag: dev-39b89c52
+    tag: dev-1e443671
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -243,7 +243,7 @@ stores:
 order:
   replicaCount: 1
   image:
-    tag: dev-39b89c52
+    tag: dev-1e443671
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -281,7 +281,7 @@ payment:
   enabled: true
   replicaCount: 1
   image:
-    tag: dev-39b89c52
+    tag: dev-1e443671
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -451,7 +451,7 @@ checkins:
     SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: "checkins"
 orderQuery:
   image:
-    tag: dev-39b89c52
+    tag: dev-1e443671
 checkIns:
   image:
-    tag: dev-39b89c52
+    tag: dev-1e443671
