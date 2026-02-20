@@ -5,6 +5,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "common.fullname" . }}-preview
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
   labels:
     {{- include "common.labels" . | nindent 4 }}
 spec:
