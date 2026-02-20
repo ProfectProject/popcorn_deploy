@@ -83,6 +83,9 @@ helm upgrade --install users ./charts/users \
 ### 2. Umbrella Chart로 전체 배포
 
 ```bash
+# 로컬 charts 변경 사항을 umbrella dependency(.tgz)로 동기화
+./scripts/sync-umbrella-deps.sh
+
 # 개발 환경
 helm upgrade --install popcorn-dev ./popcorn-umbrella \
   --namespace popcorn-dev \
@@ -191,8 +194,8 @@ ArgoCD의 Progressive Delivery 사용
 
 ### Chart 의존성 업데이트
 ```bash
-cd popcorn-umbrella
-helm dependency update
+# umbrella가 참조하는 charts/*.tgz를 최신화
+./scripts/sync-umbrella-deps.sh
 ```
 
 ### Dry-run으로 확인

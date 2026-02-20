@@ -57,22 +57,21 @@ helm/
 
 #### 개발 환경 배포
 ```bash
-# Chart dependencies 업데이트
-cd helm/popcorn-umbrella
-helm dependency update
+# Chart dependencies(.tgz) 동기화
+./helm/scripts/sync-umbrella-deps.sh
 
 # 배포 (dry-run으로 먼저 확인)
-helm upgrade --install popcorn-dev . \
+helm upgrade --install popcorn-dev ./helm/popcorn-umbrella \
   --namespace popcorn-dev \
-  --values values.yaml \
-  --values values-dev.yaml \
+  --values ./helm/popcorn-umbrella/values.yaml \
+  --values ./helm/popcorn-umbrella/values-dev.yaml \
   --dry-run --debug
 
 # 실제 배포
-helm upgrade --install popcorn-dev . \
+helm upgrade --install popcorn-dev ./helm/popcorn-umbrella \
   --namespace popcorn-dev \
-  --values values.yaml \
-  --values values-dev.yaml
+  --values ./helm/popcorn-umbrella/values.yaml \
+  --values ./helm/popcorn-umbrella/values-dev.yaml
 ```
 
 #### 운영 환경 배포
@@ -308,6 +307,7 @@ kubectl auth can-i list pods --as=system:serviceaccount:popcorn-dev:gateway
 # .github/workflows/deploy.yaml
 - name: Deploy to EKS
   run: |
+    ./helm/scripts/sync-umbrella-deps.sh
     helm upgrade --install popcorn-prod ./helm/popcorn-umbrella \
       --namespace popcorn-prod \
       --values values-prod.yaml \
