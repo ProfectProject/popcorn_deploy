@@ -223,6 +223,11 @@ users:
     JAVA_OPTS: "-Xms512m -Xmx1024m"
     APP_GATEWAY_URL: "https://api.goormpopcorn.shop"
     SPRING_DATA_REDIS_SSL_ENABLED: "true"
+    SPRING_DATA_REDIS_SSL: "true"
+    SPRING_REDIS_SSL_ENABLED: "true"
+    SPRING_REDIS_SSL: "true"
+    SPRING_DATA_REDIS_CONNECT_TIMEOUT: "5s"
+    SPRING_DATA_REDIS_TIMEOUT: "5s"
     SPRING_DATASOURCE_URL: "jdbc:postgresql://goorm-popcorn-prod-postgres.cds4g0gykt3t.ap-northeast-2.rds.amazonaws.com:5432/popcorn_prod?currentSchema=user_auth"
     SPRING_DATASOURCE_USERNAME:
       valueFrom:
