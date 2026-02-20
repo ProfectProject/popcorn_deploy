@@ -103,7 +103,7 @@ autoscaling:
   targetCPUUtilizationPercentage: 70
 
 rollout:
-  enabled: false
+  enabled: true
   blueGreen:
     autoPromotionEnabled: true
     scaleDownDelaySeconds: 30
