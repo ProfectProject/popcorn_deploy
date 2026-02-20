@@ -93,6 +93,9 @@ cd infrastructure/scripts
 #### Helm CLI 배포
 
 ```bash
+# 로컬 charts 변경 사항을 umbrella dependency(.tgz)로 동기화
+./helm/scripts/sync-umbrella-deps.sh
+
 # 개발 환경
 helm upgrade --install popcorn-dev ./helm/popcorn-umbrella \
   --namespace popcorn-dev \
