@@ -82,7 +82,7 @@ frontend:
 gateway:
   replicaCount: 1
   image:
-    tag: v1.0.1
+    tag: dev-280c775c
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -191,7 +191,7 @@ gateway:
 users:
   replicaCount: 1
   image:
-    tag: v1.0.1
+    tag: dev-280c775c
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -236,7 +236,7 @@ users:
 stores:
   replicaCount: 1
   image:
-    tag: v1.0.1
+    tag: dev-280c775c
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -296,7 +296,7 @@ stores:
 order:
   replicaCount: 1
   image:
-    tag: v1.0.1
+    tag: dev-280c775c
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -356,7 +356,7 @@ payment:
   enabled: true
   replicaCount: 1
   image:
-    tag: v1.0.1
+    tag: dev-280c775c
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -613,7 +613,7 @@ checkins:
     SPRING_DATASOURCE_HIKARI_MAX_LIFETIME: "900000"
 orderQuery:
   image:
-    tag: dev-4537917f
+    tag: dev-280c775c
 checkIns:
   image:
-    tag: dev-4537917f
+    tag: dev-280c775c
