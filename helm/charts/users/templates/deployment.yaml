@@ -1,1 +1,3 @@
+{{- if not .Values.rollout.enabled }}
 {{- include "common.deployment" . }}
+{{- end }}
