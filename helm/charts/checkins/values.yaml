@@ -67,3 +67,11 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 4
   targetCPUUtilizationPercentage: 70
+
+rollout:
+  enabled: true
+  keepDeployment: false
+  replicas: 1
+  canary:
+    maxSurge: "25%"
+    maxUnavailable: 0
