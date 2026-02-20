@@ -101,3 +101,9 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 5
   targetCPUUtilizationPercentage: 70
+
+rollout:
+  enabled: false
+  blueGreen:
+    autoPromotionEnabled: true
+    scaleDownDelaySeconds: 30

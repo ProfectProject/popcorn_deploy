@@ -194,6 +194,12 @@ users:
     enabled: false
     minReplicas: 3
     maxReplicas: 8
+  rollout:
+    enabled: true
+    blueGreen:
+      autoPromotionEnabled: false
+      scaleDownDelaySeconds: 30
+      previewReplicaCount: 1
   healthCheck:
     initialDelaySeconds: 150
   env:
