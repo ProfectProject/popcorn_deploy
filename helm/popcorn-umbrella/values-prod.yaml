@@ -125,8 +125,9 @@ gateway:
           name: passport-secret
           key: PASSPORT_SECRET
     # gateway application.yaml placeholder 변수들 (k8s prod 기준)
-    GATEWAY_SERVICE_URL: "http://popcorn-prod-gateway:8080"
+    GATEWAY_SERVICE_URL: "https://api.goormpopcorn.shop"
     CHECKIN_SERVICE_URL: "http://popcorn-prod-checkins:8080"
+    GATEWAY_URL: "http://popcorn-prod-gateway:8080"
     # 기존 문서에서 CHECKINS_SERVICE_URL로 쓰인 호환값 (동일 값 유지)
     CHECKINS_SERVICE_URL: "http://popcorn-prod-checkins:8080"
     COUPON_SERVICE_URL: "http://popcorn-prod-coupon:8080"
