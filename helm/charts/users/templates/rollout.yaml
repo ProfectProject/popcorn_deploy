@@ -3,6 +3,8 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: {{ include "common.fullname" . }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
   labels:
     {{- include "common.labels" . | nindent 4 }}
 spec:
