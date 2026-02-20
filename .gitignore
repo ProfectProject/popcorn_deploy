@@ -29,3 +29,6 @@ charts/*.tgz
 
 # Kubernetes
 *.kubeconfig
+
+# Local-only docs artifacts
+docs/
