@@ -1,10 +1,10 @@
 # Kafka 기본 설정 (KRaft 모드)
 
-# Bitnami 무료 티어 제약으로 latest 태그를 사용
+# Bitnami legacy 이미지 태그 기반 사용
 image:
   registry: docker.io
-  repository: bitnami/kafka
-  tag: latest
+  repository: bitnamilegacy/kafka
+  tag: 4.0.0-debian-12-r10
 
 # controller 노드가 broker 역할을 함께 수행하는 KRaft 구성
 controller:
@@ -70,6 +70,9 @@ externalAccess:
 metrics:
   jmx:
     enabled: true
+    image:
+      repository: bitnamilegacy/jmx-exporter
+      tag: 1.4.0-debian-12-r0
 
 config:
   # 로그 보관 설정
