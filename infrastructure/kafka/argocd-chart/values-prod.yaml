@@ -1,0 +1,33 @@
+kafka:
+  fullnameOverride: kafka-prod
+
+kafka-ui:
+  fullnameOverride: kafka-ui
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:375896310755:certificate/085e3315-785c-480d-93c2-57f656b60f7b"
+      alb.ingress.kubernetes.io/ssl-redirect: "443"
+    hosts:
+      - host: kafka.goormpopcorn.shop
+        paths:
+          - path: /
+            pathType: Prefix
+  yamlApplicationConfig:
+    kafka:
+      clusters:
+        - name: popcorn-kafka
+          bootstrapServers: kafka-prod:9092
+          metrics:
+            port: 9997
+            type: JMX
+          readOnly: false
+
+  env:
+    - name: KAFKA_CLUSTERS_0_NAME
+      value: "popcorn-kafka"
+    - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+      value: "kafka-prod:9092"

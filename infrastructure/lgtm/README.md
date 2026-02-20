@@ -17,6 +17,20 @@ LGTM은 Grafana의 통합 관찰성 스택입니다:
 3. Mimir (메트릭 저장소)
 4. Grafana (시각화)
 
+## ArgoCD GitOps 배포
+
+`lgtm` 스택은 `infrastructure/lgtm/argocd-chart`로 묶어 배포할 수 있습니다.
+
+- `applications/dev/infrastructure-lgtm.yaml`
+- `applications/prod/infrastructure-lgtm.yaml`
+
+적용 예시:
+
+```bash
+kubectl apply -f applications/dev/infrastructure-lgtm.yaml
+kubectl apply -f applications/prod/infrastructure-lgtm.yaml
+```
+
 ## Helm Repository
 
 ```bash

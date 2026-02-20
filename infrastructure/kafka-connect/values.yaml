@@ -1,0 +1,55 @@
+replicaCount: 1
+
+image:
+  repository: debezium/connect
+  tag: "2.7"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8083
+
+kafka:
+  # dev/prod 환경에서 각각 오버라이드 가능
+  bootstrapServers: kafka:9092
+
+connect:
+  groupId: popcorn-connect
+  configStorageTopic: connect-configs
+  offsetStorageTopic: connect-offsets
+  statusStorageTopic: connect-status
+  configStorageReplicationFactor: 3
+  offsetStorageReplicationFactor: 3
+  statusStorageReplicationFactor: 3
+
+converters:
+  keyConverter: org.apache.kafka.connect.storage.StringConverter
+  valueConverter: org.apache.kafka.connect.json.JsonConverter
+  valueConverterSchemasEnable: "false"
+
+pod:
+  annotations: {}
+  topologySpreadConstraints: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+  probes:
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 10
+
+  extraEnv: []
+
+serviceAccount:
+  create: false
+  name: default
+
+securityContext: {}

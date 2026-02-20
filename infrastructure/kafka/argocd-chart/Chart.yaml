@@ -1,0 +1,15 @@
+apiVersion: v2
+name: kafka-stack
+description: Kafka + Kafka UI stack for Popcorn
+type: application
+version: 0.1.0
+appVersion: "4.0.0"
+
+dependencies:
+  - name: kafka
+    version: "32.4.3"
+    repository: https://charts.bitnami.com/bitnami
+  - name: kafka-ui
+    version: "0.7.6"
+    repository: https://provectus.github.io/kafka-ui-charts
+

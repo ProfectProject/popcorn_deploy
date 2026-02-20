@@ -44,6 +44,24 @@ helm repo update
 ./infrastructure/scripts/install-kafka.sh dev
 ```
 
+### 1-1. ArgoCD 관리로 전환(권장)
+
+`Kafka`, `Kafka UI`, `Kafka Connect` 모두 ArgoCD로 GitOps 관리할 수 있도록 구성했습니다.
+
+- `applications/dev/kafka-connect.yaml`
+- `applications/prod/kafka-connect.yaml`
+- `applications/dev/infrastructure-kafka.yaml`
+- `applications/prod/infrastructure-kafka.yaml`
+
+적용 예시:
+
+```bash
+kubectl apply -f applications/dev/infrastructure-kafka.yaml
+kubectl apply -f applications/prod/infrastructure-kafka.yaml
+kubectl apply -f applications/dev/kafka-connect.yaml
+kubectl apply -f applications/prod/kafka-connect.yaml
+```
+
 ### 2. 수동 Helm 설치
 
 ```bash
@@ -112,3 +130,19 @@ kubectl exec -it kafka-prod-controller-0 -n kafka -- kafka-topics.sh \
 - `user-events`: 사용자 이벤트
 - `store-events`: 스토어 이벤트
 - `checkin-events`: 체크인 이벤트
+
+## Kafka Connect 배포/검증
+
+- `Pod` 확인
+
+```bash
+kubectl get pods -n kafka -l app.kubernetes.io/component=kafka-connect
+```
+
+- 포트포워드와 커넥터 목록 확인
+
+```bash
+kubectl -n kafka port-forward svc/kafka-connect 18083:8083
+
+curl -s http://127.0.0.1:18083/connectors | jq
+```

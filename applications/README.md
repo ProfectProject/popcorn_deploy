@@ -7,9 +7,15 @@
 ```
 applications/
 ├── dev/
-│   └── application.yaml      # 개발 환경 Application
+│   ├── application.yaml      # 애플리케이션(Application) 배포
+│   ├── infrastructure-kafka.yaml # Kafka 스택(Kafka + Kafka UI) 배포
+│   ├── infrastructure-lgtm.yaml  # LGTM 모니터링 스택 배포
+│   └── kafka-connect.yaml    # Kafka Connect 배포
 └── prod/
-    └── application.yaml      # 운영 환경 Application
+    ├── application.yaml      # 애플리케이션(Application) 배포
+    ├── infrastructure-kafka.yaml # Kafka 스택(Kafka + Kafka UI) 배포
+    ├── infrastructure-lgtm.yaml  # LGTM 모니터링 스택 배포
+    └── kafka-connect.yaml    # Kafka Connect 배포
 ```
 
 ## 용도
@@ -40,9 +46,15 @@ cd infrastructure/scripts
 ```bash
 # 개발 환경
 kubectl apply -f applications/dev/application.yaml
+kubectl apply -f applications/dev/infrastructure-kafka.yaml
+kubectl apply -f applications/dev/infrastructure-lgtm.yaml
+kubectl apply -f applications/dev/kafka-connect.yaml
 
 # 운영 환경
 kubectl apply -f applications/prod/application.yaml
+kubectl apply -f applications/prod/infrastructure-kafka.yaml
+kubectl apply -f applications/prod/infrastructure-lgtm.yaml
+kubectl apply -f applications/prod/kafka-connect.yaml
 ```
 
 ### 3. 상태 확인
