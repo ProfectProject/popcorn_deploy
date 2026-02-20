@@ -1,0 +1,366 @@
+loki-stack:
+  # 이름 유지
+  fullnameOverride: loki
+
+  # 공통 설정
+  loki:
+    auth_enabled: false
+
+    commonConfig:
+      replication_factor: 1
+
+    storage:
+      type: filesystem
+      filesystem:
+        chunks_directory: /var/loki/chunks
+        rules_directory: /var/loki/rules
+      bucketNames:
+        chunks: chunks
+        ruler: ruler
+        admin: admin
+
+    schemaConfig:
+      configs:
+        - from: 2024-01-01
+          store: tsdb
+          object_store: filesystem
+          schema: v13
+          index:
+            prefix: index_
+            period: 24h
+
+  deploymentMode: SingleBinary
+
+  singleBinary:
+    replicas: 1
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+    persistence:
+      enabled: true
+      storageClass: gp3
+      size: 10Gi
+
+  # 읽기/쓰기 비활성
+  read:
+    replicas: 0
+
+  write:
+    replicas: 0
+
+  backend:
+    replicas: 0
+
+  # 게이트웨이
+  gateway:
+    enabled: false
+
+  # 모니터링
+  monitoring:
+    selfMonitoring:
+      enabled: false
+      grafanaAgent:
+        installOperator: false
+
+  # 테스트 비활성화
+  test:
+    enabled: false
+
+tempo:
+  # 이름 유지
+  fullnameOverride: tempo
+
+  # 공통 설정
+  service:
+    type: ClusterIP
+
+  tolerations:
+    - key: karpenter.sh/spot
+      operator: Exists
+      effect: NoSchedule
+
+  persistence:
+    enabled: true
+    storageClassName: gp3
+    size: 10Gi
+
+  tempo:
+    pullPolicy: IfNotPresent
+    retention: 168h
+
+    # OTel Receiver
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+    storage:
+      trace:
+        backend: local
+        local:
+          path: /var/tempo/traces
+        wal:
+          path: /var/tempo/wal
+
+    metricsGenerator:
+      enabled: false
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 400m
+        memory: 512Mi
+
+  # 차트 테스트 비활성화
+  test:
+    enabled: false
+
+mimir:
+  # 이름 유지
+  fullnameOverride: mimir
+
+  # 공통 기본 설정 (mimir-distributed 기준)
+  mimir:
+    structuredConfig:
+      multitenancy_enabled: false
+      ingester:
+        ring:
+          replication_factor: 1
+
+  alertmanager:
+    enabled: false
+
+  ruler:
+    enabled: false
+
+  rollout_operator:
+    enabled: false
+
+  distributor:
+    replicas: 1
+    tolerations:
+      - key: karpenter.sh/spot
+        operator: Exists
+        effect: NoSchedule
+
+  ingester:
+    replicas: 1
+    zoneAwareReplication:
+      enabled: false
+    persistentVolume:
+      enabled: true
+      size: 10Gi
+      storageClass: gp3
+    tolerations:
+      - key: karpenter.sh/spot
+        operator: Exists
+        effect: NoSchedule
+
+  querier:
+    replicas: 1
+    tolerations:
+      - key: karpenter.sh/spot
+        operator: Exists
+        effect: NoSchedule
+
+  query_frontend:
+    replicas: 1
+    tolerations:
+      - key: karpenter.sh/spot
+        operator: Exists
+        effect: NoSchedule
+
+  query_scheduler:
+    replicas: 1
+    tolerations:
+      - key: karpenter.sh/spot
+        operator: Exists
+        effect: NoSchedule
+
+  store_gateway:
+    replicas: 1
+    zoneAwareReplication:
+      enabled: false
+    persistentVolume:
+      enabled: true
+      size: 10Gi
+      storageClass: gp3
+    tolerations:
+      - key: karpenter.sh/spot
+        operator: Exists
+        effect: NoSchedule
+
+  compactor:
+    replicas: 1
+    persistentVolume:
+      enabled: true
+      size: 10Gi
+      storageClass: gp3
+    tolerations:
+      - key: karpenter.sh/spot
+        operator: Exists
+        effect: NoSchedule
+
+  gateway:
+    enabled: true
+    replicas: 1
+    tolerations:
+      - key: karpenter.sh/spot
+        operator: Exists
+        effect: NoSchedule
+
+  minio:
+    enabled: true
+    mode: standalone
+    tolerations:
+      - key: karpenter.sh/spot
+        operator: Exists
+        effect: NoSchedule
+    persistence:
+      enabled: true
+      size: 20Gi
+      storageClass: gp3
+
+grafana:
+  # 이름 유지
+  fullnameOverride: grafana
+
+  # 공통 설정
+  replicas: 1
+
+  image:
+    repository: grafana/grafana
+    tag: 10.2.3
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  deploymentStrategy:
+    type: Recreate
+
+  ingress:
+    enabled: false
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+    hosts:
+      - grafana.goormpopcorn.shop
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  tolerations:
+    - key: karpenter.sh/spot
+      operator: Exists
+      effect: NoSchedule
+
+  # 관리자 설정
+  adminUser: admin
+  adminPassword: admin
+
+  # 데이터 소스 자동 구성
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Loki
+          uid: loki
+          type: loki
+          access: proxy
+          url: http://loki:3100
+          isDefault: false
+          jsonData:
+            maxLines: 1000
+
+        - name: Tempo
+          uid: tempo
+          type: tempo
+          access: proxy
+          url: http://tempo:3100
+          isDefault: false
+          jsonData:
+            tracesToLogsV2:
+              datasourceUid: loki
+            serviceMap:
+              datasourceUid: mimir
+
+        - name: Mimir
+          uid: mimir
+          type: prometheus
+          access: proxy
+          url: http://mimir-nginx/prometheus
+          isDefault: true
+          jsonData:
+            timeInterval: 30s
+
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: 'default'
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
+
+  dashboards:
+    default:
+      kubernetes-cluster:
+        gnetId: 7249
+        revision: 1
+        datasource: Mimir
+
+      kubernetes-pods:
+        gnetId: 6417
+        revision: 1
+        datasource: Mimir
+
+      loki-logs:
+        gnetId: 13639
+        revision: 2
+        datasource: Loki
+
+  plugins:
+    - grafana-piechart-panel
+    - grafana-clock-panel
+
+  persistence:
+    enabled: true
+    storageClassName: gp3
+    size: 10Gi
+
+  env:
+    GF_USERS_ALLOW_SIGN_UP: false
+    GF_SERVER_ROOT_URL: "https://grafana.goormpopcorn.shop"
+
+  grafana.ini:
+    server:
+      root_url: "https://grafana.goormpopcorn.shop"
+    analytics:
+      check_for_updates: true
+    log:
+      mode: console
+    grafana_net:
+      url: https://grafana.net

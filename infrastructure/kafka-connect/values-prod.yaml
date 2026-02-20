@@ -1,0 +1,19 @@
+image:
+  tag: "2.7"
+
+kafka:
+  bootstrapServers: kafka-prod:9092
+
+connect:
+  configStorageReplicationFactor: 3
+  offsetStorageReplicationFactor: 3
+  statusStorageReplicationFactor: 3
+
+pod:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 800m
+      memory: 1Gi

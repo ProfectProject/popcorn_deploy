@@ -1,0 +1,170 @@
+loki-stack:
+  deploymentMode: SingleBinary
+
+  loki:
+    commonConfig:
+      replication_factor: 1
+
+    limits_config:
+      retention_period: 168h
+      max_query_lookback: 168h
+      ingestion_rate_mb: 10
+      ingestion_burst_size_mb: 20
+
+  singleBinary:
+    replicas: 1
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 192Mi
+      limits:
+        cpu: 300m
+        memory: 512Mi
+
+    persistence:
+      enabled: true
+      storageClass: gp3
+      size: 20Gi
+
+  # 메모리 사용량이 큰 기본 캐시 비활성화
+  read:
+    replicas: 0
+
+  write:
+    replicas: 0
+
+  backend:
+    replicas: 0
+
+  gateway:
+    enabled: false
+
+  chunksCache:
+    enabled: false
+
+  resultsCache:
+    enabled: false
+
+tempo:
+  persistence:
+    enabled: true
+    storageClassName: gp3
+    size: 20Gi
+
+  tempo:
+    retention: 168h
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+
+mimir:
+  distributor:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 192Mi
+      limits:
+        cpu: 300m
+        memory: 512Mi
+
+  ingester:
+    resources:
+      requests:
+        cpu: 200m
+        memory: 384Mi
+      limits:
+        cpu: 600m
+        memory: 1Gi
+    persistentVolume:
+      size: 20Gi
+
+  querier:
+    resources:
+      requests:
+        cpu: 80m
+        memory: 192Mi
+      limits:
+        cpu: 250m
+        memory: 512Mi
+
+  query_frontend:
+    resources:
+      requests:
+        cpu: 80m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 384Mi
+
+  query_scheduler:
+    resources:
+      requests:
+        cpu: 80m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 384Mi
+
+  store_gateway:
+    resources:
+      requests:
+        cpu: 120m
+        memory: 256Mi
+      limits:
+        cpu: 400m
+        memory: 640Mi
+    persistentVolume:
+      size: 20Gi
+
+  compactor:
+    resources:
+      requests:
+        cpu: 120m
+        memory: 256Mi
+      limits:
+        cpu: 400m
+        memory: 640Mi
+    persistentVolume:
+      size: 20Gi
+
+  minio:
+    resources:
+      requests:
+        cpu: 80m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 384Mi
+    persistentVolume:
+      size: 20Gi
+
+grafana:
+  ingress:
+    enabled: false
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+
+  adminPassword: "CHANGE_ME"
+
+  plugins:
+    - grafana-piechart-panel
+    - grafana-clock-panel
+    - grafana-simple-json-datasource
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70

@@ -1,0 +1,146 @@
+# 공통 값
+kafka:
+  # Kafka 컨트롤러/브로커 KRaft
+  image:
+    registry: docker.io
+    repository: bitnami/kafka
+    tag: latest
+
+  controller:
+    replicaCount: 3
+    controllerOnly: false
+
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+    persistence:
+      enabled: true
+      storageClass: gp3
+      size: 10Gi
+
+    logPersistence:
+      enabled: true
+      storageClass: gp3
+      size: 5Gi
+
+    pdb:
+      create: true
+      minAvailable: 2
+
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: kafka
+              topologyKey: topology.kubernetes.io/zone
+
+  broker:
+    replicaCount: 0
+
+  listeners:
+    client:
+      protocol: PLAINTEXT
+    controller:
+      protocol: PLAINTEXT
+    interbroker:
+      protocol: PLAINTEXT
+    external:
+      protocol: PLAINTEXT
+
+  service:
+    type: ClusterIP
+    ports:
+      client: 9092
+      controller: 9093
+      interbroker: 9094
+      external: 9095
+
+  externalAccess:
+    enabled: false
+
+  metrics:
+    jmx:
+      enabled: true
+
+  config:
+    log.retention.hours: 168
+    log.retention.bytes: 1073741824
+    log.segment.bytes: 1073741824
+    offsets.topic.replication.factor: 3
+    transaction.state.log.replication.factor: 3
+    transaction.state.log.min.isr: 2
+    default.replication.factor: 3
+    min.insync.replicas: 2
+    compression.type: producer
+    auto.create.topics.enable: true
+    num.partitions: 3
+
+  fullnameOverride: kafka
+
+kafka-ui:
+  replicaCount: 1
+
+  image:
+    repository: provectuslabs/kafka-ui
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ingress:
+    enabled: false
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+    hosts:
+      - host: kafka.goormpopcorn.shop
+        paths:
+          - path: /
+            pathType: Prefix
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  yamlApplicationConfig:
+    kafka:
+      clusters:
+        - name: popcorn-kafka
+          bootstrapServers: kafka:9092
+          metrics:
+            port: 9997
+            type: JMX
+          readOnly: false
+
+    auth:
+      type: disabled
+
+    management:
+      health:
+        ldap:
+          enabled: false
+
+  env:
+    - name: KAFKA_CLUSTERS_0_NAME
+      value: "popcorn-kafka"
+    - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+      value: "kafka:9092"
+    - name: DYNAMIC_CONFIG_ENABLED
+      value: "true"
+
+  fullnameOverride: kafka-ui
