@@ -226,6 +226,7 @@ users:
     SPRING_DATA_REDIS_SSL: "true"
     SPRING_REDIS_SSL_ENABLED: "true"
     SPRING_REDIS_SSL: "true"
+    SPRING_DATA_REDIS_URL: "rediss://master.goorm-popcorn-cache-prod.mkltth.apn2.cache.amazonaws.com:6379"
     SPRING_DATA_REDIS_CONNECT_TIMEOUT: "5s"
     SPRING_DATA_REDIS_TIMEOUT: "5s"
     SPRING_DATASOURCE_URL: "jdbc:postgresql://goorm-popcorn-prod-postgres.cds4g0gykt3t.ap-northeast-2.rds.amazonaws.com:5432/popcorn_prod?currentSchema=user_auth"
