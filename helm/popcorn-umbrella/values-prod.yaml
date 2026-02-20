@@ -389,6 +389,8 @@ payment:
   env:
     SPRING_PROFILES_ACTIVE: "prod"
     JAVA_OPTS: "-Xms512m -Xmx1024m"
+    SPRINGDOC_API_DOCS_ENABLED: "true"
+    SPRINGDOC_SWAGGER_UI_ENABLED: "true"
     ORDER_SERVICE_URL: "http://popcorn-prod-order:8080"
     GATEWAY_URL: "http://popcorn-prod-gateway:8080"
     PAYMENT_TOKEN_SECRET:
