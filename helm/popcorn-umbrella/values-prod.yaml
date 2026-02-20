@@ -77,7 +77,7 @@ frontend:
 gateway:
   replicaCount: 1
   image:
-    tag: dev-4537917f
+    tag: v1.0.1
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -181,7 +181,7 @@ gateway:
 users:
   replicaCount: 1
   image:
-    tag: dev-4537917f
+    tag: v1.0.1
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -225,7 +225,7 @@ users:
 stores:
   replicaCount: 1
   image:
-    tag: dev-4537917f
+    tag: v1.0.1
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -280,7 +280,7 @@ stores:
 order:
   replicaCount: 1
   image:
-    tag: dev-4537917f
+    tag: v1.0.1
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -335,7 +335,7 @@ payment:
   enabled: true
   replicaCount: 1
   image:
-    tag: dev-4537917f
+    tag: v1.0.1
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
