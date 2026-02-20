@@ -223,6 +223,8 @@ users:
     JAVA_OPTS: "-Xms512m -Xmx1024m"
     JAVA_TOOL_OPTIONS: "-Dspring.data.redis.ssl.enabled=true -Dspring.data.redis.url=rediss://master.goorm-popcorn-cache-prod.mkltth.apn2.cache.amazonaws.com:6379 -Dspring.data.redis.connect-timeout=5s -Dspring.data.redis.timeout=5s"
     APP_GATEWAY_URL: "https://api.goormpopcorn.shop"
+    SPRING_DATA_REDIS_HOST: "master.goorm-popcorn-cache-prod.mkltth.apn2.cache.amazonaws.com"
+    SPRING_DATA_REDIS_PORT: "6379"
     SPRING_DATA_REDIS_SSL_ENABLED: "true"
     SPRING_DATA_REDIS_SSL: "true"
     SPRING_REDIS_SSL_ENABLED: "true"
