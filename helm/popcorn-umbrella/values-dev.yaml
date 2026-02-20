@@ -50,6 +50,13 @@ frontend:
         secretKeyRef:
           name: payment-api-keys
           key: TOSS_PAYMENTS_CLIENT_KEY
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
   ingress:
     enabled: false
 
@@ -68,6 +75,13 @@ gateway:
   env:
     SPRING_PROFILES_ACTIVE: "dev"
     LOGGING_LEVEL_ROOT: "DEBUG"
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
   envFrom:
     - configMapRef:
         name: "{{ .Release.Name }}-gateway-config"
@@ -92,6 +106,10 @@ users:
   env:
     SPRING_PROFILES_ACTIVE: "dev"
     SPRING_JPA_SHOW_SQL: "true"
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
   envFrom:
     - configMapRef:
         name: "{{ .Release.Name }}-users-config"
@@ -110,6 +128,13 @@ stores:
       memory: 256Mi
   env:
     SPRING_PROFILES_ACTIVE: "dev"
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
   envFrom:
     - configMapRef:
         name: "{{ .Release.Name }}-stores-config"
@@ -131,6 +156,13 @@ order:
       memory: 256Mi
   env:
     SPRING_PROFILES_ACTIVE: "dev"
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
   envFrom:
     - configMapRef:
         name: "{{ .Release.Name }}-order-config"
@@ -154,6 +186,13 @@ payment:
       memory: 256Mi
   env:
     SPRING_PROFILES_ACTIVE: "dev"
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
   envFrom:
     - configMapRef:
         name: "{{ .Release.Name }}-payment-config"
@@ -176,6 +215,13 @@ order-query:
       memory: 256Mi
   env:
     SPRING_PROFILES_ACTIVE: "dev"
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
   envFrom:
     - configMapRef:
         name: "{{ .Release.Name }}-order-query-config"
@@ -198,6 +244,13 @@ checkins:
       memory: 256Mi
   env:
     SPRING_PROFILES_ACTIVE: "dev"
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
   envFrom:
     - configMapRef:
         name: "{{ .Release.Name }}-checkins-config"

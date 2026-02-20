@@ -37,6 +37,13 @@ frontend:
     limits:
       cpu: 500m
       memory: 1Gi
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
   healthCheck:
     initialDelaySeconds: 60
   env:
@@ -68,8 +75,7 @@ frontend:
           - path: /
             pathType: Prefix
 gateway:
-  # Rollout 전환 시 기존 Deployment는 보관하되 트래픽 대상에서 제외
-  replicaCount: 0
+  replicaCount: 1
   image:
     tag: dev-4537917f
   tolerations:
@@ -90,7 +96,7 @@ gateway:
     targetCPUUtilizationPercentage: 70
   rollout:
     enabled: true
-    keepDeployment: true
+    keepDeployment: false
     replicas: 1
     canary:
       maxSurge: "25%"
@@ -193,6 +199,8 @@ users:
     maxReplicas: 8
   rollout:
     enabled: true
+    keepDeployment: false
+    replicas: 1
     blueGreen:
       autoPromotionEnabled: false
       scaleDownDelaySeconds: 30
@@ -233,6 +241,13 @@ stores:
     enabled: false
     minReplicas: 2
     maxReplicas: 6
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
   healthCheck:
     initialDelaySeconds: 150
   env:
@@ -281,6 +296,13 @@ order:
     enabled: false
     minReplicas: 3
     maxReplicas: 10
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
   healthCheck:
     initialDelaySeconds: 150
   env:
@@ -329,6 +351,13 @@ payment:
     enabled: false
     minReplicas: 2
     maxReplicas: 5
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
   healthCheck:
     initialDelaySeconds: 360
   env:
@@ -395,6 +424,13 @@ order-query:
     enabled: false
     minReplicas: 2
     maxReplicas: 6
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
   healthCheck:
     initialDelaySeconds: 150
   env:
@@ -490,6 +526,13 @@ checkins:
     enabled: false
     minReplicas: 2
     maxReplicas: 4
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
   healthCheck:
     initialDelaySeconds: 150
   env:

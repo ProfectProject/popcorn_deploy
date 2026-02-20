@@ -53,6 +53,14 @@ autoscaling:
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
 
+rollout:
+  enabled: true
+  keepDeployment: false
+  replicas: 1
+  canary:
+    maxSurge: "25%"
+    maxUnavailable: 0
+
 # Order 서비스 전용 설정
 config:
   paymentTimeout: "30000"

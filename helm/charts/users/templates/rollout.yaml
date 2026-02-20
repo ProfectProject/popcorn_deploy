@@ -9,7 +9,7 @@ metadata:
     {{- include "common.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.rollout.replicas | default .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:

@@ -104,6 +104,8 @@ autoscaling:
 
 rollout:
   enabled: true
+  keepDeployment: false
+  replicas: 1
   blueGreen:
     autoPromotionEnabled: true
     scaleDownDelaySeconds: 30
