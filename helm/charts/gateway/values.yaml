@@ -55,6 +55,14 @@ autoscaling:
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
 
+rollout:
+  enabled: false
+  keepDeployment: false
+  replicas: 1
+  canary:
+    maxSurge: "25%"
+    maxUnavailable: 0
+
 nodeSelector: {}
 
 tolerations: []

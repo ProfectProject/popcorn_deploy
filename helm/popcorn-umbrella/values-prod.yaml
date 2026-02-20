@@ -74,7 +74,8 @@ frontend:
             pathType: Prefix
 
 gateway:
-  replicaCount: 1
+  # Rollout 전환 시 기존 Deployment는 보관하되 트래픽 대상에서 제외
+  replicaCount: 0
   image:
     tag: v1.0.1
   tolerations:
@@ -93,6 +94,13 @@ gateway:
     minReplicas: 3
     maxReplicas: 10
     targetCPUUtilizationPercentage: 70
+  rollout:
+    enabled: true
+    keepDeployment: true
+    replicas: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
   healthCheck:
     initialDelaySeconds: 330
   env:
