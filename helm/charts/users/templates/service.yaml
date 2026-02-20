@@ -1,5 +1,5 @@
 {{- include "common.service" . }}
-{{- if .Values.rollout.enabled }}
+{{- if and .Values.rollout.enabled (eq (default "blueGreen" .Values.rollout.strategy) "blueGreen") }}
 ---
 apiVersion: v1
 kind: Service

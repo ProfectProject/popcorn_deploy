@@ -41,6 +41,11 @@ frontend:
     enabled: true
     keepDeployment: false
     replicas: 1
+    strategy: blueGreen
+    blueGreen:
+      autoPromotionEnabled: true
+      scaleDownDelaySeconds: 30
+      previewReplicaCount: 1
     canary:
       maxSurge: "25%"
       maxUnavailable: 0
@@ -98,6 +103,11 @@ gateway:
     enabled: true
     keepDeployment: false
     replicas: 1
+    strategy: blueGreen
+    blueGreen:
+      autoPromotionEnabled: true
+      scaleDownDelaySeconds: 30
+      previewReplicaCount: 1
     canary:
       maxSurge: "25%"
       maxUnavailable: 0
@@ -201,6 +211,7 @@ users:
     enabled: true
     keepDeployment: false
     replicas: 1
+    strategy: blueGreen
     blueGreen:
       autoPromotionEnabled: false
       scaleDownDelaySeconds: 30
@@ -245,6 +256,11 @@ stores:
     enabled: true
     keepDeployment: false
     replicas: 1
+    strategy: blueGreen
+    blueGreen:
+      autoPromotionEnabled: true
+      scaleDownDelaySeconds: 30
+      previewReplicaCount: 1
     canary:
       maxSurge: "25%"
       maxUnavailable: 0
@@ -300,6 +316,11 @@ order:
     enabled: true
     keepDeployment: false
     replicas: 1
+    strategy: blueGreen
+    blueGreen:
+      autoPromotionEnabled: true
+      scaleDownDelaySeconds: 30
+      previewReplicaCount: 1
     canary:
       maxSurge: "25%"
       maxUnavailable: 0
@@ -355,6 +376,11 @@ payment:
     enabled: true
     keepDeployment: false
     replicas: 1
+    strategy: blueGreen
+    blueGreen:
+      autoPromotionEnabled: true
+      scaleDownDelaySeconds: 30
+      previewReplicaCount: 1
     canary:
       maxSurge: "25%"
       maxUnavailable: 0
@@ -428,6 +454,11 @@ order-query:
     enabled: true
     keepDeployment: false
     replicas: 1
+    strategy: blueGreen
+    blueGreen:
+      autoPromotionEnabled: true
+      scaleDownDelaySeconds: 30
+      previewReplicaCount: 1
     canary:
       maxSurge: "25%"
       maxUnavailable: 0
@@ -530,6 +561,11 @@ checkins:
     enabled: true
     keepDeployment: false
     replicas: 1
+    strategy: blueGreen
+    blueGreen:
+      autoPromotionEnabled: true
+      scaleDownDelaySeconds: 30
+      previewReplicaCount: 1
     canary:
       maxSurge: "25%"
       maxUnavailable: 0

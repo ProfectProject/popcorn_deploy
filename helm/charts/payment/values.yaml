@@ -60,6 +60,11 @@ rollout:
   enabled: true
   keepDeployment: false
   replicas: 1
+  strategy: blueGreen
+  blueGreen:
+    autoPromotionEnabled: true
+    scaleDownDelaySeconds: 30
+    previewReplicaCount: 1
   canary:
     maxSurge: "25%"
     maxUnavailable: 0
