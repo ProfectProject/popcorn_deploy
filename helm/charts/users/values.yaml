@@ -106,6 +106,8 @@ rollout:
   enabled: true
   keepDeployment: false
   replicas: 1
+  strategy: blueGreen
   blueGreen:
     autoPromotionEnabled: true
     scaleDownDelaySeconds: 30
+    previewReplicaCount: 1

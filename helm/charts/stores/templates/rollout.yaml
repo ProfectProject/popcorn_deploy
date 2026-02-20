@@ -105,7 +105,21 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
   strategy:
+    {{- if eq (default "blueGreen" .Values.rollout.strategy) "blueGreen" }}
+    blueGreen:
+      activeService: {{ include "common.fullname" . }}
+      previewService: {{ include "common.fullname" . }}-preview
+      autoPromotionEnabled: {{ .Values.rollout.blueGreen.autoPromotionEnabled | default true }}
+      scaleDownDelaySeconds: {{ .Values.rollout.blueGreen.scaleDownDelaySeconds | default 30 }}
+      {{- if .Values.rollout.blueGreen.autoPromotionSeconds }}
+      autoPromotionSeconds: {{ .Values.rollout.blueGreen.autoPromotionSeconds }}
+      {{- end }}
+      {{- if .Values.rollout.blueGreen.previewReplicaCount }}
+      previewReplicaCount: {{ .Values.rollout.blueGreen.previewReplicaCount }}
+      {{- end }}
+    {{- else }}
     canary:
       maxSurge: {{ .Values.rollout.canary.maxSurge | default "25%" | quote }}
       maxUnavailable: {{ .Values.rollout.canary.maxUnavailable | default 0 | quote }}
+    {{- end }}
 {{- end }}
