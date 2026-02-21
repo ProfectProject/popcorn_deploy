@@ -73,7 +73,7 @@ kafka:
         repository: bitnamilegacy/jmx-exporter
         tag: 1.4.0-debian-12-r0
 
-  config:
+  overrideConfiguration:
     log.retention.hours: 168
     log.retention.bytes: 1073741824
     log.segment.bytes: 1073741824
