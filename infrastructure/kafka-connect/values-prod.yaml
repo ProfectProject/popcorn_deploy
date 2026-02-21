@@ -1,5 +1,5 @@
 image:
-  tag: "2.7"
+  tag: "2.7.3.Final"
 
 kafka:
   bootstrapServers: kafka-prod:9092

@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: debezium/connect
-  tag: "2.7"
+  tag: "2.7.3.Final"
   pullPolicy: IfNotPresent
 
 service:

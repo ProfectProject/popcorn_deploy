@@ -1,5 +1,5 @@
 image:
-  tag: "2.7"
+  tag: "2.7.3.Final"
 
 connect:
   groupId: popcorn-connect-dev
@@ -15,4 +15,3 @@ pod:
     limits:
       cpu: 400m
       memory: 768Mi
-
