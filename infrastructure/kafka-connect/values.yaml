@@ -53,3 +53,52 @@ serviceAccount:
   name: default
 
 securityContext: {}
+
+# Outbox CDC 커넥터를 GitOps로 등록하기 위한 bootstrap Job
+connectorBootstrap:
+  enabled: false
+  # ArgoCD Sync 시 매번 실행하려면 true 유지
+  useArgoHook: true
+  connectUrl: ""
+  waitAttempts: 60
+  waitDelaySeconds: 5
+  backoffLimit: 2
+
+  image:
+    repository: python
+    tag: "3.12-alpine"
+    pullPolicy: IfNotPresent
+
+  # ${VAR_NAME} 치환에 사용할 Secret 이름 목록
+  envFromSecrets: []
+  extraEnv: []
+
+  # 예시
+  # connectors:
+  #   - name: checkins-outbox-connector
+  #     config:
+  #       connector.class: io.debezium.connector.postgresql.PostgresConnector
+  #       database.hostname: ${CHECKINS_DB_HOST}
+  #       database.port: "5432"
+  #       database.user: ${CHECKINS_DB_USER}
+  #       database.password: ${CHECKINS_DB_PASSWORD}
+  #       database.dbname: popcorn_prod
+  #       plugin.name: pgoutput
+  #       slot.name: checkins_outbox_slot
+  #       publication.autocreate.mode: filtered
+  #       schema.include.list: checkins
+  #       table.include.list: checkins.outbox_events
+  #       topic.prefix: popcorn
+  #       transforms: outbox
+  #       transforms.outbox.type: io.debezium.transforms.outbox.EventRouter
+  #       transforms.outbox.table.field.event.id: event_id
+  #       transforms.outbox.table.field.event.key: partition_key
+  #       transforms.outbox.table.field.event.type: event_type
+  #       transforms.outbox.table.field.event.payload: event_data
+  #       transforms.outbox.table.expand.json.payload: "true"
+  #       transforms.outbox.route.by.field: topic
+  #       transforms.outbox.route.topic.replacement: ${routedByValue}
+  #       key.converter: org.apache.kafka.connect.storage.StringConverter
+  #       value.converter: org.apache.kafka.connect.json.JsonConverter
+  #       value.converter.schemas.enable: "false"
+  connectors: []

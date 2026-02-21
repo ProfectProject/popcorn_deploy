@@ -1,71 +1,98 @@
-# Kafka Connect on EKS
+# Kafka Connect on EKS (Helm/GitOps)
 
-`debezium/connect:2.7` 기반 Kafka Connect를 ArgoCD로 배포하는 설정입니다.
+`debezium/connect:2.7.3.Final` 기반 Kafka Connect를 Helm 차트로 운영합니다.
 
-## 배포 방식
+## 운영 기준
 
-1. `Deployment`는 Helm 차트로 렌더링됩니다.
-2. 배포 리소스는 `kafka` 네임스페이스에서 실행됩니다.
-3. 값 오버라이드는 환경별 파일(`values-dev.yaml`, `values-prod.yaml`)로 분리되어 있습니다.
+- Kafka/Connect는 **Helm 차트 + ArgoCD** 기준으로만 관리합니다.
+- 수동 `kubectl patch/set image`는 금지하고, 값 변경은 Git 커밋으로 반영합니다.
+- 현재 기본값:
+  - prod: `replicaCount=1`, `bootstrapServers=kafka-prod:9092`
+  - dev: `replicaCount=0` (불필요 CrashLoop/비용 방지)
 
-## 현재 ArgoCD Application
+## ArgoCD Application
 
-- `applications/dev/kafka-connect.yaml`
-- `applications/prod/kafka-connect.yaml`
+- `/Users/beom/IdeaProjects/popcorn_deploy/applications/prod/kafka-connect.yaml`
+- `/Users/beom/IdeaProjects/popcorn_deploy/applications/dev/kafka-connect.yaml`
 
 적용:
 
 ```bash
-kubectl apply -f applications/dev/kafka-connect.yaml
 kubectl apply -f applications/prod/kafka-connect.yaml
+kubectl apply -f applications/dev/kafka-connect.yaml
 ```
 
-## compose 기반 대비 (EKS 적용 포인트)
+## Outbox CDC 커넥터 GitOps 등록
 
-- `kafka` 서비스는 `kafka-prod:9092`로 변경
-- `host.docker.internal`는 EKS에서 동작하지 않으므로 RDS 엔드포인트 또는 클러스터 내 DB Service DNS로 변경
-- `kafka-connect`는 `kafka-connect` Deployment(Service)로 분리
-- `docker-compose`의 `kafka-connect` 환경변수는 Helm values로 주입해 관리
+차트에 `connectorBootstrap` Job이 추가되어, 커넥터 정의를 values에 두고 Sync 시 REST API로 upsert 할 수 있습니다.
 
-## DB 접속 정보 주입 방법
-
-`debezium` 커넥터에서 사용할 DB 사용자/비밀번호는 Secret으로 넣고 `values.yaml` `pod.extraEnv`로 주입하세요.
-
-예시:
+### 1) Secret 준비 (예시)
 
 ```bash
 kubectl -n kafka create secret generic popcorn-cdc-db-credentials \
-  --from-literal=CHECKINS_DB_USER=qr_app \
-  --from-literal=CHECKINS_DB_PASSWORD=비밀번호 \
-  --from-literal=PAYMENT_DB_USER=payment_app \
-  --from-literal=PAYMENT_DB_PASSWORD=비밀번호
+  --from-literal=CHECKINS_DB_HOST=<rds-endpoint> \
+  --from-literal=CHECKINS_DB_USER=<user> \
+  --from-literal=CHECKINS_DB_PASSWORD=<password> \
+  --from-literal=PAYMENT_DB_HOST=<rds-endpoint> \
+  --from-literal=PAYMENT_DB_USER=<user> \
+  --from-literal=PAYMENT_DB_PASSWORD=<password>
 ```
 
-차트에 아래 항목을 추가해주면 됩니다.
+### 2) `values-prod.yaml`에 커넥터 정의 추가
 
 ```yaml
-pod:
-  extraEnv:
-    - name: CHECKINS_DB_USER
-      valueFrom:
-        secretKeyRef:
-          name: popcorn-cdc-db-credentials
-          key: CHECKINS_DB_USER
+connectorBootstrap:
+  enabled: true
+  envFromSecrets:
+    - popcorn-cdc-db-credentials
+  connectors:
+    - name: checkins-outbox-connector
+      config:
+        connector.class: io.debezium.connector.postgresql.PostgresConnector
+        database.hostname: ${CHECKINS_DB_HOST}
+        database.port: "5432"
+        database.user: ${CHECKINS_DB_USER}
+        database.password: ${CHECKINS_DB_PASSWORD}
+        database.dbname: popcorn_prod
+        plugin.name: pgoutput
+        slot.name: checkins_outbox_slot
+        publication.autocreate.mode: filtered
+        schema.include.list: checkins
+        table.include.list: checkins.outbox_events
+        topic.prefix: popcorn
+        transforms: outbox
+        transforms.outbox.type: io.debezium.transforms.outbox.EventRouter
+        transforms.outbox.table.field.event.id: event_id
+        transforms.outbox.table.field.event.key: partition_key
+        transforms.outbox.table.field.event.type: event_type
+        transforms.outbox.table.field.event.payload: event_data
+        transforms.outbox.table.expand.json.payload: "true"
+        transforms.outbox.route.by.field: topic
+        transforms.outbox.route.topic.replacement: ${routedByValue}
+        key.converter: org.apache.kafka.connect.storage.StringConverter
+        value.converter: org.apache.kafka.connect.json.JsonConverter
+        value.converter.schemas.enable: "false"
 ```
 
-`valueFrom`도 함께 지원됩니다.
-민감정보는 **Secret 참조 방식**으로 관리하는 것을 권장합니다.
-
-## ArgoCD 배포 후 기본 확인
+### 3) Sync 후 확인
 
 ```bash
-kubectl get pods -n kafka -l app.kubernetes.io/component=kafka-connect
-kubectl -n kafka port-forward svc/kafka-connect 18083:8083
+kubectl -n argocd get app popcorn-prod-kafka-connect
+
+CONNECT_SVC=$(kubectl -n kafka get svc -l app.kubernetes.io/component=kafka-connect -o jsonpath='{.items[0].metadata.name}')
+kubectl -n kafka port-forward svc/${CONNECT_SVC} 18083:8083
+
 curl -s http://127.0.0.1:18083/connectors | jq
+curl -s http://127.0.0.1:18083/connectors/checkins-outbox-connector/status | jq
 ```
 
-## 주의
+## 주의사항
 
-- 아직 `Kafka Connect` 커넥터 등록은 API 호출(`POST /connectors`) 단계가 별도입니다.
-- 권한 제한으로 `kafka-connect`가 컨테이너 내부에서 Connector 등록 권한을 갖는지 확인하려면
-  `kubectl -n kafka logs deploy/kafka-connect`로 Connect 기동 로그를 먼저 확인하세요.
+- `host.docker.internal`는 EKS에서 동작하지 않으므로 RDS 엔드포인트를 사용해야 합니다.
+- `connect-configs`, `connect-offsets`, `connect-status` 토픽은 사전에 적절한 replication factor를 유지해야 합니다.
+- 커넥터 등록 실패 시 다음 로그를 먼저 확인하세요:
+
+```bash
+kubectl -n kafka logs deploy/popcorn-prod-kafka-connect-kafka-connect
+kubectl -n kafka logs job/popcorn-prod-kafka-connect-kafka-connect-connector-bootstrap --tail=200
+```

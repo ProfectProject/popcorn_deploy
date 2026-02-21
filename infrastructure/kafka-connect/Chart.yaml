@@ -3,5 +3,4 @@ name: kafka-connect
 description: Debezium Kafka Connect deployment for Popcorn EKS
 type: application
 version: 0.1.0
-appVersion: "2.7.0"
-
+appVersion: "2.7.3"

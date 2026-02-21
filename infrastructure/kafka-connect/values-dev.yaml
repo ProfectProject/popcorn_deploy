@@ -1,5 +1,10 @@
+replicaCount: 0
+
 image:
   tag: "2.7.3.Final"
+
+kafka:
+  bootstrapServers: kafka-prod:9092
 
 connect:
   groupId: popcorn-connect-dev
@@ -15,3 +20,6 @@ pod:
     limits:
       cpu: 400m
       memory: 768Mi
+
+connectorBootstrap:
+  enabled: false

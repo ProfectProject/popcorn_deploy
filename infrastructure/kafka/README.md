@@ -2,6 +2,12 @@
 
 Popcorn Deploy 레포에서 Kafka(KRaft)와 Kafka UI를 설치/운영하는 가이드입니다.
 
+## 운영 원칙
+
+- Kafka 런타임은 **Helm(Bitnami legacy image 기반 KRaft)** 으로만 관리합니다.
+- Strimzi 기반 CR(`kafka.strimzi.io/*`)은 운영 경로에서 제외합니다.
+- 변경은 Git 커밋 -> ArgoCD 동기화 순서로 반영합니다.
+
 ## 디렉터리 구조
 
 ```text
@@ -139,10 +145,11 @@ kubectl exec -it kafka-prod-controller-0 -n kafka -- kafka-topics.sh \
 kubectl get pods -n kafka -l app.kubernetes.io/component=kafka-connect
 ```
 
-- 포트포워드와 커넥터 목록 확인
+- 포트포워드와 커넥터 목록 확인(서비스명 자동 조회)
 
 ```bash
-kubectl -n kafka port-forward svc/kafka-connect 18083:8083
+CONNECT_SVC=$(kubectl -n kafka get svc -l app.kubernetes.io/component=kafka-connect -o jsonpath='{.items[0].metadata.name}')
+kubectl -n kafka port-forward svc/${CONNECT_SVC} 18083:8083
 
 curl -s http://127.0.0.1:18083/connectors | jq
 ```

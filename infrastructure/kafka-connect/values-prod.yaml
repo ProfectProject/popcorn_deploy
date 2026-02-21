@@ -17,3 +17,8 @@ pod:
     limits:
       cpu: 800m
       memory: 1Gi
+
+connectorBootstrap:
+  enabled: false
+  # Secret 예시: popcorn-cdc-db-credentials
+  envFromSecrets: []
