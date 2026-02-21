@@ -33,7 +33,7 @@ controller:
               app.kubernetes.io/name: kafka
           topologyKey: topology.kubernetes.io/zone
 
-config:
+overrideConfiguration:
   # 로그 보관 설정 (7일)
   log.retention.hours: 168
   log.retention.bytes: 10737418240
