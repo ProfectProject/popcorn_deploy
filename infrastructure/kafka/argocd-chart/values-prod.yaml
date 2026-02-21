@@ -11,11 +11,9 @@ kafka-ui:
       alb.ingress.kubernetes.io/target-type: ip
       alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:375896310755:certificate/085e3315-785c-480d-93c2-57f656b60f7b"
       alb.ingress.kubernetes.io/ssl-redirect: "443"
-    hosts:
-      - host: kafka.goormpopcorn.shop
-        paths:
-          - path: /
-            pathType: Prefix
+    host: kafka.goormpopcorn.shop
+    path: /
+    pathType: Prefix
   yamlApplicationConfig:
     kafka:
       clusters:
