@@ -106,11 +106,9 @@ kafka-ui:
     annotations:
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: ip
-    hosts:
-      - host: kafka.goormpopcorn.shop
-        paths:
-          - path: /
-            pathType: Prefix
+    host: kafka.goormpopcorn.shop
+    path: /
+    pathType: Prefix
 
   resources:
     requests:
