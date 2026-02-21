@@ -67,11 +67,14 @@ spec:
               wait_attempts = int(os.environ.get("CONNECT_WAIT_ATTEMPTS", "60"))
               wait_delay = int(os.environ.get("CONNECT_WAIT_DELAY_SECONDS", "5"))
               pattern = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
+              passthrough_vars = {"routedByValue"}
 
               def expand_vars(value):
                   if isinstance(value, str):
                       def replace(match):
                           var_name = match.group(1)
+                          if var_name in passthrough_vars:
+                              return match.group(0)
                           if var_name not in os.environ:
                               raise RuntimeError(f"환경변수 '{var_name}'가 없어 connector config를 치환할 수 없습니다.")
                           return os.environ[var_name]

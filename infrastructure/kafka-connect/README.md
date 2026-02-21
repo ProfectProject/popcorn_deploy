@@ -26,52 +26,29 @@ kubectl apply -f applications/dev/kafka-connect.yaml
 
 차트에 `connectorBootstrap` Job이 추가되어, 커넥터 정의를 values에 두고 Sync 시 REST API로 upsert 할 수 있습니다.
 
-### 1) Secret 준비 (예시)
+### 1) Secret 준비
 
 ```bash
+# 예시: 동일 RDS를 사용하면서 권한 계정을 분리해 주입
 kubectl -n kafka create secret generic popcorn-cdc-db-credentials \
   --from-literal=CHECKINS_DB_HOST=<rds-endpoint> \
-  --from-literal=CHECKINS_DB_USER=<user> \
+  --from-literal=CHECKINS_DB_PORT=5432 \
+  --from-literal=CHECKINS_DB_NAME=popcorn_prod \
+  --from-literal=CHECKINS_DB_USER=<checkins-replication-user> \
   --from-literal=CHECKINS_DB_PASSWORD=<password> \
   --from-literal=PAYMENT_DB_HOST=<rds-endpoint> \
-  --from-literal=PAYMENT_DB_USER=<user> \
-  --from-literal=PAYMENT_DB_PASSWORD=<password>
+  --from-literal=PAYMENT_DB_PORT=5432 \
+  --from-literal=PAYMENT_DB_NAME=popcorn_prod \
+  --from-literal=PAYMENT_DB_USER=<payment-replication-user> \
+  --from-literal=PAYMENT_DB_PASSWORD=<password> \
+  --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 ### 2) `values-prod.yaml`에 커넥터 정의 추가
 
 ```yaml
-connectorBootstrap:
-  enabled: true
-  envFromSecrets:
-    - popcorn-cdc-db-credentials
-  connectors:
-    - name: checkins-outbox-connector
-      config:
-        connector.class: io.debezium.connector.postgresql.PostgresConnector
-        database.hostname: ${CHECKINS_DB_HOST}
-        database.port: "5432"
-        database.user: ${CHECKINS_DB_USER}
-        database.password: ${CHECKINS_DB_PASSWORD}
-        database.dbname: popcorn_prod
-        plugin.name: pgoutput
-        slot.name: checkins_outbox_slot
-        publication.autocreate.mode: filtered
-        schema.include.list: checkins
-        table.include.list: checkins.outbox_events
-        topic.prefix: popcorn
-        transforms: outbox
-        transforms.outbox.type: io.debezium.transforms.outbox.EventRouter
-        transforms.outbox.table.field.event.id: event_id
-        transforms.outbox.table.field.event.key: partition_key
-        transforms.outbox.table.field.event.type: event_type
-        transforms.outbox.table.field.event.payload: event_data
-        transforms.outbox.table.expand.json.payload: "true"
-        transforms.outbox.route.by.field: topic
-        transforms.outbox.route.topic.replacement: ${routedByValue}
-        key.converter: org.apache.kafka.connect.storage.StringConverter
-        value.converter: org.apache.kafka.connect.json.JsonConverter
-        value.converter.schemas.enable: "false"
+# 실제 prod values에는 checkins/payment 2개 커넥터가 기본 정의되어 있습니다.
+# (checkins-outbox-connector, payment-outbox-connector)
 ```
 
 ### 3) Sync 후 확인
