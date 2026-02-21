@@ -1,0 +1,149 @@
+{{- if .Values.connectorBootstrap.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "kafka-connect.fullname" . }}-connector-bootstrap
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "kafka-connect.name" . }}
+    helm.sh/chart: {{ include "kafka-connect.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: kafka-connect
+  {{- if .Values.connectorBootstrap.useArgoHook }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+  {{- end }}
+spec:
+  backoffLimit: {{ .Values.connectorBootstrap.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "kafka-connect.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: kafka-connect
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: connector-bootstrap
+          image: {{ .Values.connectorBootstrap.image.repository }}:{{ .Values.connectorBootstrap.image.tag }}
+          imagePullPolicy: {{ .Values.connectorBootstrap.image.pullPolicy }}
+          env:
+            - name: CONNECT_URL
+              value: {{ default (printf "http://%s:%v" (include "kafka-connect.fullname" .) .Values.service.port) .Values.connectorBootstrap.connectUrl | quote }}
+            - name: CONNECT_WAIT_ATTEMPTS
+              value: {{ .Values.connectorBootstrap.waitAttempts | quote }}
+            - name: CONNECT_WAIT_DELAY_SECONDS
+              value: {{ .Values.connectorBootstrap.waitDelaySeconds | quote }}
+            - name: CONNECTOR_DEFINITIONS_FILE
+              value: /config/connectors.json
+{{- if .Values.connectorBootstrap.extraEnv }}
+{{ toYaml .Values.connectorBootstrap.extraEnv | nindent 12 }}
+{{- end }}
+{{- if .Values.connectorBootstrap.envFromSecrets }}
+          envFrom:
+{{- range .Values.connectorBootstrap.envFromSecrets }}
+            - secretRef:
+                name: {{ . | quote }}
+{{- end }}
+{{- end }}
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - |
+              python - <<'PY'
+              import json
+              import os
+              import re
+              import sys
+              import time
+              import urllib.error
+              import urllib.request
+
+              connect_url = os.environ["CONNECT_URL"].rstrip("/")
+              definitions_file = os.environ.get("CONNECTOR_DEFINITIONS_FILE", "/config/connectors.json")
+              wait_attempts = int(os.environ.get("CONNECT_WAIT_ATTEMPTS", "60"))
+              wait_delay = int(os.environ.get("CONNECT_WAIT_DELAY_SECONDS", "5"))
+              pattern = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
+
+              def expand_vars(value):
+                  if isinstance(value, str):
+                      def replace(match):
+                          var_name = match.group(1)
+                          if var_name not in os.environ:
+                              raise RuntimeError(f"환경변수 '{var_name}'가 없어 connector config를 치환할 수 없습니다.")
+                          return os.environ[var_name]
+                      return pattern.sub(replace, value)
+                  if isinstance(value, list):
+                      return [expand_vars(item) for item in value]
+                  if isinstance(value, dict):
+                      return {k: expand_vars(v) for k, v in value.items()}
+                  return value
+
+              def http_get(url):
+                  req = urllib.request.Request(url, method="GET")
+                  with urllib.request.urlopen(req, timeout=5) as resp:
+                      return resp.getcode(), resp.read().decode("utf-8", errors="ignore")
+
+              def upsert_connector(name, config):
+                  data = json.dumps(config).encode("utf-8")
+                  req = urllib.request.Request(
+                      f"{connect_url}/connectors/{name}/config",
+                      data=data,
+                      method="PUT",
+                      headers={"Content-Type": "application/json"},
+                  )
+                  with urllib.request.urlopen(req, timeout=15) as resp:
+                      return resp.getcode(), resp.read().decode("utf-8", errors="ignore")
+
+              for attempt in range(1, wait_attempts + 1):
+                  try:
+                      code, _ = http_get(f"{connect_url}/connectors")
+                      if code == 200:
+                          print(f"[wait] Kafka Connect ready ({attempt}/{wait_attempts})")
+                          break
+                  except Exception as exc:
+                      print(f"[wait] Kafka Connect not ready ({attempt}/{wait_attempts}): {exc}")
+                  time.sleep(wait_delay)
+              else:
+                  print("ERROR: Kafka Connect 준비 대기 시간이 초과되었습니다.", file=sys.stderr)
+                  sys.exit(1)
+
+              with open(definitions_file, "r", encoding="utf-8") as f:
+                  connectors = json.load(f)
+
+              if not connectors:
+                  print("[bootstrap] 등록할 connector 정의가 없습니다. 종료합니다.")
+                  sys.exit(0)
+
+              for connector in connectors:
+                  name = connector.get("name")
+                  config = connector.get("config", {})
+                  if not name:
+                      print("ERROR: connector 항목에 name이 없습니다.", file=sys.stderr)
+                      sys.exit(1)
+                  try:
+                      expanded_config = expand_vars(config)
+                      code, _ = upsert_connector(name, expanded_config)
+                      print(f"[bootstrap] upsert 완료: {name} (HTTP {code})")
+                  except urllib.error.HTTPError as exc:
+                      body = exc.read().decode("utf-8", errors="ignore")
+                      print(f"ERROR: connector upsert 실패: {name}, HTTP {exc.code}, body={body}", file=sys.stderr)
+                      sys.exit(1)
+                  except Exception as exc:
+                      print(f"ERROR: connector upsert 실패: {name}, err={exc}", file=sys.stderr)
+                      sys.exit(1)
+
+              print("[bootstrap] 모든 connector upsert 완료")
+              PY
+          volumeMounts:
+            - name: connector-definitions
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: connector-definitions
+          configMap:
+            name: {{ include "kafka-connect.fullname" . }}-connector-bootstrap
+{{- end }}
