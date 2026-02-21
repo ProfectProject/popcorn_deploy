@@ -19,6 +19,67 @@ pod:
       memory: 1Gi
 
 connectorBootstrap:
-  enabled: false
-  # Secret 예시: popcorn-cdc-db-credentials
-  envFromSecrets: []
+  enabled: true
+  envFromSecrets:
+    - popcorn-cdc-db-credentials
+  connectors:
+    - name: checkins-outbox-connector
+      config:
+        connector.class: io.debezium.connector.postgresql.PostgresConnector
+        tasks.max: "1"
+        database.hostname: ${CHECKINS_DB_HOST}
+        database.port: ${CHECKINS_DB_PORT}
+        database.user: ${CHECKINS_DB_USER}
+        database.password: ${CHECKINS_DB_PASSWORD}
+        database.dbname: ${CHECKINS_DB_NAME}
+        database.sslmode: require
+        plugin.name: pgoutput
+        slot.name: checkins_outbox_slot
+        publication.name: checkins_outbox_pub
+        publication.autocreate.mode: filtered
+        snapshot.mode: no_data
+        schema.include.list: checkins
+        table.include.list: checkins.outbox_events
+        topic.prefix: popcorn
+        transforms: outbox
+        transforms.outbox.type: io.debezium.transforms.outbox.EventRouter
+        transforms.outbox.table.field.event.id: event_id
+        transforms.outbox.table.field.event.key: partition_key
+        transforms.outbox.table.field.event.type: event_type
+        transforms.outbox.table.field.event.payload: event_data
+        transforms.outbox.table.expand.json.payload: "true"
+        transforms.outbox.route.by.field: topic
+        transforms.outbox.route.topic.replacement: ${routedByValue}
+        key.converter: org.apache.kafka.connect.storage.StringConverter
+        value.converter: org.apache.kafka.connect.json.JsonConverter
+        value.converter.schemas.enable: "false"
+    - name: payment-outbox-connector
+      config:
+        connector.class: io.debezium.connector.postgresql.PostgresConnector
+        tasks.max: "1"
+        database.hostname: ${PAYMENT_DB_HOST}
+        database.port: ${PAYMENT_DB_PORT}
+        database.user: ${PAYMENT_DB_USER}
+        database.password: ${PAYMENT_DB_PASSWORD}
+        database.dbname: ${PAYMENT_DB_NAME}
+        database.sslmode: require
+        plugin.name: pgoutput
+        slot.name: payment_outbox_slot
+        publication.name: payment_outbox_pub
+        publication.autocreate.mode: filtered
+        snapshot.mode: no_data
+        schema.include.list: payment
+        table.include.list: payment.outbox_events
+        topic.prefix: popcorn
+        transforms: outbox
+        transforms.outbox.type: io.debezium.transforms.outbox.EventRouter
+        transforms.outbox.table.field.event.id: event_id
+        transforms.outbox.table.field.event.key: partition_key
+        transforms.outbox.table.field.event.type: event_type
+        transforms.outbox.table.field.event.payload: event_data
+        transforms.outbox.table.expand.json.payload: "true"
+        transforms.outbox.route.by.field: topic
+        transforms.outbox.route.topic.replacement: ${routedByValue}
+        key.converter: org.apache.kafka.connect.storage.StringConverter
+        value.converter: org.apache.kafka.connect.json.JsonConverter
+        value.converter.schemas.enable: "false"
