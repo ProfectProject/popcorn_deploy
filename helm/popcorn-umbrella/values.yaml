@@ -234,3 +234,29 @@ checkins:
     canary:
       maxSurge: "25%"
       maxUnavailable: 0
+
+# Coupon Service
+coupon:
+  enabled: true
+  replicaCount: 1
+  image:
+    tag: latest
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
+    strategy: blueGreen
+    blueGreen:
+      autoPromotionEnabled: true
+      scaleDownDelaySeconds: 30
+      previewReplicaCount: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0

@@ -623,6 +623,87 @@ checkins:
     SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT: "5000"
     SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT: "300000"
     SPRING_DATASOURCE_HIKARI_MAX_LIFETIME: "900000"
+coupon:
+  enabled: true
+  replicaCount: 1
+  image:
+    tag: v1.0.1
+  tolerations:
+    - key: karpenter.sh/spot
+      operator: Exists
+      effect: NoSchedule
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 4
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
+    strategy: blueGreen
+    blueGreen:
+      autoPromotionEnabled: true
+      scaleDownDelaySeconds: 30
+      previewReplicaCount: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
+  healthCheck:
+    initialDelaySeconds: 180
+  env:
+    SPRING_PROFILES_ACTIVE: "prod"
+    SERVER_PORT: "8080"
+    JAVA_OPTS: "-Xms256m -Xmx512m"
+    KAFKA_BOOTSTRAP_SERVERS: "kafka-prod.kafka.svc.cluster.local:9092"
+    USER_SERVICE_BASE_URL: "http://popcorn-prod-gateway:8080"
+    GATEWAY_URL: "https://api.goormpopcorn.shop"
+    SPRING_DATASOURCE_URL: "jdbc:postgresql://goorm-popcorn-prod-postgres.cds4g0gykt3t.ap-northeast-2.rds.amazonaws.com:5432/popcorn_prod?currentSchema=coupons"
+    COUPON_USERNAME:
+      valueFrom:
+        secretKeyRef:
+          name: database-users
+          key: COUPON_DB_USERNAME
+    COUPON_PASSWORD:
+      valueFrom:
+        secretKeyRef:
+          name: database-users
+          key: COUPON_DB_PASSWORD
+    COUPON_FLYWAY_USERNAME:
+      valueFrom:
+        secretKeyRef:
+          name: database-users
+          key: COUPON_FLYWAY_USERNAME
+    COUPON_FLYWAY_PASSWORD:
+      valueFrom:
+        secretKeyRef:
+          name: database-users
+          key: COUPON_FLYWAY_PASSWORD
+    JWT_SECRET:
+      valueFrom:
+        secretKeyRef:
+          name: jwt-secret
+          key: JWT_SECRET
+    PASSPORT_SECRET:
+      valueFrom:
+        secretKeyRef:
+          name: passport-secret
+          key: PASSPORT_SECRET
+    SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+    SPRING_FLYWAY_DEFAULT_SCHEMA: "coupons"
+    SPRING_FLYWAY_SCHEMAS: "coupons"
+    SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: "coupons"
+    SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "2"
+    SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: "0"
+    SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT: "5000"
+    SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT: "300000"
+    SPRING_DATASOURCE_HIKARI_MAX_LIFETIME: "900000"
 orderQuery:
   image:
     tag: v1.0.9
