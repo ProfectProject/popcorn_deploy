@@ -18,80 +18,96 @@ spec:
     metadata:
       labels:
         {{- include "common.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "common.serviceAccountName" . }}
       {{- end }}
+      {{- with .Values.extraInitContainers }}
+      initContainers:
+{{ toYaml . | nindent 8 }}
+      {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
-          {{- if .Values.env }}
-          env:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.port }}
+          protocol: TCP
+        {{- with .Values.extraVolumeMounts }}
+        volumeMounts:
+{{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- if .Values.env }}
+        env:
 {{- range $key, $value := .Values.env }}
-            - name: {{ $key }}
+          - name: {{ $key }}
 {{- if kindIs "map" $value }}
-{{ toYaml $value | nindent 14 }}
+{{ toYaml $value | nindent 12 }}
 {{- else if kindIs "string" $value }}
-              value: {{ tpl $value $ | quote }}
+            value: {{ tpl $value $ | quote }}
 {{- else if kindIs "bool" $value }}
-              value: {{ $value | quote }}
+            value: {{ $value | quote }}
 {{- else if kindIs "int" $value }}
-              value: {{ $value | quote }}
+            value: {{ $value | quote }}
 {{- else if kindIs "float64" $value }}
-              value: {{ $value | quote }}
+            value: {{ $value | quote }}
 {{- else if kindIs "slice" $value }}
-              value: {{ toJson $value | quote }}
+            value: {{ toJson $value | quote }}
 {{- else }}
-              value: {{ $value | quote }}
+            value: {{ $value | quote }}
 {{- end }}
 {{- end }}
-          {{- end }}
-          {{- if .Values.envFrom }}
-          envFrom:
+        {{- end }}
+        {{- if .Values.envFrom }}
+        envFrom:
 {{- range .Values.envFrom }}
 {{- if .configMapRef }}
-            - configMapRef:
-                name: {{ tpl .configMapRef.name $ | quote }}
+          - configMapRef:
+              name: {{ tpl .configMapRef.name $ | quote }}
 {{- if hasKey .configMapRef "optional" }}
-                optional: {{ .configMapRef.optional }}
+              optional: {{ .configMapRef.optional }}
 {{- end }}
 {{- end }}
 {{- if .secretRef }}
-            - secretRef:
-                name: {{ tpl .secretRef.name $ | quote }}
+          - secretRef:
+              name: {{ tpl .secretRef.name $ | quote }}
 {{- if hasKey .secretRef "optional" }}
-                optional: {{ .secretRef.optional }}
+              optional: {{ .secretRef.optional }}
 {{- end }}
 {{- end }}
 {{- end }}
-          {{- end }}
-          {{- if .Values.resources }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          {{- end }}
-          {{- if .Values.healthCheck.enabled }}
-          livenessProbe:
-            httpGet:
-              path: {{ .Values.healthCheck.livenessPath | default .Values.healthCheck.path }}
-              port: http
-            initialDelaySeconds: {{ .Values.healthCheck.initialDelaySeconds }}
-            periodSeconds: {{ .Values.healthCheck.periodSeconds }}
-            timeoutSeconds: {{ .Values.healthCheck.timeoutSeconds | default 5 }}
-            failureThreshold: {{ .Values.healthCheck.failureThreshold | default 3 }}
-          readinessProbe:
-            httpGet:
-              path: {{ .Values.healthCheck.readinessPath | default .Values.healthCheck.path }}
-              port: http
-            initialDelaySeconds: {{ .Values.healthCheck.initialDelaySeconds }}
-            periodSeconds: {{ .Values.healthCheck.periodSeconds }}
-            timeoutSeconds: {{ .Values.healthCheck.timeoutSeconds | default 5 }}
-            failureThreshold: {{ .Values.healthCheck.failureThreshold | default 3 }}
-          {{- end }}
+        {{- end }}
+        {{- if .Values.resources }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        {{- end }}
+        {{- if .Values.healthCheck.enabled }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.healthCheck.livenessPath | default .Values.healthCheck.path }}
+            port: http
+          initialDelaySeconds: {{ .Values.healthCheck.initialDelaySeconds }}
+          periodSeconds: {{ .Values.healthCheck.periodSeconds }}
+          timeoutSeconds: {{ .Values.healthCheck.timeoutSeconds | default 5 }}
+          failureThreshold: {{ .Values.healthCheck.failureThreshold | default 3 }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.healthCheck.readinessPath | default .Values.healthCheck.path }}
+            port: http
+          initialDelaySeconds: {{ .Values.healthCheck.initialDelaySeconds }}
+          periodSeconds: {{ .Values.healthCheck.periodSeconds }}
+          timeoutSeconds: {{ .Values.healthCheck.timeoutSeconds | default 5 }}
+          failureThreshold: {{ .Values.healthCheck.failureThreshold | default 3 }}
+        {{- end }}
+      {{- with .Values.extraVolumes }}
+      volumes:
+{{ toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -105,15 +121,21 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
   strategy:
+    {{- if eq (default "blueGreen" .Values.rollout.strategy) "blueGreen" }}
     blueGreen:
       activeService: {{ include "common.fullname" . }}
       previewService: {{ include "common.fullname" . }}-preview
-      autoPromotionEnabled: {{ .Values.rollout.blueGreen.autoPromotionEnabled }}
-      scaleDownDelaySeconds: {{ .Values.rollout.blueGreen.scaleDownDelaySeconds }}
+      autoPromotionEnabled: {{ .Values.rollout.blueGreen.autoPromotionEnabled | default true }}
+      scaleDownDelaySeconds: {{ .Values.rollout.blueGreen.scaleDownDelaySeconds | default 30 }}
       {{- if .Values.rollout.blueGreen.autoPromotionSeconds }}
       autoPromotionSeconds: {{ .Values.rollout.blueGreen.autoPromotionSeconds }}
       {{- end }}
       {{- if .Values.rollout.blueGreen.previewReplicaCount }}
       previewReplicaCount: {{ .Values.rollout.blueGreen.previewReplicaCount }}
       {{- end }}
+    {{- else }}
+    canary:
+      maxSurge: {{ .Values.rollout.canary.maxSurge | default "25%" | quote }}
+      maxUnavailable: {{ .Values.rollout.canary.maxUnavailable | default 0 | quote }}
+    {{- end }}
 {{- end }}

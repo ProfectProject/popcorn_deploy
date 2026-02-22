@@ -20,6 +20,38 @@ global:
     storeApiBaseUrl: "https://api.goormpopcorn.shop"
     orderQueryApiBaseUrl: "https://api.goormpopcorn.shop"
     paymentApiBaseUrl: "https://api.goormpopcorn.shop"
+
+otelJavaDefaults:
+  extraInitContainers: &otelJavaExtraInitContainers
+    - name: otel-javaagent-init
+      image: curlimages/curl:8.12.1
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+      args:
+        - >
+          set -euo pipefail;
+          curl -fsSL https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.25.0/opentelemetry-javaagent.jar
+          -o /otel-auto-instrumentation/opentelemetry-javaagent.jar
+      volumeMounts:
+        - name: otel-auto-instrumentation
+          mountPath: /otel-auto-instrumentation
+  extraVolumeMounts: &otelJavaExtraVolumeMounts
+    - name: otel-auto-instrumentation
+      mountPath: /otel-auto-instrumentation
+  extraVolumes: &otelJavaExtraVolumes
+    - name: otel-auto-instrumentation
+      emptyDir: {}
+  commonEnv: &otelJavaCommonEnvProd
+    OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector-opentelemetry-collector.monitoring.svc.cluster.local:4318"
+    OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
+    OTEL_TRACES_EXPORTER: "otlp"
+    OTEL_METRICS_EXPORTER: "otlp"
+    OTEL_LOGS_EXPORTER: "none"
+    OTEL_INSTRUMENTATION_LOGBACK_APPENDER_ENABLED: "true"
+    OTEL_METRIC_EXPORT_INTERVAL: "30000"
+    OTEL_RESOURCE_ATTRIBUTES: "service.namespace=popcorn,deployment.environment=prod"
 # 운영 환경 고가용성 설정
 frontend:
   enabled: true
@@ -94,6 +126,9 @@ gateway:
     limits:
       cpu: 500m
       memory: 1Gi
+  extraInitContainers: *otelJavaExtraInitContainers
+  extraVolumeMounts: *otelJavaExtraVolumeMounts
+  extraVolumes: *otelJavaExtraVolumes
   autoscaling:
     enabled: false
     minReplicas: 3
@@ -114,9 +149,12 @@ gateway:
   healthCheck:
     initialDelaySeconds: 330
   env:
+    <<: *otelJavaCommonEnvProd
+    OTEL_SERVICE_NAME: "gateway"
     SPRING_PROFILES_ACTIVE: "prod"
     LOGGING_LEVEL_ROOT: "WARN"
     JAVA_OPTS: "-Xms512m -Xmx1024m"
+    JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
     SPRING_DATA_REDIS_HOST:
       valueFrom:
         secretKeyRef:
@@ -203,6 +241,9 @@ users:
     limits:
       cpu: 500m
       memory: 1Gi
+  extraInitContainers: *otelJavaExtraInitContainers
+  extraVolumeMounts: *otelJavaExtraVolumeMounts
+  extraVolumes: *otelJavaExtraVolumes
   autoscaling:
     enabled: false
     minReplicas: 3
@@ -219,9 +260,11 @@ users:
   healthCheck:
     initialDelaySeconds: 150
   env:
+    <<: *otelJavaCommonEnvProd
+    OTEL_SERVICE_NAME: "users"
     SPRING_PROFILES_ACTIVE: "prod"
     JAVA_OPTS: "-Xms512m -Xmx1024m"
-    JAVA_TOOL_OPTIONS: "-Dspring.data.redis.ssl.enabled=true -Dspring.data.redis.url=rediss://master.goorm-popcorn-cache-prod.mkltth.apn2.cache.amazonaws.com:6379 -Dspring.data.redis.connect-timeout=5s -Dspring.data.redis.timeout=5s"
+    JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar -Dspring.data.redis.ssl.enabled=true -Dspring.data.redis.url=rediss://master.goorm-popcorn-cache-prod.mkltth.apn2.cache.amazonaws.com:6379 -Dspring.data.redis.connect-timeout=5s -Dspring.data.redis.timeout=5s"
     APP_GATEWAY_URL: "https://api.goormpopcorn.shop"
     SPRING_DATA_REDIS_HOST: "master.goorm-popcorn-cache-prod.mkltth.apn2.cache.amazonaws.com"
     SPRING_DATA_REDIS_PORT: "6379"
@@ -258,6 +301,9 @@ stores:
     limits:
       cpu: 500m
       memory: 1Gi
+  extraInitContainers: *otelJavaExtraInitContainers
+  extraVolumeMounts: *otelJavaExtraVolumeMounts
+  extraVolumes: *otelJavaExtraVolumes
   autoscaling:
     enabled: false
     minReplicas: 2
@@ -277,8 +323,11 @@ stores:
   healthCheck:
     initialDelaySeconds: 150
   env:
+    <<: *otelJavaCommonEnvProd
+    OTEL_SERVICE_NAME: "stores"
     SPRING_PROFILES_ACTIVE: "prod"
     JAVA_OPTS: "-Xms512m -Xmx1024m"
+    JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
     SPRING_DATASOURCE_TYPE: "org.springframework.jdbc.datasource.SimpleDriverDataSource"
     JWT_SECRET:
       valueFrom:
@@ -318,6 +367,9 @@ order:
     limits:
       cpu: 500m
       memory: 1Gi
+  extraInitContainers: *otelJavaExtraInitContainers
+  extraVolumeMounts: *otelJavaExtraVolumeMounts
+  extraVolumes: *otelJavaExtraVolumes
   autoscaling:
     enabled: false
     minReplicas: 3
@@ -337,8 +389,11 @@ order:
   healthCheck:
     initialDelaySeconds: 150
   env:
+    <<: *otelJavaCommonEnvProd
+    OTEL_SERVICE_NAME: "order"
     SPRING_PROFILES_ACTIVE: "prod"
     JAVA_OPTS: "-Xms512m -Xmx1024m"
+    JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
     GATEWAY_URL: "http://popcorn-prod-gateway:8080"
     CHECKINS_SERVICE_URL: "http://popcorn-prod-checkins:8080"
     FRONTEND_BASE_URL: "https://goormpopcorn.shop"
@@ -378,6 +433,9 @@ payment:
     limits:
       cpu: 500m
       memory: 1Gi
+  extraInitContainers: *otelJavaExtraInitContainers
+  extraVolumeMounts: *otelJavaExtraVolumeMounts
+  extraVolumes: *otelJavaExtraVolumes
   autoscaling:
     enabled: false
     minReplicas: 2
@@ -397,8 +455,11 @@ payment:
   healthCheck:
     initialDelaySeconds: 360
   env:
+    <<: *otelJavaCommonEnvProd
+    OTEL_SERVICE_NAME: "payment"
     SPRING_PROFILES_ACTIVE: "prod"
     JAVA_OPTS: "-Xms512m -Xmx1024m"
+    JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
     SPRINGDOC_API_DOCS_ENABLED: "true"
     SPRINGDOC_SWAGGER_UI_ENABLED: "true"
     ORDER_SERVICE_URL: "http://popcorn-prod-order:8080"
@@ -458,6 +519,9 @@ order-query:
     limits:
       cpu: 1000m
       memory: 1Gi
+  extraInitContainers: *otelJavaExtraInitContainers
+  extraVolumeMounts: *otelJavaExtraVolumeMounts
+  extraVolumes: *otelJavaExtraVolumes
   autoscaling:
     enabled: false
     minReplicas: 2
@@ -477,8 +541,11 @@ order-query:
   healthCheck:
     initialDelaySeconds: 150
   env:
+    <<: *otelJavaCommonEnvProd
+    OTEL_SERVICE_NAME: "order-query"
     SPRING_PROFILES_ACTIVE: "prod"
     JAVA_OPTS: "-Xms512m -Xmx1024m"
+    JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
     JWT_SECRET:
       valueFrom:
         secretKeyRef:
@@ -565,6 +632,9 @@ checkins:
     limits:
       cpu: 300m
       memory: 512Mi
+  extraInitContainers: *otelJavaExtraInitContainers
+  extraVolumeMounts: *otelJavaExtraVolumeMounts
+  extraVolumes: *otelJavaExtraVolumes
   autoscaling:
     enabled: false
     minReplicas: 2
@@ -584,8 +654,11 @@ checkins:
   healthCheck:
     initialDelaySeconds: 150
   env:
+    <<: *otelJavaCommonEnvProd
+    OTEL_SERVICE_NAME: "checkins"
     SPRING_PROFILES_ACTIVE: "prod"
     JAVA_OPTS: "-Xms256m -Xmx512m"
+    JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
     KAFKA_BOOTSTRAP_SERVERS: "kafka-prod.kafka.svc.cluster.local:9092"
     CHECKINS_KAFKA_CONSUMER_GROUP_ID: "checkins-service-group"
     PASSPORT_SECRET:
@@ -639,6 +712,9 @@ coupon:
     limits:
       cpu: 500m
       memory: 512Mi
+  extraInitContainers: *otelJavaExtraInitContainers
+  extraVolumeMounts: *otelJavaExtraVolumeMounts
+  extraVolumes: *otelJavaExtraVolumes
   autoscaling:
     enabled: false
     minReplicas: 2
@@ -658,9 +734,12 @@ coupon:
   healthCheck:
     initialDelaySeconds: 180
   env:
+    <<: *otelJavaCommonEnvProd
+    OTEL_SERVICE_NAME: "coupon"
     SPRING_PROFILES_ACTIVE: "prod"
     SERVER_PORT: "8080"
     JAVA_OPTS: "-Xms256m -Xmx512m"
+    JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
     KAFKA_BOOTSTRAP_SERVERS: "kafka-prod.kafka.svc.cluster.local:9092"
     USER_SERVICE_BASE_URL: "http://popcorn-prod-gateway:8080"
     GATEWAY_URL: "https://api.goormpopcorn.shop"

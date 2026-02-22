@@ -364,3 +364,88 @@ grafana:
       mode: console
     grafana_net:
       url: https://grafana.net
+
+fluent-bit:
+  kind: DaemonSet
+
+  tolerations:
+    - key: karpenter.sh/spot
+      operator: Exists
+      effect: NoSchedule
+
+  rbac:
+    create: true
+    nodeAccess: true
+    eventsAccess: false
+
+  serviceMonitor:
+    enabled: false
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+  # containerd 기반 EKS 환경을 기준으로 /var/log 수집만 사용
+  daemonSetVolumes:
+    - name: varlog
+      hostPath:
+        path: /var/log
+    - name: etcmachineid
+      hostPath:
+        path: /etc/machine-id
+        type: File
+
+  daemonSetVolumeMounts:
+    - name: varlog
+      mountPath: /var/log
+    - name: etcmachineid
+      mountPath: /etc/machine-id
+      readOnly: true
+
+  config:
+    service: |
+      [SERVICE]
+          Daemon Off
+          Flush {{ .Values.flush }}
+          Log_Level {{ .Values.logLevel }}
+          Parsers_File /fluent-bit/etc/parsers.conf
+          Parsers_File /fluent-bit/etc/conf/custom_parsers.conf
+          HTTP_Server On
+          HTTP_Listen 0.0.0.0
+          HTTP_Port {{ .Values.metricsPort }}
+          Health_Check On
+
+    inputs: |
+      [INPUT]
+          Name tail
+          Path /var/log/containers/*.log
+          Tag kube.*
+          Parser cri
+          multiline.parser docker, cri
+          Mem_Buf_Limit 20MB
+          Skip_Long_Lines On
+          Refresh_Interval 5
+
+    filters: |
+      [FILTER]
+          Name kubernetes
+          Match kube.*
+          Merge_Log On
+          Keep_Log Off
+          K8S-Logging.Parser On
+          K8S-Logging.Exclude On
+
+    outputs: |
+      [OUTPUT]
+          Name loki
+          Match kube.*
+          Host loki.monitoring.svc.cluster.local
+          Port 3100
+          labels job=fluent-bit,namespace=$kubernetes['namespace_name'],pod=$kubernetes['pod_name'],container=$kubernetes['container_name']
+          line_format json
+          auto_kubernetes_labels off
+          retry_limit false

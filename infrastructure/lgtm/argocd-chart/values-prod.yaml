@@ -171,3 +171,12 @@ grafana:
     minReplicas: 1
     maxReplicas: 3
     targetCPUUtilizationPercentage: 70
+
+fluent-bit:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 400m
+      memory: 512Mi
