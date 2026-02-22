@@ -4,7 +4,7 @@ global:
   imageTag: v1.0.1
   observability:
     # 단계형 관측성 롤아웃: logs -> metrics -> traces
-    stage: "metrics"
+    stage: "traces"
   # 실제 RDS 엔드포인트
   database:
     host: goorm-popcorn-prod-postgres.cds4g0gykt3t.ap-northeast-2.rds.amazonaws.com
