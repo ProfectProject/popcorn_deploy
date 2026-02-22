@@ -508,7 +508,7 @@ payment:
 order-query:
   replicaCount: 1
   image:
-    tag: v1.0.1
+    tag: v1.0.15
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
