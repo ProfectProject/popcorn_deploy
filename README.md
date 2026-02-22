@@ -16,6 +16,7 @@ popcorn_deploy/
 │   │   ├── stores/               # Store Service
 │   │   ├── order/                # Order Service
 │   │   ├── payment/              # Payment Service
+│   │   ├── coupon/               # Coupon Service
 │   │   ├── frontend/             # Frontend Service
 │   │   ├── orderQuery/           # Order Query Service
 │   │   └── checkIns/             # CheckIn Service
@@ -55,6 +56,7 @@ popcorn_deploy/
 6. **frontend** - 프론트엔드 서비스 (Next.js)
 7. **orderQuery** - 주문 조회 서비스 (Query, CQRS)
 8. **checkIns** - 체크인 서비스 (QR 코드 포함)
+9. **coupon** - 쿠폰 서비스
 
 ## ECR 이미지 주소
 
@@ -67,6 +69,7 @@ popcorn_deploy/
 {aws_account_id}.dkr.ecr.{region}.amazonaws.com/goorm-popcorn-front
 {aws_account_id}.dkr.ecr.{region}.amazonaws.com/goorm-popcorn-order-query
 {aws_account_id}.dkr.ecr.{region}.amazonaws.com/goorm-popcorn-checkin
+{aws_account_id}.dkr.ecr.{region}.amazonaws.com/goorm-popcorn-coupon
 ```
 
 ## 배포 방법

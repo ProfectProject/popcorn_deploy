@@ -23,8 +23,11 @@ dependencies:
 - name: checkins
   repository: file://../charts/checkins
   version: 1.0.0
+- name: coupon
+  repository: file://../charts/coupon
+  version: 1.0.0
 - name: common
   repository: file://../charts/common
   version: 1.0.0
-digest: sha256:ed019f6aaf9824239631c403431a2f82cee33c16489c39d4939088dea07fc4cf
-generated: "2026-02-19T13:31:35.619166+09:00"
+digest: sha256:b10184c4752395aac8054f34596b097958a7171d9d7a84833f1f9a9503bce107
+generated: "2026-02-22T03:29:02.977452+09:00"

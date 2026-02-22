@@ -1,0 +1,103 @@
+replicaCount: 1
+
+image:
+  repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-coupon
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+serviceAccount:
+  create: true
+
+service:
+  type: ClusterIP
+  port: 8080
+
+env:
+  SPRING_PROFILES_ACTIVE: "default"
+  SERVER_PORT: "8080"
+  JAVA_OPTS: "-Xms256m -Xmx512m"
+  COUPON_USERNAME:
+    valueFrom:
+      secretKeyRef:
+        name: database-users
+        key: COUPON_DB_USERNAME
+  COUPON_PASSWORD:
+    valueFrom:
+      secretKeyRef:
+        name: database-users
+        key: COUPON_DB_PASSWORD
+  COUPON_FLYWAY_USERNAME:
+    valueFrom:
+      secretKeyRef:
+        name: database-users
+        key: COUPON_FLYWAY_USERNAME
+  COUPON_FLYWAY_PASSWORD:
+    valueFrom:
+      secretKeyRef:
+        name: database-users
+        key: COUPON_FLYWAY_PASSWORD
+  JWT_SECRET:
+    valueFrom:
+      secretKeyRef:
+        name: jwt-secret
+        key: JWT_SECRET
+  PASSPORT_SECRET:
+    valueFrom:
+      secretKeyRef:
+        name: passport-secret
+        key: PASSPORT_SECRET
+
+envFrom:
+  - configMapRef:
+      name: "{{ .Release.Name }}-coupon-config"
+      optional: true
+  - secretRef:
+      name: rds-credentials
+      optional: true
+  - secretRef:
+      name: redis-credentials
+      optional: true
+  - secretRef:
+      name: database-users
+      optional: true
+  - secretRef:
+      name: jwt-secret
+      optional: true
+  - secretRef:
+      name: passport-secret
+      optional: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+healthCheck:
+  enabled: true
+  path: /actuator/health
+  livenessPath: /actuator/health/liveness
+  readinessPath: /actuator/health/readiness
+  initialDelaySeconds: 60
+  periodSeconds: 10
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+rollout:
+  enabled: true
+  keepDeployment: false
+  replicas: 1
+  strategy: blueGreen
+  blueGreen:
+    autoPromotionEnabled: true
+    scaleDownDelaySeconds: 30
+    previewReplicaCount: 1
+  canary:
+    maxSurge: "25%"
+    maxUnavailable: 0

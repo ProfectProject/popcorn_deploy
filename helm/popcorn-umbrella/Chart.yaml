@@ -46,6 +46,11 @@ dependencies:
   repository: "file://../charts/checkins"
   condition: checkins.enabled
 
+- name: coupon
+  version: "1.0.0"
+  repository: "file://../charts/coupon"
+  condition: coupon.enabled
+
 - name: common
   version: "1.0.0"
   repository: "file://../charts/common"

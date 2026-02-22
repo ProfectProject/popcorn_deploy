@@ -297,3 +297,38 @@ checkins:
     - secretRef:
         name: "{{ .Release.Name }}-checkins-secret"
         optional: true
+
+coupon:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: 375896310755.dkr.ecr.ap-northeast-2.amazonaws.com/goorm-popcorn-coupon
+    tag: test-113
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  env:
+    SPRING_PROFILES_ACTIVE: "dev"
+    SERVER_PORT: "8080"
+  rollout:
+    enabled: true
+    keepDeployment: false
+    replicas: 1
+    strategy: blueGreen
+    blueGreen:
+      autoPromotionEnabled: true
+      scaleDownDelaySeconds: 30
+      previewReplicaCount: 1
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
+  envFrom:
+    - configMapRef:
+        name: "{{ .Release.Name }}-coupon-config"
+    - secretRef:
+        name: database-users
+        optional: true
