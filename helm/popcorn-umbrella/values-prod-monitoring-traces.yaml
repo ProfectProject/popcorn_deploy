@@ -1,0 +1,4 @@
+global:
+  observability:
+    # metrics 단계 다음: traces 활성화
+    stage: "traces"

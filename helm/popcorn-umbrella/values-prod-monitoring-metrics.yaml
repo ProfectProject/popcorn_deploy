@@ -1,0 +1,4 @@
+global:
+  observability:
+    # logs 단계 다음: metrics 활성화
+    stage: "metrics"

@@ -2,6 +2,9 @@
 global:
   environment: prod
   imageTag: v1.0.1
+  observability:
+    # 단계형 관측성 롤아웃: logs -> metrics -> traces
+    stage: "logs"
   # 실제 RDS 엔드포인트
   database:
     host: goorm-popcorn-prod-postgres.cds4g0gykt3t.ap-northeast-2.rds.amazonaws.com
@@ -44,8 +47,8 @@ otelJavaDefaults:
   commonEnv: &otelJavaCommonEnvProd
     OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector-opentelemetry-collector.monitoring.svc.cluster.local:4318"
     OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
-    OTEL_TRACES_EXPORTER: "otlp"
-    OTEL_METRICS_EXPORTER: "otlp"
+    OTEL_TRACES_EXPORTER: '{{- if eq .Values.global.observability.stage "traces" -}}otlp{{- else -}}none{{- end -}}'
+    OTEL_METRICS_EXPORTER: '{{- if or (eq .Values.global.observability.stage "metrics") (eq .Values.global.observability.stage "traces") -}}otlp{{- else -}}none{{- end -}}'
     OTEL_LOGS_EXPORTER: "none"
     OTEL_INSTRUMENTATION_LOGBACK_APPENDER_ENABLED: "true"
     OTEL_METRIC_EXPORT_INTERVAL: "30000"
