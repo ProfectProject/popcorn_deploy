@@ -88,17 +88,27 @@ spec:
         {{- end }}
         {{- if .Values.healthCheck.enabled }}
         livenessProbe:
+          {{- if eq (default "http" .Values.healthCheck.type) "tcp" }}
+          tcpSocket:
+            port: http
+          {{- else }}
           httpGet:
             path: {{ .Values.healthCheck.livenessPath | default .Values.healthCheck.path }}
             port: http
+          {{- end }}
           initialDelaySeconds: {{ .Values.healthCheck.initialDelaySeconds }}
           periodSeconds: {{ .Values.healthCheck.periodSeconds }}
           timeoutSeconds: {{ .Values.healthCheck.timeoutSeconds | default 5 }}
           failureThreshold: {{ .Values.healthCheck.failureThreshold | default 3 }}
         readinessProbe:
+          {{- if eq (default "http" .Values.healthCheck.type) "tcp" }}
+          tcpSocket:
+            port: http
+          {{- else }}
           httpGet:
             path: {{ .Values.healthCheck.readinessPath | default .Values.healthCheck.path }}
             port: http
+          {{- end }}
           initialDelaySeconds: {{ .Values.healthCheck.initialDelaySeconds }}
           periodSeconds: {{ .Values.healthCheck.periodSeconds }}
           timeoutSeconds: {{ .Values.healthCheck.timeoutSeconds | default 5 }}

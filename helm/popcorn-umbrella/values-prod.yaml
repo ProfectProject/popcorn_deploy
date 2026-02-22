@@ -620,7 +620,7 @@ checkins:
   enabled: true
   replicaCount: 1
   image:
-    tag: v1.0.1
+    tag: v1.0.13
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -652,7 +652,7 @@ checkins:
       maxSurge: "25%"
       maxUnavailable: 0
   healthCheck:
-    initialDelaySeconds: 150
+    initialDelaySeconds: 300
   env:
     <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "checkins"
@@ -732,7 +732,8 @@ coupon:
       maxSurge: "25%"
       maxUnavailable: 0
   healthCheck:
-    initialDelaySeconds: 180
+    type: tcp
+    initialDelaySeconds: 300
   env:
     <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "coupon"
