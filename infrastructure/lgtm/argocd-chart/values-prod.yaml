@@ -370,18 +370,50 @@ grafana:
             ]
           }
 
-  # Grafana Unified Alerting 초안 (기본은 Pause 상태)
+  # Grafana Unified Alerting (운영 활성화)
   alerting:
+    contactpoints.yaml:
+      apiVersion: 1
+      contactPoints:
+        - orgId: 1
+          name: popcorn-slo
+          receivers:
+            - uid: popcorn-slo-email
+              type: email
+              settings:
+                addresses: "ops@goormpopcorn.shop"
+                singleEmail: true
+              disableResolveMessage: false
+
+    policies.yaml:
+      apiVersion: 1
+      policies:
+        - orgId: 1
+          receiver: popcorn-slo
+          group_by:
+            - alertname
+            - job
+            - severity
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 4h
+          routes:
+            - receiver: popcorn-slo
+              object_matchers:
+                - - team
+                  - =
+                  - popcorn-platform
+
     rules.yaml:
       apiVersion: 1
       groups:
         - orgId: 1
-          name: popcorn-slo-draft
+          name: popcorn-slo
           folder: popcorn-slo
           interval: 1m
           rules:
-            - uid: popcorn-slo-5xx-rate
-              title: Popcorn SLO 5xx Rate > 5%
+            - uid: popcorn-gateway-5xx-critical
+              title: Gateway 5xx Rate > 2%
               condition: C
               data:
                 - refId: A
@@ -394,7 +426,67 @@ grafana:
                       type: prometheus
                       uid: mimir
                     editorMode: code
-                    expr: 100 * sum(rate(http_server_request_duration_seconds_count{job=~"popcorn/.*",http_response_status_code=~"5.."}[5m])) / clamp_min(sum(rate(http_server_request_duration_seconds_count{job=~"popcorn/.*"}[5m])), 0.001)
+                    expr: 100 * sum(rate(http_server_request_duration_seconds_count{job="popcorn/gateway",http_response_status_code=~"5.."}[5m])) / clamp_min(sum(rate(http_server_request_duration_seconds_count{job="popcorn/gateway"}[5m])), 0.001)
+                    instant: true
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    range: false
+                    refId: A
+                - refId: C
+                  relativeTimeRange:
+                    from: 0
+                    to: 0
+                  datasourceUid: "-100"
+                  model:
+                    conditions:
+                      - evaluator:
+                          params:
+                            - 2
+                          type: gt
+                        operator:
+                          type: and
+                        query:
+                          params:
+                            - A
+                        reducer:
+                          params: []
+                          type: last
+                        type: query
+                    datasource:
+                      type: __expr__
+                      uid: "-100"
+                    expression: A
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    refId: C
+                    type: threshold
+              for: 10m
+              noDataState: NoData
+              execErrState: Error
+              annotations:
+                summary: "Gateway 5xx 비율 임계치 초과"
+                description: "최근 5분 기준 gateway 5xx 비율이 2%를 초과했습니다."
+              labels:
+                severity: critical
+                team: popcorn-platform
+                category: slo
+                job: popcorn/gateway
+              isPaused: false
+            - uid: popcorn-core-5xx-critical
+              title: Core Services 5xx Rate > 5%
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 300
+                    to: 0
+                  datasourceUid: mimir
+                  model:
+                    datasource:
+                      type: prometheus
+                      uid: mimir
+                    editorMode: code
+                    expr: 100 * sum by (job) (rate(http_server_request_duration_seconds_count{job=~"popcorn/(users|stores|order|order-query|payment|checkins|coupon)",http_response_status_code=~"5.."}[5m])) / clamp_min(sum by (job) (rate(http_server_request_duration_seconds_count{job=~"popcorn/(users|stores|order|order-query|payment|checkins|coupon)"}[5m])), 0.001)
                     instant: true
                     intervalMs: 1000
                     maxDataPoints: 43200
@@ -432,15 +524,15 @@ grafana:
               noDataState: NoData
               execErrState: Error
               annotations:
-                summary: "Popcorn 전체 5xx 에러율이 5% 초과"
-                description: "최근 5분 기준 전체 API의 5xx 비율이 임계치(5%)를 초과했습니다."
+                summary: "Core 서비스 5xx 비율 임계치 초과"
+                description: "최근 5분 기준 core 서비스의 5xx 비율이 5%를 초과했습니다."
               labels:
                 severity: critical
                 team: popcorn-platform
                 category: slo
-              isPaused: true
-            - uid: popcorn-slo-p95-latency
-              title: Popcorn SLO P95 Latency > 1.2s
+              isPaused: false
+            - uid: popcorn-gateway-p95-warning
+              title: Gateway P95 Latency > 0.8s
               condition: C
               data:
                 - refId: A
@@ -453,7 +545,7 @@ grafana:
                       type: prometheus
                       uid: mimir
                     editorMode: code
-                    expr: histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~"popcorn/.*"}[5m])))
+                    expr: histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job="popcorn/gateway"}[5m])))
                     instant: true
                     intervalMs: 1000
                     maxDataPoints: 43200
@@ -468,7 +560,7 @@ grafana:
                     conditions:
                       - evaluator:
                           params:
-                            - 1.2
+                            - 0.8
                           type: gt
                         operator:
                           type: and
@@ -491,15 +583,16 @@ grafana:
               noDataState: NoData
               execErrState: Error
               annotations:
-                summary: "Popcorn 전체 P95 지연이 1.2초 초과"
-                description: "최근 5분 기준 전체 API P95 지연이 임계치(1.2초)를 초과했습니다."
+                summary: "Gateway P95 지연 임계치 초과"
+                description: "최근 5분 기준 gateway P95 지연이 0.8초를 초과했습니다."
               labels:
                 severity: warning
                 team: popcorn-platform
                 category: slo
-              isPaused: true
-            - uid: popcorn-slo-span-drop
-              title: Popcorn Span Ingest Too Low
+                job: popcorn/gateway
+              isPaused: false
+            - uid: popcorn-core-p95-warning
+              title: Core Services P95 Latency > 1.5s
               condition: C
               data:
                 - refId: A
@@ -512,7 +605,7 @@ grafana:
                       type: prometheus
                       uid: mimir
                     editorMode: code
-                    expr: sum(rate(otel_sdk_span_started_total{job=~"popcorn/.*"}[5m]))
+                    expr: histogram_quantile(0.95, sum by (job, le) (rate(http_server_request_duration_seconds_bucket{job=~"popcorn/(users|stores|order|order-query|payment|checkins|coupon)"}[5m])))
                     instant: true
                     intervalMs: 1000
                     maxDataPoints: 43200
@@ -527,7 +620,66 @@ grafana:
                     conditions:
                       - evaluator:
                           params:
-                            - 0.05
+                            - 1.5
+                          type: gt
+                        operator:
+                          type: and
+                        query:
+                          params:
+                            - A
+                        reducer:
+                          params: []
+                          type: last
+                        type: query
+                    datasource:
+                      type: __expr__
+                      uid: "-100"
+                    expression: A
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    refId: C
+                    type: threshold
+              for: 10m
+              noDataState: NoData
+              execErrState: Error
+              annotations:
+                summary: "Core 서비스 P95 지연 임계치 초과"
+                description: "최근 5분 기준 core 서비스 P95 지연이 1.5초를 초과했습니다."
+              labels:
+                severity: warning
+                team: popcorn-platform
+                category: slo
+              isPaused: false
+            - uid: popcorn-trace-coverage-warning
+              title: Trace Coverage Ratio < 0.5
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 300
+                    to: 0
+                  datasourceUid: mimir
+                  model:
+                    datasource:
+                      type: prometheus
+                      uid: mimir
+                    editorMode: code
+                    expr: sum by (job) (rate(otel_sdk_span_started_total{job=~"popcorn/.*"}[5m])) / clamp_min(sum by (job) (rate(http_server_request_duration_seconds_count{job=~"popcorn/.*"}[5m])), 0.001)
+                    instant: true
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    range: false
+                    refId: A
+                - refId: C
+                  relativeTimeRange:
+                    from: 0
+                    to: 0
+                  datasourceUid: "-100"
+                  model:
+                    conditions:
+                      - evaluator:
+                          params:
+                            - 0.5
                           type: lt
                         operator:
                           type: and
@@ -550,13 +702,13 @@ grafana:
               noDataState: NoData
               execErrState: Error
               annotations:
-                summary: "Popcorn Span 유입량 저하"
-                description: "최근 5분 기준 span 시작량(rate)이 임계치보다 낮습니다."
+                summary: "Trace 커버리지 저하"
+                description: "최근 5분 기준 span/request 비율이 0.5 미만으로 떨어졌습니다."
               labels:
                 severity: warning
                 team: popcorn-platform
                 category: observability
-              isPaused: true
+              isPaused: false
 
   autoscaling:
     enabled: false
