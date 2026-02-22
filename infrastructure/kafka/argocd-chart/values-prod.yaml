@@ -1,5 +1,16 @@
 kafka:
   fullnameOverride: kafka-prod
+  controller:
+    # Kafka 컨트롤러 OOM(Exit 137) 방지를 위한 운영 리소스 상향
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 1
+        memory: 2Gi
+    # 컨테이너 제한 메모리 대비 힙 비율을 낮춰 off-heap/OH 버퍼 여유 확보
+    heapOpts: -XX:InitialRAMPercentage=35 -XX:MaxRAMPercentage=50
 
 kafka-ui:
   fullnameOverride: kafka-ui
