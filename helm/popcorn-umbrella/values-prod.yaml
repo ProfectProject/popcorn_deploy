@@ -388,7 +388,7 @@ order:
       maxSurge: "25%"
       maxUnavailable: 0
   healthCheck:
-    initialDelaySeconds: 150
+    initialDelaySeconds: 300
   env:
     !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "order"
