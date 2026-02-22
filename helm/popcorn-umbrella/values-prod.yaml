@@ -20,7 +20,6 @@ global:
     storeApiBaseUrl: "https://api.goormpopcorn.shop"
     orderQueryApiBaseUrl: "https://api.goormpopcorn.shop"
     paymentApiBaseUrl: "https://api.goormpopcorn.shop"
-
 otelJavaDefaults:
   extraInitContainers: &otelJavaExtraInitContainers
     - name: otel-javaagent-init
@@ -31,9 +30,8 @@ otelJavaDefaults:
         - -c
       args:
         - >
-          set -euo pipefail;
-          curl -fsSL https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.25.0/opentelemetry-javaagent.jar
-          -o /otel-auto-instrumentation/opentelemetry-javaagent.jar
+          set -euo pipefail; curl -fsSL https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.25.0/opentelemetry-javaagent.jar -o /otel-auto-instrumentation/opentelemetry-javaagent.jar
+
       volumeMounts:
         - name: otel-auto-instrumentation
           mountPath: /otel-auto-instrumentation
@@ -114,7 +112,7 @@ frontend:
 gateway:
   replicaCount: 1
   image:
-    tag: v1.0.13
+    tag: v1.0.14
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -149,7 +147,7 @@ gateway:
   healthCheck:
     initialDelaySeconds: 330
   env:
-    <<: *otelJavaCommonEnvProd
+    !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "gateway"
     SPRING_PROFILES_ACTIVE: "prod"
     LOGGING_LEVEL_ROOT: "WARN"
@@ -229,7 +227,7 @@ gateway:
 users:
   replicaCount: 1
   image:
-    tag: v1.0.13
+    tag: v1.0.14
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -260,7 +258,7 @@ users:
   healthCheck:
     initialDelaySeconds: 150
   env:
-    <<: *otelJavaCommonEnvProd
+    !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "users"
     SPRING_PROFILES_ACTIVE: "prod"
     JAVA_OPTS: "-Xms512m -Xmx1024m"
@@ -289,7 +287,7 @@ users:
 stores:
   replicaCount: 1
   image:
-    tag: v1.0.13
+    tag: v1.0.14
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -323,7 +321,7 @@ stores:
   healthCheck:
     initialDelaySeconds: 150
   env:
-    <<: *otelJavaCommonEnvProd
+    !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "stores"
     SPRING_PROFILES_ACTIVE: "prod"
     JAVA_OPTS: "-Xms512m -Xmx1024m"
@@ -355,7 +353,7 @@ stores:
 order:
   replicaCount: 1
   image:
-    tag: v1.0.13
+    tag: v1.0.14
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -389,7 +387,7 @@ order:
   healthCheck:
     initialDelaySeconds: 150
   env:
-    <<: *otelJavaCommonEnvProd
+    !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "order"
     SPRING_PROFILES_ACTIVE: "prod"
     JAVA_OPTS: "-Xms512m -Xmx1024m"
@@ -421,7 +419,7 @@ payment:
   enabled: true
   replicaCount: 1
   image:
-    tag: v1.0.13
+    tag: v1.0.14
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -455,7 +453,7 @@ payment:
   healthCheck:
     initialDelaySeconds: 360
   env:
-    <<: *otelJavaCommonEnvProd
+    !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "payment"
     SPRING_PROFILES_ACTIVE: "prod"
     JAVA_OPTS: "-Xms512m -Xmx1024m"
@@ -541,7 +539,7 @@ order-query:
   healthCheck:
     initialDelaySeconds: 150
   env:
-    <<: *otelJavaCommonEnvProd
+    !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "order-query"
     SPRING_PROFILES_ACTIVE: "prod"
     JAVA_OPTS: "-Xms512m -Xmx1024m"
@@ -654,7 +652,7 @@ checkins:
   healthCheck:
     initialDelaySeconds: 300
   env:
-    <<: *otelJavaCommonEnvProd
+    !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "checkins"
     SPRING_PROFILES_ACTIVE: "prod"
     JAVA_OPTS: "-Xms256m -Xmx512m"
@@ -700,7 +698,7 @@ coupon:
   enabled: true
   replicaCount: 1
   image:
-    tag: v1.0.13
+    tag: v1.0.14
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -735,7 +733,7 @@ coupon:
     type: tcp
     initialDelaySeconds: 300
   env:
-    <<: *otelJavaCommonEnvProd
+    !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "coupon"
     SPRING_PROFILES_ACTIVE: "prod"
     SERVER_PORT: "8080"
@@ -786,7 +784,7 @@ coupon:
     SPRING_DATASOURCE_HIKARI_MAX_LIFETIME: "900000"
 orderQuery:
   image:
-    tag: v1.0.13
+    tag: v1.0.14
 checkIns:
   image:
-    tag: v1.0.13
+    tag: v1.0.14
