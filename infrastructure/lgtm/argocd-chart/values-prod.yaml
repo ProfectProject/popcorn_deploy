@@ -161,6 +161,12 @@ grafana:
 
   adminPassword: "CHANGE_ME"
 
+  envValueFrom:
+    DISCORD_WEBHOOK_URL:
+      secretKeyRef:
+        name: grafana-alerting-webhooks
+        key: discord-webhook-url
+
   plugins:
     - grafana-piechart-panel
     - grafana-clock-panel
@@ -374,15 +380,20 @@ grafana:
   alerting:
     contactpoints.yaml:
       apiVersion: 1
+      deleteContactPoints:
+        - orgId: 1
+          uid: popcorn-slo-email
       contactPoints:
         - orgId: 1
           name: popcorn-slo
           receivers:
-            - uid: popcorn-slo-email
-              type: email
+            - uid: popcorn-slo-discord
+              type: discord
               settings:
-                addresses: "ops@goormpopcorn.shop"
-                singleEmail: true
+                url: $DISCORD_WEBHOOK_URL
+                use_discord_username: false
+                message: |
+                  {{ `{{ template "default.message" . }}` }}
               disableResolveMessage: false
 
     policies.yaml:
