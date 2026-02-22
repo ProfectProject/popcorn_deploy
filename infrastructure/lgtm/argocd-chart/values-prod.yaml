@@ -406,6 +406,13 @@ grafana:
 
     rules.yaml:
       apiVersion: 1
+      deleteRules:
+        - orgId: 1
+          uid: popcorn-slo-5xx-rate
+        - orgId: 1
+          uid: popcorn-slo-p95-latency
+        - orgId: 1
+          uid: popcorn-slo-span-drop
       groups:
         - orgId: 1
           name: popcorn-slo
