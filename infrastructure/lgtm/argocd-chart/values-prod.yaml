@@ -1494,7 +1494,7 @@ grafana:
               isPaused: false
         - orgId: 1
           name: popcorn-logs-alerts
-          folder: popcorn-logs
+          folder: popcorn-slo
           interval: 1m
           rules:
             - uid: popcorn-logs-error-spike-warning
