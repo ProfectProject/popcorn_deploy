@@ -513,7 +513,7 @@ payment:
 order-query:
   replicaCount: 1
   image:
-    tag: v1.0.15
+    tag: v1.0.46
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
@@ -626,7 +626,7 @@ checkins:
   enabled: true
   replicaCount: 1
   image:
-    tag: v1.0.26
+    tag: v1.0.46
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
