@@ -175,8 +175,8 @@ grafana:
           rm -rf /var/lib/grafana/dashboards/default/popcorn-metrics-overview.json
           rm -rf /var/lib/grafana/dashboards/default/popcorn-traces-overview.json
       securityContext:
-        runAsUser: 0
-        runAsGroup: 0
+        runAsUser: 472
+        runAsGroup: 472
       volumeMounts:
         - name: storage
           mountPath: /var/lib/grafana
