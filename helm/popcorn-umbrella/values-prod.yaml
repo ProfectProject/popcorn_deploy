@@ -626,7 +626,7 @@ checkins:
   enabled: true
   replicaCount: 1
   image:
-    tag: v1.0.13
+    tag: v1.0.26
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
