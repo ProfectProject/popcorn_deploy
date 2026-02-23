@@ -172,7 +172,7 @@ grafana:
     - grafana-clock-panel
     - grafana-simple-json-datasource
 
-  # 운영 관찰성 대시보드 (SLO 초안)
+  # 운영 관찰성 대시보드 (SLO + Signal별 운영보드)
   dashboards:
     default:
       popcorn-slo-overview:
@@ -371,6 +371,627 @@ grafana:
                 "options": {
                   "legend": { "displayMode": "table", "placement": "bottom" },
                   "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              }
+            ]
+          }
+      popcorn-logs-overview:
+        json: |
+          {
+            "id": null,
+            "uid": "popcorn-logs-overview",
+            "title": "Popcorn Logs Operations",
+            "tags": ["popcorn", "logs", "loki"],
+            "timezone": "browser",
+            "schemaVersion": 39,
+            "version": 1,
+            "refresh": "30s",
+            "time": {
+              "from": "now-6h",
+              "to": "now"
+            },
+            "panels": [
+              {
+                "id": 1,
+                "type": "timeseries",
+                "title": "ERROR Logs per 5m By Service",
+                "datasource": {
+                  "type": "loki",
+                  "uid": "loki"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "sum by (service) (count_over_time({namespace=\\\"popcorn-prod\\\"} | json | level=\\\"ERROR\\\" [5m]))",
+                    "legendFormat": "{{service}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "min": 0
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              },
+              {
+                "id": 2,
+                "type": "timeseries",
+                "title": "WARN Logs per 5m By Service",
+                "datasource": {
+                  "type": "loki",
+                  "uid": "loki"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "sum by (service) (count_over_time({namespace=\\\"popcorn-prod\\\"} | json | level=\\\"WARN\\\" [5m]))",
+                    "legendFormat": "{{service}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "min": 0
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              },
+              {
+                "id": 3,
+                "type": "timeseries",
+                "title": "Sensitive Keyword Hits per 5m By Pod",
+                "datasource": {
+                  "type": "loki",
+                  "uid": "loki"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "sum by (pod) (count_over_time({namespace=\\\"popcorn-prod\\\"} |~ \\\"(?i)(passport.secret|authorization|password|token)\\\" [5m]))",
+                    "legendFormat": "{{pod}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "min": 0
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              },
+              {
+                "id": 4,
+                "type": "timeseries",
+                "title": "4xx/5xx Completion Logs per 5m By Service",
+                "datasource": {
+                  "type": "loki",
+                  "uid": "loki"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "sum by (service) (count_over_time({namespace=\\\"popcorn-prod\\\"} | json | message=~\\\".*Completed (4|5)[0-9][0-9].*\\\" [5m]))",
+                    "legendFormat": "{{service}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "min": 0
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              },
+              {
+                "id": 5,
+                "type": "logs",
+                "title": "Recent ERROR Logs",
+                "datasource": {
+                  "type": "loki",
+                  "uid": "loki"
+                },
+                "gridPos": { "h": 10, "w": 12, "x": 0, "y": 16 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "{namespace=\\\"popcorn-prod\\\"} | json | level=\\\"ERROR\\\""
+                  }
+                ],
+                "options": {
+                  "dedupStrategy": "none",
+                  "enableLogDetails": true,
+                  "prettifyLogMessage": false,
+                  "showCommonLabels": false,
+                  "showLabels": true,
+                  "showTime": true,
+                  "sortOrder": "Descending",
+                  "wrapLogMessage": true
+                }
+              },
+              {
+                "id": 6,
+                "type": "logs",
+                "title": "Potential Secret Leakage Logs",
+                "datasource": {
+                  "type": "loki",
+                  "uid": "loki"
+                },
+                "gridPos": { "h": 10, "w": 12, "x": 12, "y": 16 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "{namespace=\\\"popcorn-prod\\\"} |~ \\\"(?i)(passport.secret|authorization|password|token)\\\""
+                  }
+                ],
+                "options": {
+                  "dedupStrategy": "none",
+                  "enableLogDetails": true,
+                  "prettifyLogMessage": false,
+                  "showCommonLabels": false,
+                  "showLabels": true,
+                  "showTime": true,
+                  "sortOrder": "Descending",
+                  "wrapLogMessage": true
+                }
+              }
+            ]
+          }
+      popcorn-metrics-overview:
+        json: |
+          {
+            "id": null,
+            "uid": "popcorn-metrics-overview",
+            "title": "Popcorn Metrics Operations",
+            "tags": ["popcorn", "metrics", "mimir"],
+            "timezone": "browser",
+            "schemaVersion": 39,
+            "version": 1,
+            "refresh": "30s",
+            "time": {
+              "from": "now-6h",
+              "to": "now"
+            },
+            "panels": [
+              {
+                "id": 1,
+                "type": "timeseries",
+                "title": "RPS By Service (5m)",
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "mimir"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "sum by (job) (rate(http_server_request_duration_seconds_count{job=~\\\"popcorn/.*\\\"}[5m]))",
+                    "legendFormat": "{{job}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "reqps",
+                    "min": 0
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              },
+              {
+                "id": 2,
+                "type": "timeseries",
+                "title": "5xx Error Rate % By Service (5m)",
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "mimir"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "100 * sum by (job) (rate(http_server_request_duration_seconds_count{job=~\\\"popcorn/.*\\\",http_response_status_code=~\\\"5..\\\"}[5m])) / clamp_min(sum by (job) (rate(http_server_request_duration_seconds_count{job=~\\\"popcorn/.*\\\"}[5m])), 0.001)",
+                    "legendFormat": "{{job}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "percent",
+                    "min": 0
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              },
+              {
+                "id": 3,
+                "type": "timeseries",
+                "title": "Server P95 Latency (s) By Service (5m)",
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "mimir"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "histogram_quantile(0.95, sum by (job, le) (rate(http_server_request_duration_seconds_bucket{job=~\\\"popcorn/.*\\\"}[5m])))",
+                    "legendFormat": "{{job}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "s",
+                    "min": 0
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              },
+              {
+                "id": 4,
+                "type": "timeseries",
+                "title": "Outbound HTTP P95 Latency (s) By Service (5m)",
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "mimir"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "histogram_quantile(0.95, sum by (job, le) (rate(http_client_request_duration_seconds_bucket{job=~\\\"popcorn/.*\\\"}[5m])))",
+                    "legendFormat": "{{job}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "s",
+                    "min": 0
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              },
+              {
+                "id": 5,
+                "type": "timeseries",
+                "title": "JVM Heap Usage % By Service",
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "mimir"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "100 * sum by (job) (jvm_memory_used_bytes{job=~\\\"popcorn/.*\\\",jvm_memory_type=\\\"heap\\\"}) / clamp_min(sum by (job) (jvm_memory_limit_bytes{job=~\\\"popcorn/.*\\\",jvm_memory_type=\\\"heap\\\"}), 1)",
+                    "legendFormat": "{{job}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "percent",
+                    "min": 0,
+                    "max": 100
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              },
+              {
+                "id": 6,
+                "type": "timeseries",
+                "title": "DB Connection Used Ratio % By Service",
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "mimir"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "100 * sum by (job) (db_client_connections_usage{job=~\\\"popcorn/.*\\\",state=\\\"used\\\"}) / clamp_min(sum by (job) (db_client_connections_usage{job=~\\\"popcorn/.*\\\"}), 1)",
+                    "legendFormat": "{{job}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "percent",
+                    "min": 0,
+                    "max": 100
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              },
+              {
+                "id": 7,
+                "type": "timeseries",
+                "title": "Kafka Consumer Lag Max By Service",
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "mimir"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "sum by (job) (kafka_consumer_records_lag_max{job=~\\\"popcorn/.*\\\"})",
+                    "legendFormat": "{{job}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "min": 0
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              },
+              {
+                "id": 8,
+                "type": "timeseries",
+                "title": "Outbound HTTP RPS By Service (5m)",
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "mimir"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "sum by (job) (rate(http_client_request_duration_seconds_count{job=~\\\"popcorn/.*\\\"}[5m]))",
+                    "legendFormat": "{{job}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "reqps",
+                    "min": 0
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              }
+            ]
+          }
+      popcorn-traces-overview:
+        json: |
+          {
+            "id": null,
+            "uid": "popcorn-traces-overview",
+            "title": "Popcorn Traces Operations",
+            "tags": ["popcorn", "traces", "tempo", "otel"],
+            "timezone": "browser",
+            "schemaVersion": 39,
+            "version": 1,
+            "refresh": "30s",
+            "time": {
+              "from": "now-6h",
+              "to": "now"
+            },
+            "panels": [
+              {
+                "id": 1,
+                "type": "timeseries",
+                "title": "Started Spans/s By Service (5m)",
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "mimir"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "sum by (job) (rate(otel_sdk_span_started_total{job=~\\\"popcorn/.*\\\"}[5m]))",
+                    "legendFormat": "{{job}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "reqps",
+                    "min": 0
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              },
+              {
+                "id": 2,
+                "type": "timeseries",
+                "title": "Span-to-Request Ratio By Service",
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "mimir"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "sum by (job) (rate(otel_sdk_span_started_total{job=~\\\"popcorn/.*\\\"}[5m])) / clamp_min(sum by (job) (rate(http_server_request_duration_seconds_count{job=~\\\"popcorn/.*\\\"}[5m])), 0.001)",
+                    "legendFormat": "{{job}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "short",
+                    "min": 0
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              },
+              {
+                "id": 3,
+                "type": "timeseries",
+                "title": "OTLP Span Export Success % (5m)",
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "mimir"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "100 * sum by (job) (rate(otlp_exporter_exported_total{job=~\\\"popcorn/.*\\\",type=\\\"span\\\",success=\\\"true\\\"}[5m])) / clamp_min(sum by (job) (rate(otlp_exporter_seen_total{job=~\\\"popcorn/.*\\\",type=\\\"span\\\"}[5m])), 0.001)",
+                    "legendFormat": "{{job}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "percent",
+                    "min": 0,
+                    "max": 100
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              },
+              {
+                "id": 4,
+                "type": "timeseries",
+                "title": "Exported Spans/s By Service (5m)",
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "mimir"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "sum by (job) (rate(otlp_exporter_exported_total{job=~\\\"popcorn/.*\\\",type=\\\"span\\\",success=\\\"true\\\"}[5m]))",
+                    "legendFormat": "{{job}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "reqps",
+                    "min": 0
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              },
+              {
+                "id": 5,
+                "type": "timeseries",
+                "title": "Live Spans By Service",
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "mimir"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "sum by (job) (otel_sdk_span_live{job=~\\\"popcorn/.*\\\"})",
+                    "legendFormat": "{{job}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "short",
+                    "min": 0
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom" },
+                  "tooltip": { "mode": "multi", "sort": "desc" }
+                }
+              },
+              {
+                "id": 6,
+                "type": "stat",
+                "title": "Trace Reporting Services (5m)",
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "mimir"
+                },
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+                "targets": [
+                  {
+                    "refId": "A",
+                    "expr": "count(sum by (job) (rate(otel_sdk_span_started_total{job=~\\\"popcorn/.*\\\"}[5m])) > 0)"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "min": 0,
+                    "thresholds": {
+                      "mode": "absolute",
+                      "steps": [
+                        { "color": "red", "value": null },
+                        { "color": "yellow", "value": 6 },
+                        { "color": "green", "value": 8 }
+                      ]
+                    }
+                  },
+                  "overrides": []
+                },
+                "options": {
+                  "reduceOptions": {
+                    "calcs": ["lastNotNull"],
+                    "fields": "",
+                    "values": false
+                  },
+                  "orientation": "auto",
+                  "colorMode": "value",
+                  "graphMode": "none",
+                  "justifyMode": "auto"
                 }
               }
             ]
