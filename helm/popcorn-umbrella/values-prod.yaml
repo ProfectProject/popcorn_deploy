@@ -58,7 +58,7 @@ frontend:
   enabled: true
   replicaCount: 1
   image:
-    tag: v1.0.11
+    tag: v1.0.12
   tolerations:
     - key: karpenter.sh/spot
       operator: Exists
