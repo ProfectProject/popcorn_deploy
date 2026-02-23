@@ -425,7 +425,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "sum by (service) (count_over_time({namespace=\\\"popcorn-prod\\\"} | json | level=\\\"ERROR\\\" [5m]))",
+                    "expr": "sum by (service) (count_over_time({namespace=\"popcorn-prod\"} | json | level=\"ERROR\" [5m]))",
                     "legendFormat": "{{service}}"
                   }
                 ],
@@ -452,7 +452,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "sum by (service) (count_over_time({namespace=\\\"popcorn-prod\\\"} | json | level=\\\"WARN\\\" [5m]))",
+                    "expr": "sum by (service) (count_over_time({namespace=\"popcorn-prod\"} | json | level=\"WARN\" [5m]))",
                     "legendFormat": "{{service}}"
                   }
                 ],
@@ -479,7 +479,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "sum by (pod) (count_over_time({namespace=\\\"popcorn-prod\\\"} |~ \\\"(?i)(passport.secret|authorization|password|token)\\\" [5m]))",
+                    "expr": "sum by (pod) (count_over_time({namespace=\"popcorn-prod\"} |~ \"(?i)(passport.secret|authorization|password|token)\" [5m]))",
                     "legendFormat": "{{pod}}"
                   }
                 ],
@@ -506,7 +506,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "sum by (service) (count_over_time({namespace=\\\"popcorn-prod\\\"} | json | message=~\\\".*Completed (4|5)[0-9][0-9].*\\\" [5m]))",
+                    "expr": "sum by (service) (count_over_time({namespace=\"popcorn-prod\"} | json | message=~\".*Completed (4|5)[0-9][0-9].*\" [5m]))",
                     "legendFormat": "{{service}}"
                   }
                 ],
@@ -533,7 +533,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "{namespace=\\\"popcorn-prod\\\"} | json | level=\\\"ERROR\\\""
+                    "expr": "{namespace=\"popcorn-prod\"} | json | level=\"ERROR\""
                   }
                 ],
                 "options": {
@@ -559,7 +559,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "{namespace=\\\"popcorn-prod\\\"} |~ \\\"(?i)(passport.secret|authorization|password|token)\\\""
+                    "expr": "{namespace=\"popcorn-prod\"} |~ \"(?i)(passport.secret|authorization|password|token)\""
                   }
                 ],
                 "options": {
@@ -603,7 +603,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "sum by (job) (rate(http_server_request_duration_seconds_count{job=~\\\"popcorn/.*\\\"}[5m]))",
+                    "expr": "sum by (job) (rate(http_server_request_duration_seconds_count{job=~\"popcorn/.*\"}[5m]))",
                     "legendFormat": "{{job}}"
                   }
                 ],
@@ -631,7 +631,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "100 * sum by (job) (rate(http_server_request_duration_seconds_count{job=~\\\"popcorn/.*\\\",http_response_status_code=~\\\"5..\\\"}[5m])) / clamp_min(sum by (job) (rate(http_server_request_duration_seconds_count{job=~\\\"popcorn/.*\\\"}[5m])), 0.001)",
+                    "expr": "100 * sum by (job) (rate(http_server_request_duration_seconds_count{job=~\"popcorn/.*\",http_response_status_code=~\"5..\"}[5m])) / clamp_min(sum by (job) (rate(http_server_request_duration_seconds_count{job=~\"popcorn/.*\"}[5m])), 0.001)",
                     "legendFormat": "{{job}}"
                   }
                 ],
@@ -659,7 +659,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "histogram_quantile(0.95, sum by (job, le) (rate(http_server_request_duration_seconds_bucket{job=~\\\"popcorn/.*\\\"}[5m])))",
+                    "expr": "histogram_quantile(0.95, sum by (job, le) (rate(http_server_request_duration_seconds_bucket{job=~\"popcorn/.*\"}[5m])))",
                     "legendFormat": "{{job}}"
                   }
                 ],
@@ -687,7 +687,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "histogram_quantile(0.95, sum by (job, le) (rate(http_client_request_duration_seconds_bucket{job=~\\\"popcorn/.*\\\"}[5m])))",
+                    "expr": "histogram_quantile(0.95, sum by (job, le) (rate(http_client_request_duration_seconds_bucket{job=~\"popcorn/.*\"}[5m])))",
                     "legendFormat": "{{job}}"
                   }
                 ],
@@ -715,7 +715,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "100 * sum by (job) (jvm_memory_used_bytes{job=~\\\"popcorn/.*\\\",jvm_memory_type=\\\"heap\\\"}) / clamp_min(sum by (job) (jvm_memory_limit_bytes{job=~\\\"popcorn/.*\\\",jvm_memory_type=\\\"heap\\\"}), 1)",
+                    "expr": "100 * sum by (job) (jvm_memory_used_bytes{job=~\"popcorn/.*\",jvm_memory_type=\"heap\"}) / clamp_min(sum by (job) (jvm_memory_limit_bytes{job=~\"popcorn/.*\",jvm_memory_type=\"heap\"}), 1)",
                     "legendFormat": "{{job}}"
                   }
                 ],
@@ -744,7 +744,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "100 * sum by (job) (db_client_connections_usage{job=~\\\"popcorn/.*\\\",state=\\\"used\\\"}) / clamp_min(sum by (job) (db_client_connections_usage{job=~\\\"popcorn/.*\\\"}), 1)",
+                    "expr": "100 * sum by (job) (db_client_connections_usage{job=~\"popcorn/.*\",state=\"used\"}) / clamp_min(sum by (job) (db_client_connections_usage{job=~\"popcorn/.*\"}), 1)",
                     "legendFormat": "{{job}}"
                   }
                 ],
@@ -773,7 +773,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "sum by (job) (kafka_consumer_records_lag_max{job=~\\\"popcorn/.*\\\"})",
+                    "expr": "sum by (job) (kafka_consumer_records_lag_max{job=~\"popcorn/.*\"})",
                     "legendFormat": "{{job}}"
                   }
                 ],
@@ -800,7 +800,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "sum by (job) (rate(http_client_request_duration_seconds_count{job=~\\\"popcorn/.*\\\"}[5m]))",
+                    "expr": "sum by (job) (rate(http_client_request_duration_seconds_count{job=~\"popcorn/.*\"}[5m]))",
                     "legendFormat": "{{job}}"
                   }
                 ],
@@ -846,7 +846,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "sum by (job) (rate(otel_sdk_span_started_total{job=~\\\"popcorn/.*\\\"}[5m]))",
+                    "expr": "sum by (job) (rate(otel_sdk_span_started_total{job=~\"popcorn/.*\"}[5m]))",
                     "legendFormat": "{{job}}"
                   }
                 ],
@@ -874,7 +874,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "sum by (job) (rate(otel_sdk_span_started_total{job=~\\\"popcorn/.*\\\"}[5m])) / clamp_min(sum by (job) (rate(http_server_request_duration_seconds_count{job=~\\\"popcorn/.*\\\"}[5m])), 0.001)",
+                    "expr": "sum by (job) (rate(otel_sdk_span_started_total{job=~\"popcorn/.*\"}[5m])) / clamp_min(sum by (job) (rate(http_server_request_duration_seconds_count{job=~\"popcorn/.*\"}[5m])), 0.001)",
                     "legendFormat": "{{job}}"
                   }
                 ],
@@ -902,7 +902,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "100 * sum by (job) (rate(otlp_exporter_exported_total{job=~\\\"popcorn/.*\\\",type=\\\"span\\\",success=\\\"true\\\"}[5m])) / clamp_min(sum by (job) (rate(otlp_exporter_seen_total{job=~\\\"popcorn/.*\\\",type=\\\"span\\\"}[5m])), 0.001)",
+                    "expr": "100 * sum by (job) (rate(otlp_exporter_exported_total{job=~\"popcorn/.*\",type=\"span\",success=\"true\"}[5m])) / clamp_min(sum by (job) (rate(otlp_exporter_seen_total{job=~\"popcorn/.*\",type=\"span\"}[5m])), 0.001)",
                     "legendFormat": "{{job}}"
                   }
                 ],
@@ -931,7 +931,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "sum by (job) (rate(otlp_exporter_exported_total{job=~\\\"popcorn/.*\\\",type=\\\"span\\\",success=\\\"true\\\"}[5m]))",
+                    "expr": "sum by (job) (rate(otlp_exporter_exported_total{job=~\"popcorn/.*\",type=\"span\",success=\"true\"}[5m]))",
                     "legendFormat": "{{job}}"
                   }
                 ],
@@ -959,7 +959,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "sum by (job) (otel_sdk_span_live{job=~\\\"popcorn/.*\\\"})",
+                    "expr": "sum by (job) (otel_sdk_span_live{job=~\"popcorn/.*\"})",
                     "legendFormat": "{{job}}"
                   }
                 ],
@@ -987,7 +987,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "count(sum by (job) (rate(otel_sdk_span_started_total{job=~\\\"popcorn/.*\\\"}[5m])) > 0)"
+                    "expr": "count(sum by (job) (rate(otel_sdk_span_started_total{job=~\"popcorn/.*\"}[5m])) > 0)"
                   }
                 ],
                 "fieldConfig": {
