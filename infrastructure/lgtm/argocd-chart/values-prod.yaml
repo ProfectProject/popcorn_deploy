@@ -159,6 +159,28 @@ grafana:
       cpu: 300m
       memory: 512Mi
 
+  # PVC 내 stale 경로 정리(추가 대시보드 subPath 마운트 충돌 방지)
+  extraInitContainers:
+    - name: cleanup-dashboard-mount-paths
+      image: docker.io/library/busybox:1.36.1
+      imagePullPolicy: IfNotPresent
+      command:
+        - /bin/sh
+        - -c
+      args:
+        - |
+          set -eu
+          mkdir -p /var/lib/grafana/dashboards/default
+          rm -rf /var/lib/grafana/dashboards/default/popcorn-logs-overview.json
+          rm -rf /var/lib/grafana/dashboards/default/popcorn-metrics-overview.json
+          rm -rf /var/lib/grafana/dashboards/default/popcorn-traces-overview.json
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+      volumeMounts:
+        - name: storage
+          mountPath: /var/lib/grafana
+
   adminPassword: "CHANGE_ME"
 
   envValueFrom:
