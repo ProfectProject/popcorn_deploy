@@ -329,12 +329,12 @@ stores:
     SPRING_PROFILES_ACTIVE: "prod"
     JAVA_OPTS: "-Xms512m -Xmx1024m"
     JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
-    SPRING_DATASOURCE_TYPE: "org.springframework.jdbc.datasource.SimpleDriverDataSource"
     JWT_SECRET:
       valueFrom:
         secretKeyRef:
           name: jwt-secret
           key: JWT_SECRET
+    SPRING_DATASOURCE_TYPE: "org.springframework.jdbc.datasource.SimpleDriverDataSource"
     SPRING_DATASOURCE_URL: "jdbc:postgresql://goorm-popcorn-prod-postgres.cds4g0gykt3t.ap-northeast-2.rds.amazonaws.com:5432/popcorn_prod?currentSchema=store"
     SPRING_DATASOURCE_USERNAME:
       valueFrom:
@@ -395,6 +395,11 @@ order:
     SPRING_PROFILES_ACTIVE: "prod"
     JAVA_OPTS: "-Xms512m -Xmx1024m"
     JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
+    JWT_SECRET:
+      valueFrom:
+        secretKeyRef:
+          name: jwt-secret
+          key: JWT_SECRET
     GATEWAY_URL: "http://popcorn-prod-gateway:8080"
     CHECKINS_SERVICE_URL: "http://popcorn-prod-checkins:8080"
     FRONTEND_BASE_URL: "https://goormpopcorn.shop"
@@ -662,6 +667,11 @@ checkins:
     JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
     KAFKA_BOOTSTRAP_SERVERS: "kafka-prod.kafka.svc.cluster.local:9092"
     CHECKINS_KAFKA_CONSUMER_GROUP_ID: "checkins-service-group"
+    JWT_SECRET:
+      valueFrom:
+        secretKeyRef:
+          name: jwt-secret
+          key: JWT_SECRET
     PASSPORT_SECRET:
       valueFrom:
         secretKeyRef:

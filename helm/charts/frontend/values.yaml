@@ -15,11 +15,14 @@ service:
   port: 3000
 
 env:
-  NEXT_PUBLIC_APP_URL: "http://localhost:3000"
-  NEXT_PUBLIC_API_BASE_URL: "http://localhost:8080"
-  NEXT_PUBLIC_STORE_API_BASE_URL: "http://localhost:8080"
-  NEXT_PUBLIC_ORDERQUERY_API_BASE_URL: "http://localhost:8080"
-  NEXT_PUBLIC_PAYMENT_API_BASE_URL: "http://localhost:8080"
+  NODE_ENV: "production"
+  NEXT_PUBLIC_APP_URL: "https://goormpopcorn.shop"
+  NEXT_PUBLIC_API_BASE_URL: "https://api.goormpopcorn.shop"
+  NEXT_PUBLIC_STORE_API_BASE_URL: "https://api.goormpopcorn.shop"
+  NEXT_PUBLIC_ORDERQUERY_API_BASE_URL: "https://api.goormpopcorn.shop"
+  NEXT_PUBLIC_PAYMENT_API_BASE_URL: "https://api.goormpopcorn.shop"
+  NEXT_PUBLIC_TOSS_SUCCESS_URL: "https://goormpopcorn.shop/payments/success"
+  NEXT_PUBLIC_TOSS_FAIL_URL: "https://goormpopcorn.shop/payments/fail"
   NEXT_PUBLIC_TOSS_CLIENT_KEY:
     valueFrom:
       secretKeyRef:

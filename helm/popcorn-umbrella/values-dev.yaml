@@ -25,6 +25,38 @@ global:
     orderQueryApiBaseUrl: "https://api-dev.goormpopcorn.shop"
     paymentApiBaseUrl: "https://api-dev.goormpopcorn.shop"
 
+otelJavaDefaults:
+  extraInitContainers: &otelJavaExtraInitContainers
+    - name: otel-javaagent-init
+      image: curlimages/curl:8.12.1
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+      args:
+        - >
+          set -euo pipefail;
+          curl -fsSL https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.25.0/opentelemetry-javaagent.jar
+          -o /otel-auto-instrumentation/opentelemetry-javaagent.jar
+      volumeMounts:
+        - name: otel-auto-instrumentation
+          mountPath: /otel-auto-instrumentation
+  extraVolumeMounts: &otelJavaExtraVolumeMounts
+    - name: otel-auto-instrumentation
+      mountPath: /otel-auto-instrumentation
+  extraVolumes: &otelJavaExtraVolumes
+    - name: otel-auto-instrumentation
+      emptyDir: {}
+  commonEnv: &otelJavaCommonEnvDev
+    OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector-opentelemetry-collector.monitoring.svc.cluster.local:4318"
+    OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
+    OTEL_TRACES_EXPORTER: "otlp"
+    OTEL_METRICS_EXPORTER: "otlp"
+    OTEL_LOGS_EXPORTER: "none"
+    OTEL_INSTRUMENTATION_LOGBACK_APPENDER_ENABLED: "true"
+    OTEL_METRIC_EXPORT_INTERVAL: "30000"
+    OTEL_RESOURCE_ATTRIBUTES: "service.namespace=popcorn,deployment.environment=dev"
+
 # 개발 환경 리소스 최소화
 frontend:
   enabled: true
@@ -82,9 +114,15 @@ gateway:
     limits:
       cpu: 200m
       memory: 256Mi
+  extraInitContainers: *otelJavaExtraInitContainers
+  extraVolumeMounts: *otelJavaExtraVolumeMounts
+  extraVolumes: *otelJavaExtraVolumes
   env:
+    <<: *otelJavaCommonEnvDev
+    OTEL_SERVICE_NAME: "gateway"
     SPRING_PROFILES_ACTIVE: "dev"
     LOGGING_LEVEL_ROOT: "DEBUG"
+    JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
   rollout:
     enabled: true
     keepDeployment: false
@@ -118,9 +156,15 @@ users:
     limits:
       cpu: 200m
       memory: 256Mi
+  extraInitContainers: *otelJavaExtraInitContainers
+  extraVolumeMounts: *otelJavaExtraVolumeMounts
+  extraVolumes: *otelJavaExtraVolumes
   env:
+    <<: *otelJavaCommonEnvDev
+    OTEL_SERVICE_NAME: "users"
     SPRING_PROFILES_ACTIVE: "dev"
     SPRING_JPA_SHOW_SQL: "true"
+    JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
   rollout:
     enabled: true
     keepDeployment: false
@@ -141,8 +185,14 @@ stores:
     limits:
       cpu: 200m
       memory: 256Mi
+  extraInitContainers: *otelJavaExtraInitContainers
+  extraVolumeMounts: *otelJavaExtraVolumeMounts
+  extraVolumes: *otelJavaExtraVolumes
   env:
+    <<: *otelJavaCommonEnvDev
+    OTEL_SERVICE_NAME: "stores"
     SPRING_PROFILES_ACTIVE: "dev"
+    JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
   rollout:
     enabled: true
     keepDeployment: false
@@ -174,8 +224,14 @@ order:
     limits:
       cpu: 200m
       memory: 256Mi
+  extraInitContainers: *otelJavaExtraInitContainers
+  extraVolumeMounts: *otelJavaExtraVolumeMounts
+  extraVolumes: *otelJavaExtraVolumes
   env:
+    <<: *otelJavaCommonEnvDev
+    OTEL_SERVICE_NAME: "order"
     SPRING_PROFILES_ACTIVE: "dev"
+    JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
   rollout:
     enabled: true
     keepDeployment: false
@@ -209,8 +265,14 @@ payment:
     limits:
       cpu: 200m
       memory: 256Mi
+  extraInitContainers: *otelJavaExtraInitContainers
+  extraVolumeMounts: *otelJavaExtraVolumeMounts
+  extraVolumes: *otelJavaExtraVolumes
   env:
+    <<: *otelJavaCommonEnvDev
+    OTEL_SERVICE_NAME: "payment"
     SPRING_PROFILES_ACTIVE: "dev"
+    JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
   rollout:
     enabled: true
     keepDeployment: false
@@ -243,8 +305,14 @@ order-query:
     limits:
       cpu: 200m
       memory: 256Mi
+  extraInitContainers: *otelJavaExtraInitContainers
+  extraVolumeMounts: *otelJavaExtraVolumeMounts
+  extraVolumes: *otelJavaExtraVolumes
   env:
+    <<: *otelJavaCommonEnvDev
+    OTEL_SERVICE_NAME: "order-query"
     SPRING_PROFILES_ACTIVE: "dev"
+    JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
   rollout:
     enabled: true
     keepDeployment: false
@@ -277,8 +345,14 @@ checkins:
     limits:
       cpu: 200m
       memory: 256Mi
+  extraInitContainers: *otelJavaExtraInitContainers
+  extraVolumeMounts: *otelJavaExtraVolumeMounts
+  extraVolumes: *otelJavaExtraVolumes
   env:
+    <<: *otelJavaCommonEnvDev
+    OTEL_SERVICE_NAME: "checkins"
     SPRING_PROFILES_ACTIVE: "dev"
+    JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
   rollout:
     enabled: true
     keepDeployment: false
@@ -311,9 +385,15 @@ coupon:
     limits:
       cpu: 200m
       memory: 256Mi
+  extraInitContainers: *otelJavaExtraInitContainers
+  extraVolumeMounts: *otelJavaExtraVolumeMounts
+  extraVolumes: *otelJavaExtraVolumes
   env:
+    <<: *otelJavaCommonEnvDev
+    OTEL_SERVICE_NAME: "coupon"
     SPRING_PROFILES_ACTIVE: "dev"
     SERVER_PORT: "8080"
+    JAVA_TOOL_OPTIONS: "-javaagent:/otel-auto-instrumentation/opentelemetry-javaagent.jar"
   rollout:
     enabled: true
     keepDeployment: false

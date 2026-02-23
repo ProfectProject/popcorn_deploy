@@ -146,3 +146,12 @@ grafana:
   grafana.ini:
     server:
       root_url: "http://localhost:3000"
+
+fluent-bit:
+  resources:
+    requests:
+      cpu: 30m
+      memory: 48Mi
+    limits:
+      cpu: 150m
+      memory: 192Mi

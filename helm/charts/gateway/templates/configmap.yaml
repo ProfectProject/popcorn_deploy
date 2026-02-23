@@ -5,12 +5,12 @@ metadata:
   labels:
     {{- include "common.labels" . | nindent 4 }}
 data:
-  CHECKIN_SERVICE_URL: "http://popcorn-prod-checkins:8080/"
-  COUPON_SERVICE_URL: "http://popcorn-prod-coupon:8080/"
-  BACKEND_SERVICE_URL: "http://popcorn-prod-backend:8080/"
-  USER_SERVICE_URL: "http://popcorn-prod-users:8080/"
-  STORE_SERVICE_URL: "http://popcorn-prod-stores:8080/"
-  ORDER_SERVICE_URL: "http://popcorn-prod-order:8080/"
-  PAYMENT_SERVICE_URL: "http://popcorn-prod-payment:8080/"
-  ORDERQUERY_SERVICE_URL: "http://popcorn-prod-order-query:8080/"
-  GATEWAY_SERVICE_URL: "https://api.goormpopcorn.shop/"
+  CHECKIN_SERVICE_URL: "http://popcorn-prod-checkins:8080"
+  COUPON_SERVICE_URL: "http://popcorn-prod-coupon:8080"
+  BACKEND_SERVICE_URL: "http://popcorn-prod-backend:8080"
+  USER_SERVICE_URL: "http://popcorn-prod-users:8080"
+  STORE_SERVICE_URL: "http://popcorn-prod-stores:8080"
+  ORDER_SERVICE_URL: "http://popcorn-prod-order:8080"
+  PAYMENT_SERVICE_URL: "http://popcorn-prod-payment:8080"
+  ORDERQUERY_SERVICE_URL: "http://popcorn-prod-order-query:8080"
+  GATEWAY_SERVICE_URL: "https://api.goormpopcorn.shop"

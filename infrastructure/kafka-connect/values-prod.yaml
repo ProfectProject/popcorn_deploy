@@ -40,7 +40,7 @@ connectorBootstrap:
         snapshot.mode: no_data
         schema.include.list: checkins
         table.include.list: checkins.outbox_events
-        topic.prefix: popcorn
+        topic.prefix: popcorn-checkins-cdc
         transforms: outbox
         transforms.outbox.type: io.debezium.transforms.outbox.EventRouter
         transforms.outbox.table.field.event.id: event_id
@@ -48,8 +48,8 @@ connectorBootstrap:
         transforms.outbox.table.field.event.type: event_type
         transforms.outbox.table.field.event.payload: event_data
         transforms.outbox.table.expand.json.payload: "true"
-        transforms.outbox.route.by.field: topic
-        transforms.outbox.route.topic.replacement: ${routedByValue}
+        transforms.outbox.route.by.field: aggregate_type
+        transforms.outbox.route.topic.replacement: checkin-events
         key.converter: org.apache.kafka.connect.storage.StringConverter
         value.converter: org.apache.kafka.connect.json.JsonConverter
         value.converter.schemas.enable: "false"
@@ -70,7 +70,7 @@ connectorBootstrap:
         snapshot.mode: no_data
         schema.include.list: payment
         table.include.list: payment.outbox_events
-        topic.prefix: popcorn
+        topic.prefix: popcorn-payment-cdc
         transforms: outbox
         transforms.outbox.type: io.debezium.transforms.outbox.EventRouter
         transforms.outbox.table.field.event.id: event_id
@@ -78,8 +78,8 @@ connectorBootstrap:
         transforms.outbox.table.field.event.type: event_type
         transforms.outbox.table.field.event.payload: event_data
         transforms.outbox.table.expand.json.payload: "true"
-        transforms.outbox.route.by.field: topic
-        transforms.outbox.route.topic.replacement: ${routedByValue}
+        transforms.outbox.route.by.field: aggregate_type
+        transforms.outbox.route.topic.replacement: payment-events
         key.converter: org.apache.kafka.connect.storage.StringConverter
         value.converter: org.apache.kafka.connect.json.JsonConverter
         value.converter.schemas.enable: "false"

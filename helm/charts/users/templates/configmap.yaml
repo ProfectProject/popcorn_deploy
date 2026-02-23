@@ -10,4 +10,4 @@ data:
   DB_NAME: "popcorn_prod"
   REDIS_HOST: "master.goorm-popcorn-cache-prod.mkltth.apn2.cache.amazonaws.com"
   REDIS_PORT: "6379"
-  GATEWAY_SERVICE_URL: "https://dev.goormpopcorn.shop"
+  GATEWAY_SERVICE_URL: "https://api.goormpopcorn.shop"

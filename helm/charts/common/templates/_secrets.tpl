@@ -54,22 +54,22 @@ Redis 자격증명 환경변수
 JWT 시크릿 환경변수
 */}}
 {{- define "common.env.jwt" -}}
-- name: JWT_SECRET_KEY
+- name: JWT_SECRET
   valueFrom:
     secretKeyRef:
       name: jwt-secret
-      key: secret-key
+      key: JWT_SECRET
 {{- end -}}
 
 {{/*
 Passport 시크릿 환경변수
 */}}
 {{- define "common.env.passport" -}}
-- name: PASSPORT_SECRET_KEY
+- name: PASSPORT_SECRET
   valueFrom:
     secretKeyRef:
       name: passport-secret
-      key: secret-key
+      key: PASSPORT_SECRET
 {{- end -}}
 
 {{/*
