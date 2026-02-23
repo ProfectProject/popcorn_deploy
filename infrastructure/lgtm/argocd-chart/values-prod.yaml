@@ -1183,6 +1183,12 @@ grafana:
           uid: popcorn-slo-p95-latency
         - orgId: 1
           uid: popcorn-slo-span-drop
+        - orgId: 1
+          uid: popcorn-logs-error-spike-warning
+        - orgId: 1
+          uid: popcorn-logs-http5xx-spike-warning
+        - orgId: 1
+          uid: popcorn-logs-sensitive-keyword-critical
       groups:
         - orgId: 1
           name: popcorn-slo
@@ -1485,6 +1491,188 @@ grafana:
                 severity: warning
                 team: popcorn-platform
                 category: observability
+              isPaused: false
+        - orgId: 1
+          name: popcorn-logs-alerts
+          folder: popcorn-logs
+          interval: 1m
+          rules:
+            - uid: popcorn-logs-error-spike-warning
+              title: Popcorn ERROR Logs Spike > 50/5m
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 300
+                    to: 0
+                  datasourceUid: loki
+                  model:
+                    datasource:
+                      type: loki
+                      uid: loki
+                    editorMode: code
+                    expr: sum(count_over_time({namespace="popcorn-prod"} | json | level="ERROR" [5m]))
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    queryType: instant
+                    refId: A
+                - refId: C
+                  relativeTimeRange:
+                    from: 0
+                    to: 0
+                  datasourceUid: "-100"
+                  model:
+                    conditions:
+                      - evaluator:
+                          params:
+                            - 50
+                          type: gt
+                        operator:
+                          type: and
+                        query:
+                          params:
+                            - A
+                        reducer:
+                          params: []
+                          type: last
+                        type: query
+                    datasource:
+                      type: __expr__
+                      uid: "-100"
+                    expression: A
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    refId: C
+                    type: threshold
+              for: 10m
+              noDataState: OK
+              execErrState: Error
+              annotations:
+                summary: "애플리케이션 ERROR 로그 급증"
+                description: "최근 5분간 ERROR 로그가 50건을 초과했고 10분 이상 지속되었습니다."
+              labels:
+                severity: warning
+                team: popcorn-platform
+                category: logs
+                namespace: popcorn-prod
+              isPaused: false
+            - uid: popcorn-logs-http5xx-spike-warning
+              title: Popcorn 5xx Completion Logs Spike > 20/5m
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 300
+                    to: 0
+                  datasourceUid: loki
+                  model:
+                    datasource:
+                      type: loki
+                      uid: loki
+                    editorMode: code
+                    expr: sum(count_over_time({namespace="popcorn-prod"} | json | message=~".*Completed 5[0-9][0-9].*" [5m]))
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    queryType: instant
+                    refId: A
+                - refId: C
+                  relativeTimeRange:
+                    from: 0
+                    to: 0
+                  datasourceUid: "-100"
+                  model:
+                    conditions:
+                      - evaluator:
+                          params:
+                            - 20
+                          type: gt
+                        operator:
+                          type: and
+                        query:
+                          params:
+                            - A
+                        reducer:
+                          params: []
+                          type: last
+                        type: query
+                    datasource:
+                      type: __expr__
+                      uid: "-100"
+                    expression: A
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    refId: C
+                    type: threshold
+              for: 5m
+              noDataState: OK
+              execErrState: Error
+              annotations:
+                summary: "5xx 완료 로그 급증"
+                description: "최근 5분간 'Completed 5xx' 로그가 20건을 초과했고 5분 이상 지속되었습니다."
+              labels:
+                severity: warning
+                team: popcorn-platform
+                category: logs
+                namespace: popcorn-prod
+              isPaused: false
+            - uid: popcorn-logs-sensitive-keyword-critical
+              title: Sensitive Keyword Detected In Logs
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 300
+                    to: 0
+                  datasourceUid: loki
+                  model:
+                    datasource:
+                      type: loki
+                      uid: loki
+                    editorMode: code
+                    expr: sum(count_over_time({namespace="popcorn-prod"} |~ "(?i)(passport.secret|authorization|password|token)" [5m]))
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    queryType: instant
+                    refId: A
+                - refId: C
+                  relativeTimeRange:
+                    from: 0
+                    to: 0
+                  datasourceUid: "-100"
+                  model:
+                    conditions:
+                      - evaluator:
+                          params:
+                            - 0
+                          type: gt
+                        operator:
+                          type: and
+                        query:
+                          params:
+                            - A
+                        reducer:
+                          params: []
+                          type: last
+                        type: query
+                    datasource:
+                      type: __expr__
+                      uid: "-100"
+                    expression: A
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    refId: C
+                    type: threshold
+              for: 1m
+              noDataState: OK
+              execErrState: Error
+              annotations:
+                summary: "민감 키워드 로그 감지"
+                description: "최근 5분 로그에서 민감 키워드(passport.secret/authorization/password/token)가 감지되었습니다."
+              labels:
+                severity: critical
+                team: popcorn-platform
+                category: security
+                namespace: popcorn-prod
               isPaused: false
 
   autoscaling:
