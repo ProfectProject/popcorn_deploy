@@ -1183,12 +1183,6 @@ grafana:
           uid: popcorn-slo-p95-latency
         - orgId: 1
           uid: popcorn-slo-span-drop
-        - orgId: 1
-          uid: popcorn-logs-error-spike-warning
-        - orgId: 1
-          uid: popcorn-logs-http5xx-spike-warning
-        - orgId: 1
-          uid: popcorn-logs-sensitive-keyword-critical
       groups:
         - orgId: 1
           name: popcorn-slo
