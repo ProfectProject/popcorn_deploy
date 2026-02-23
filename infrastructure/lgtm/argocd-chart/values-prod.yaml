@@ -54,6 +54,7 @@ tempo:
 
   tempo:
     retention: 168h
+    memBallastSizeMbs: 256
 
     resources:
       requests:
