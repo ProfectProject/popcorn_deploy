@@ -412,6 +412,122 @@ grafana:
               "from": "now-6h",
               "to": "now"
             },
+            "templating": {
+              "list": [
+                {
+                  "name": "namespace",
+                  "label": "namespace",
+                  "type": "query",
+                  "datasource": {
+                    "type": "loki",
+                    "uid": "loki"
+                  },
+                  "query": "label_values(namespace)",
+                  "refresh": 2,
+                  "multi": true,
+                  "includeAll": true,
+                  "allValue": ".*",
+                  "current": {
+                    "selected": false,
+                    "text": "popcorn-prod",
+                    "value": "popcorn-prod"
+                  }
+                },
+                {
+                  "name": "service_name",
+                  "label": "service",
+                  "type": "query",
+                  "datasource": {
+                    "type": "loki",
+                    "uid": "loki"
+                  },
+                  "query": "label_values({namespace=~\"$namespace\"}, service_name)",
+                  "refresh": 2,
+                  "multi": true,
+                  "includeAll": true,
+                  "allValue": ".*",
+                  "current": {
+                    "selected": true,
+                    "text": "All",
+                    "value": "$__all"
+                  }
+                },
+                {
+                  "name": "pod",
+                  "label": "pod",
+                  "type": "query",
+                  "datasource": {
+                    "type": "loki",
+                    "uid": "loki"
+                  },
+                  "query": "label_values({namespace=~\"$namespace\",service_name=~\"$service_name\"}, pod)",
+                  "refresh": 2,
+                  "multi": true,
+                  "includeAll": true,
+                  "allValue": ".*",
+                  "current": {
+                    "selected": true,
+                    "text": "All",
+                    "value": "$__all"
+                  }
+                },
+                {
+                  "name": "container",
+                  "label": "container",
+                  "type": "query",
+                  "datasource": {
+                    "type": "loki",
+                    "uid": "loki"
+                  },
+                  "query": "label_values({namespace=~\"$namespace\",pod=~\"$pod\"}, container)",
+                  "refresh": 2,
+                  "multi": true,
+                  "includeAll": true,
+                  "allValue": ".*",
+                  "current": {
+                    "selected": true,
+                    "text": "All",
+                    "value": "$__all"
+                  }
+                },
+                {
+                  "name": "level",
+                  "label": "level",
+                  "type": "custom",
+                  "query": "ERROR,WARN,INFO,DEBUG,TRACE",
+                  "multi": false,
+                  "includeAll": true,
+                  "allValue": ".*",
+                  "current": {
+                    "selected": true,
+                    "text": "All",
+                    "value": "$__all"
+                  }
+                },
+                {
+                  "name": "search",
+                  "label": "search",
+                  "type": "textbox",
+                  "query": "",
+                  "current": {
+                    "selected": false,
+                    "text": "",
+                    "value": ""
+                  }
+                },
+                {
+                  "name": "trace_id",
+                  "label": "traceId(regex)",
+                  "type": "textbox",
+                  "query": ".*",
+                  "current": {
+                    "selected": false,
+                    "text": ".*",
+                    "value": ".*"
+                  }
+                }
+              ]
+            },
             "panels": [
               {
                 "id": 1,
@@ -425,8 +541,8 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "sum by (service) (count_over_time({namespace=\"popcorn-prod\"} | json | level=\"ERROR\" [5m]))",
-                    "legendFormat": "{{service}}"
+                    "expr": "sum by (service_name) (count_over_time({namespace=~\"$namespace\",service_name=~\"$service_name\",pod=~\"$pod\",container=~\"$container\"} | json | level=\"ERROR\" |= \"$search\" [5m]))",
+                    "legendFormat": "{{service_name}}"
                   }
                 ],
                 "fieldConfig": {
@@ -452,8 +568,8 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "sum by (service) (count_over_time({namespace=\"popcorn-prod\"} | json | level=\"WARN\" [5m]))",
-                    "legendFormat": "{{service}}"
+                    "expr": "sum by (service_name) (count_over_time({namespace=~\"$namespace\",service_name=~\"$service_name\",pod=~\"$pod\",container=~\"$container\"} | json | level=\"WARN\" |= \"$search\" [5m]))",
+                    "legendFormat": "{{service_name}}"
                   }
                 ],
                 "fieldConfig": {
@@ -479,7 +595,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "sum by (pod) (count_over_time({namespace=\"popcorn-prod\"} |~ \"(?i)(passport.secret|authorization|password|token)\" [5m]))",
+                    "expr": "sum by (pod) (count_over_time({namespace=~\"$namespace\",service_name=~\"$service_name\",pod=~\"$pod\",container=~\"$container\"} |~ \"(?i)(passport.secret|authorization|password|token)\" [5m]))",
                     "legendFormat": "{{pod}}"
                   }
                 ],
@@ -506,8 +622,8 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "sum by (service) (count_over_time({namespace=\"popcorn-prod\"} | json | message=~\".*Completed (4|5)[0-9][0-9].*\" [5m]))",
-                    "legendFormat": "{{service}}"
+                    "expr": "sum by (service_name) (count_over_time({namespace=~\"$namespace\",service_name=~\"$service_name\",pod=~\"$pod\",container=~\"$container\"} | json | message=~\".*Completed (4|5)[0-9][0-9].*\" |= \"$search\" [5m]))",
+                    "legendFormat": "{{service_name}}"
                   }
                 ],
                 "fieldConfig": {
@@ -524,7 +640,7 @@ grafana:
               {
                 "id": 5,
                 "type": "logs",
-                "title": "Recent ERROR Logs",
+                "title": "Recent Logs (Variable Filtered)",
                 "datasource": {
                   "type": "loki",
                   "uid": "loki"
@@ -533,7 +649,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "{namespace=\"popcorn-prod\"} | json | level=\"ERROR\""
+                    "expr": "{namespace=~\"$namespace\",service_name=~\"$service_name\",pod=~\"$pod\",container=~\"$container\"} |= \"$search\""
                   }
                 ],
                 "options": {
@@ -550,7 +666,7 @@ grafana:
               {
                 "id": 6,
                 "type": "logs",
-                "title": "Potential Secret Leakage Logs",
+                "title": "Trace Correlation Logs",
                 "datasource": {
                   "type": "loki",
                   "uid": "loki"
@@ -559,7 +675,7 @@ grafana:
                 "targets": [
                   {
                     "refId": "A",
-                    "expr": "{namespace=\"popcorn-prod\"} |~ \"(?i)(passport.secret|authorization|password|token)\""
+                    "expr": "{namespace=~\"$namespace\",service_name=~\"$service_name\",pod=~\"$pod\",container=~\"$container\"} | json | level=~\"$level\" | traceId=~\"$trace_id\" |= \"$search\""
                   }
                 ],
                 "options": {
