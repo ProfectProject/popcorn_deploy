@@ -83,7 +83,10 @@ frontend:
       maxSurge: "25%"
       maxUnavailable: 0
   healthCheck:
-    initialDelaySeconds: 60
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 6
   env:
     NEXT_PUBLIC_APP_URL: "{{ .Values.global.frontend.appUrl }}"
     NEXT_PUBLIC_API_BASE_URL: "{{ .Values.global.frontend.apiBaseUrl }}"
@@ -148,7 +151,10 @@ gateway:
       maxSurge: "25%"
       maxUnavailable: 0
   healthCheck:
-    initialDelaySeconds: 330
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 6
   env:
     !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "gateway"
@@ -259,7 +265,10 @@ users:
       scaleDownDelaySeconds: 30
       previewReplicaCount: 1
   healthCheck:
-    initialDelaySeconds: 150
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 6
   env:
     !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "users"
@@ -322,7 +331,10 @@ stores:
       maxSurge: "25%"
       maxUnavailable: 0
   healthCheck:
-    initialDelaySeconds: 150
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 6
   env:
     !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "stores"
@@ -388,7 +400,10 @@ order:
       maxSurge: "25%"
       maxUnavailable: 0
   healthCheck:
-    initialDelaySeconds: 300
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 6
   env:
     !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "order"
@@ -459,7 +474,10 @@ payment:
       maxSurge: "25%"
       maxUnavailable: 0
   healthCheck:
-    initialDelaySeconds: 360
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 6
   env:
     !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "payment"
@@ -545,7 +563,10 @@ order-query:
       maxSurge: "25%"
       maxUnavailable: 0
   healthCheck:
-    initialDelaySeconds: 150
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 6
   env:
     !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "order-query"
@@ -658,7 +679,10 @@ checkins:
       maxSurge: "25%"
       maxUnavailable: 0
   healthCheck:
-    initialDelaySeconds: 300
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 6
   env:
     !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "checkins"
@@ -744,7 +768,10 @@ coupon:
       maxUnavailable: 0
   healthCheck:
     type: tcp
-    initialDelaySeconds: 300
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 6
   env:
     !!merge <<: *otelJavaCommonEnvProd
     OTEL_SERVICE_NAME: "coupon"
