@@ -9,28 +9,28 @@ Karpenter는 Kubernetes 클러스터의 자동 스케일링을 담당하는 오�
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│ EKS 클러스터: goorm-popcorn-prod                         │
+│ EKS 클러스터: goorm-popcorn-prod                          │
 ├─────────────────────────────────────────────────────────┤
-│                                                          │
-│ [기본 노드 그룹] (고정)                                   │
+│                                                         │
+│ [기본 노드 그룹] (고정)                                      │ 
 │ ├─ t3.large × 3 (ON_DEMAND)                             │
-│ ├─ 용도: 시스템 워크로드                                  │
+│ ├─ 용도: 시스템 워크로드                                     │
 │ │   ├─ CoreDNS                                          │
-│ │   ├─ AWS Load Balancer Controller                    │
+│ │   ├─ AWS Load Balancer Controller                     │
 │ │   ├─ Karpenter                                        │
 │ │   ├─ ArgoCD                                           │
-│ │   └─ 기타 인프라 서비스                                │
-│ └─ 총 리소스: 6 vCPU, 24GB 메모리                        │
-│                                                          │
-│ [Karpenter 관리 노드] (동적)                             │
-│ ├─ t3.medium/large/xlarge (SPOT 우선)                   │
-│ ├─ 용도: 애플리케이션 워크로드                            │
+│ │   └─ 기타 인프라 서비스                                   │
+│ └─ 총 리소스: 6 vCPU, 24GB 메모리                           │
+│                                                         │
+│ [Karpenter 관리 노드] (동적)                               │
+│ ├─ t3.medium/large/xlarge (SPOT 우선)                    │
+│ ├─ 용도: 애플리케이션 워크로드                                 │
 │ │   ├─ Gateway                                          │
-│ │   ├─ Users, Stores, Order                            │
+│ │   ├─ Users, Stores, Order                             │
 │ │   ├─ Payment, CheckIns                                │
 │ │   └─ OrderQuery                                       │
-│ └─ 자동 스케일링: 0 ~ 20 vCPU                            │
-│                                                          │
+│ └─ 자동 스케일링: 0 ~ 20 vCPU                              │
+│                                                         │
 └─────────────────────────────────────────────────────────┘
 ```
 
