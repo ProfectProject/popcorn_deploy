@@ -13,7 +13,7 @@ data:
   REDIS_PORT: "6379"
   KAFKA_BOOTSTRAP_SERVERS: "kafka-prod.kafka.svc.cluster.local:9092"
   GATEWAY_URL: "https://api.goormpopcorn.shop"
-  USER_SERVICE_BASE_URL: "http://popcorn-prod-gateway:8080/"
+  USER_SERVICE_BASE_URL: "http://popcorn-prod-gateway:8080"
   SPRING_DATASOURCE_URL: "jdbc:postgresql://goorm-popcorn-prod-postgres.cds4g0gykt3t.ap-northeast-2.rds.amazonaws.com:5432/popcorn_prod?currentSchema=coupons"
   SPRING_FLYWAY_DEFAULT_SCHEMA: "coupons"
   SPRING_FLYWAY_SCHEMAS: "coupons"

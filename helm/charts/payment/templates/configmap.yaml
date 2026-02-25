@@ -6,7 +6,7 @@ metadata:
     {{- include "common.labels" . | nindent 4 }}
 data:
   SERVER_PORT: "8085"
-  FRONTEND_BASE_URL: "http://frontend-service:3000"
+  FRONTEND_BASE_URL: "https://goormpopcorn.shop"
   DB_HOST: "goorm-popcorn-prod-postgres.cds4g0gykt3t.ap-northeast-2.rds.amazonaws.com"
   DB_PORT: "5432"
   DB_NAME: "popcorn_prod"
