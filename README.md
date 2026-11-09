@@ -174,3 +174,13 @@ kubectl port-forward -n monitoring svc/grafana 3000:80
 - [Infrastructure](infrastructure/README.md) - 인프라 설치 가이드
 - [Applications](applications/README.md) - ArgoCD Application 가이드
 - [파일 구조](STRUCTURE.md) - 전체 파일 트리
+
+## 인프라 설계·운영 문서
+
+| 분류 | 문서 |
+|---|---|
+| 아키텍처 | [prod 인프라 다이어그램](design/architecture/popcorn-prod-architecture.png) · [인프라 개요와 의사결정](design/INFRA_OVERVIEW_AND_DECISIONS.md) · [인프라 설계서 (popcorn-terraform)](https://github.com/ProfectProject/popcorn-terraform/blob/HEAD/docs/ARCHITECTURE.md) |
+| 관측성 | [로그 설계서](design/observability/LOGGING_DESIGN.md) · [운영 모니터링 Runbook](infrastructure/lgtm/RUNBOOK.md) · [Grafana 신호별 대시보드](infrastructure/lgtm/DASHBOARDS.md) · [OTel·LGTM 파이프라인 가이드](infrastructure/otel/PIPELINE_GUIDE.md) |
+| 의사결정 | [ADR-0001 OTel Java Agent vs SDK](design/adr/0001-otel-java-agent-vs-sdk.md) |
+| 배포 | [ArgoCD Helm 의존성 가이드](helm/ARGOCD_HELM_DEPENDENCY.md) |
+| 장애 대응 | [장애 기록 7건](design/troubleshooting/INCIDENT_REPORTS.md) · [부하 테스트 후 개선 과제](design/POST_LOADTEST_IMPROVEMENTS.md) |
