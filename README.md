@@ -177,6 +177,13 @@ kubectl port-forward -n monitoring svc/grafana 3000:80
 
 ## 인프라 설계·운영 문서
 
+![Popcorn 시스템 아키텍처](design/architecture/popcorn-system-architecture.png)
+
+| GitOps CI/CD | 관측성 파이프라인 |
+|---|---|
+| ![GitOps CI/CD](design/architecture/gitops-cicd.png) | ![관측성](design/architecture/observability-pipeline.png) |
+
+
 | 분류 | 문서 |
 |---|---|
 | 아키텍처 | [prod 인프라 다이어그램](design/architecture/popcorn-prod-architecture.png) · [인프라 개요와 의사결정](design/INFRA_OVERVIEW_AND_DECISIONS.md) · [인프라 설계서 (popcorn-terraform)](https://github.com/ProfectProject/popcorn-terraform/blob/HEAD/docs/ARCHITECTURE.md) |
